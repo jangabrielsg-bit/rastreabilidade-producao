@@ -35,11 +35,11 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <p class="mt-4 text-lg font-semibold text-gray-300">Carregando dados...</p>
+            <p class="mt-4 text-lg font-semibold text-gray-300">Conectando ao banco de dados...</p>
         </div>
     </div>
 
-    <div id="app-container" class="flex h-screen bg-gray-900">
+    <div id="app-container" class="flex h-screen bg-gray-900 hidden">
         <!-- Sidebar -->
         <aside class="w-20 lg:w-64 bg-gray-900 text-white flex flex-col transition-all duration-300 border-r border-gray-700">
             <div class="h-20 flex items-center justify-center">
@@ -85,7 +85,7 @@
         <main class="flex-1 flex flex-col overflow-hidden">
             <header class="h-20 bg-gray-800 flex items-center justify-between px-6 border-b border-gray-700">
                  <h1 id="page-title" class="text-3xl font-bold text-white">Dashboard</h1>
-                 <div id="user-info" class="text-sm text-gray-500" style="display: none;"></div>
+                 <div id="user-info" class="text-sm text-gray-500"></div>
             </header>
             <div class="flex-1 p-6 overflow-auto bg-gray-800">
 
@@ -532,7 +532,31 @@
 
 
     <script type="module">
-        // --- INITIALIZATION & STORAGE ---
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged, 
+            signInAnonymously,
+            signInWithCustomToken
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, collection, onSnapshot, doc, addDoc, setDoc, deleteDoc, query
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- CONFIG & INITIALIZATION ---
+        
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { 
+            apiKey: "YOUR_API_KEY", 
+            authDomain: "YOUR_AUTH_DOMAIN", 
+            projectId: "YOUR_PROJECT_ID" 
+        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
         let insumosCache = [];
         let produtosCache = [];
         let ordensCache = [];
@@ -542,47 +566,50 @@
         let insumosSearchTerm = '';
         let displayedInsumos = [];
 
-        const STORAGE_KEYS = {
-            insumos: 'rastreio_insumos',
-            produtos: 'rastreio_produtos',
-            ordens: 'rastreio_ordens',
-            requisicoes: 'rastreio_requisicoes'
-        };
 
-        function loadFromStorage(key) {
-            try {
-                const data = localStorage.getItem(key);
-                return data ? JSON.parse(data) : [];
-            } catch (e) {
-                console.error(`Error loading ${key} from storage`, e);
-                return [];
+        let insumosCol, produtosCol, ordensCol, requisicoesCol;
+        let unsubscribeInsumos, unsubscribeProdutos, unsubscribeOrdens, unsubscribeRequisicoes;
+
+        // --- AUTHENTICATION ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is signed in.
+                document.getElementById('user-info').textContent = `ID de Acesso Público: ${user.uid.substring(0,8)}`;
+                const dataPath = `artifacts/${appId}/public/data`; // Public path
+
+                insumosCol = collection(db, `${dataPath}/insumos`);
+                produtosCol = collection(db, `${dataPath}/produtos`);
+                ordensCol = collection(db, `${dataPath}/ordens`);
+                requisicoesCol = collection(db, `${dataPath}/requisicoes`);
+
+                // Detach previous listeners if they exist to avoid duplicates
+                if (unsubscribeInsumos) unsubscribeInsumos();
+                if (unsubscribeProdutos) unsubscribeProdutos();
+                if (unsubscribeOrdens) unsubscribeOrdens();
+                if (unsubscribeRequisicoes) unsubscribeRequisicoes();
+                
+                // Load data
+                loadInsumos();
+                loadProdutos();
+                loadOrdens();
+                loadRequisicoes();
+
+                document.getElementById('app-container').classList.remove('hidden');
+                document.getElementById('loading-overlay').style.display = 'none';
+
+            } else {
+                 try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                       await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                       await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Authentication failed:", error);
+                    document.getElementById('loading-overlay').innerHTML = `<p class="text-red-400">Falha ao conectar. Verifique a configuração do Firebase.</p>`;
+                }
             }
-        }
-
-        function saveToStorage(key, data) {
-            try {
-                localStorage.setItem(key, JSON.stringify(data));
-            } catch (e) {
-                console.error(`Error saving ${key} to storage`, e);
-            }
-        }
-
-        function initializeApp() {
-            insumosCache = loadFromStorage(STORAGE_KEYS.insumos);
-            produtosCache = loadFromStorage(STORAGE_KEYS.produtos);
-            ordensCache = loadFromStorage(STORAGE_KEYS.ordens);
-            requisicoesCache = loadFromStorage(STORAGE_KEYS.requisicoes);
-            
-            updateInsumosView();
-            renderProdutosTable(produtosCache);
-            renderOrdensTable(ordensCache);
-            renderRequisicoesTable(requisicoesCache);
-            updateDashboard(insumosCache, ordensCache);
-
-            document.getElementById('loading-overlay').style.display = 'none';
-        }
-
-        window.onload = initializeApp;
+        });
 
 
         // --- UI NAVIGATION ---
@@ -799,6 +826,13 @@
         }
 
         // --- INSUMOS (BATCHES) CRUD & RENDERING ---
+        function loadInsumos() {
+            unsubscribeInsumos = onSnapshot(query(insumosCol), snapshot => {
+                insumosCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                updateInsumosView();
+                updateDashboard(insumosCache, ordensCache);
+            });
+        }
         
         function updateInsumosView() {
             let filteredInsumos = [...insumosCache];
@@ -876,22 +910,13 @@
             });
         }
         
-        function saveInsumoData(id, data) {
+        async function saveInsumoData(id, data) {
             try {
                 if (id) {
-                    const index = insumosCache.findIndex(i => i.id === id);
-                    if (index > -1) {
-                         insumosCache[index] = { ...insumosCache[index], ...data };
-                    }
+                    await setDoc(doc(insumosCol, id), data, { merge: true });
                 } else {
-                    data.id = `insumo_${Date.now()}_${Math.random()}`; // Simple unique ID
-                    insumosCache.push(data);
+                   await addDoc(insumosCol, data);
                 }
-                saveToStorage(STORAGE_KEYS.insumos, insumosCache);
-                
-                updateInsumosView();
-                updateDashboard(insumosCache, ordensCache);
-
                 document.getElementById('insumo-form').reset();
                 document.getElementById('insumo-modal').classList.remove('active');
                 document.getElementById('shelf-life-alert-modal').classList.remove('active');
@@ -1025,10 +1050,7 @@
                 document.getElementById('insumo-modal').classList.add('active');
             } else if (target.classList.contains('delete-insumo-btn')) {
                 if(confirm('Tem certeza que deseja excluir este lote de insumo?')) {
-                    insumosCache = insumosCache.filter(i => i.id !== insumoId);
-                    saveToStorage(STORAGE_KEYS.insumos, insumosCache);
-                    updateInsumosView();
-                    updateDashboard(insumosCache, ordensCache);
+                    deleteDoc(doc(insumosCol, insumoId));
                 }
             } else if (target.classList.contains('view-history-btn')) {
                 const insumoCodigo = target.dataset.codigo;
@@ -1152,8 +1174,10 @@
 
         // --- PRODUTOS E RECEITAS ---
         function loadProdutos() {
-            produtosCache = loadFromStorage(STORAGE_KEYS.produtos);
-            renderProdutosTable(produtosCache);
+            unsubscribeProdutos = onSnapshot(query(produtosCol), snapshot => {
+                produtosCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderProdutosTable(produtosCache);
+            });
         }
         
         function renderProdutosTable(produtos) {
@@ -1221,7 +1245,7 @@
             container.appendChild(div);
         }
         
-        document.getElementById('produto-form').addEventListener('submit', e => {
+        document.getElementById('produto-form').addEventListener('submit', async e => {
              e.preventDefault();
              const id = document.getElementById('produto-id').value;
              const receitaItems = document.querySelectorAll('#receita-container > div');
@@ -1237,17 +1261,10 @@
              };
              
             if (id) {
-                const index = produtosCache.findIndex(p => p.id === id);
-                if (index > -1) {
-                    produtosCache[index] = { ...produtosCache[index], ...produtoData };
-                }
+                await setDoc(doc(produtosCol, id), produtoData);
             } else {
-                produtoData.id = `produto_${Date.now()}`;
-                produtosCache.push(produtoData);
+                await addDoc(produtosCol, produtoData);
             }
-
-            saveToStorage(STORAGE_KEYS.produtos, produtosCache);
-            renderProdutosTable(produtosCache);
             document.getElementById('produto-modal').classList.remove('active');
         });
         
@@ -1264,9 +1281,7 @@
                  document.getElementById('produto-modal').classList.add('active');
             } else if (e.target.classList.contains('delete-produto-btn')) {
                  if(confirm('Tem certeza que deseja excluir este produto?')) {
-                    produtosCache = produtosCache.filter(p => p.id !== produtoId);
-                    saveToStorage(STORAGE_KEYS.produtos, produtosCache);
-                    renderProdutosTable(produtosCache);
+                    deleteDoc(doc(produtosCol, produtoId));
                  }
             }
         });
@@ -1281,8 +1296,11 @@
         
         // --- ORDENS DE PRODUÇÃO ---
         function loadOrdens() {
-            ordensCache = loadFromStorage(STORAGE_KEYS.ordens);
-            renderOrdensTable(ordensCache);
+            unsubscribeOrdens = onSnapshot(query(ordensCol), snapshot => {
+                ordensCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderOrdensTable(ordensCache);
+                updateDashboard(insumosCache, ordensCache);
+            });
         }
 
         function resetOrdemForm() {
@@ -1395,7 +1413,7 @@
         document.getElementById('ordem-produto').addEventListener('change', updateOrdemInsumosTable);
         document.getElementById('ordem-receitas').addEventListener('input', updateOrdemInsumosTable);
         
-        document.getElementById('ordem-form').addEventListener('submit', e => {
+        document.getElementById('ordem-form').addEventListener('submit', async e => {
             e.preventDefault();
 
             const updates = [];
@@ -1415,7 +1433,7 @@
                 }
 
                 const novoEstoque = parseFloat(batch.estoque) - quantityToUse;
-                updates.push({ batchId: batch.id, newStock: novoEstoque.toFixed(3) });
+                updates.push({ docRef: doc(insumosCol, batch.id), newStock: novoEstoque.toFixed(3) });
                 
                 insumosUtilizados.push({
                     insumoId: batch.id,
@@ -1430,7 +1448,6 @@
             }
 
             const ordemData = {
-                id: `ordem_${Date.now()}`,
                 produtoNome: document.getElementById('ordem-produto').options[document.getElementById('ordem-produto').selectedIndex].text,
                 linhaProducao: document.getElementById('ordem-linha').value,
                 quantidadeReceitas: document.getElementById('ordem-receitas').value,
@@ -1441,21 +1458,16 @@
                 createdAt: new Date().toISOString()
             };
 
-            updates.forEach(update => {
-                const index = insumosCache.findIndex(i => i.id === update.batchId);
-                if (index > -1) {
-                    insumosCache[index].estoque = update.newStock;
+            try {
+                for (const update of updates) {
+                    await setDoc(update.docRef, { estoque: update.newStock }, { merge: true });
                 }
-            });
-            saveToStorage(STORAGE_KEYS.insumos, insumosCache);
-
-            ordensCache.push(ordemData);
-            saveToStorage(STORAGE_KEYS.ordens, ordensCache);
-
-            renderOrdensTable(ordensCache);
-            updateInsumosView();
-            updateDashboard(insumosCache, ordensCache);
-            document.getElementById('ordem-modal').classList.remove('active');
+                await addDoc(ordensCol, ordemData);
+                document.getElementById('ordem-modal').classList.remove('active');
+            } catch (error) {
+                console.error("Error creating order: ", error);
+                alert("Ocorreu um erro ao salvar a ordem.");
+            }
         });
 
         
@@ -1546,8 +1558,11 @@
 
         // --- REQUISIÇÕES ---
         function loadRequisicoes() {
-            requisicoesCache = loadFromStorage(STORAGE_KEYS.requisicoes);
-            renderRequisicoesTable(requisicoesCache);
+            unsubscribeRequisicoes = onSnapshot(query(requisicoesCol), snapshot => {
+                requisicoesCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderRequisicoesTable(requisicoesCache);
+                updateDashboard(insumosCache, ordensCache);
+            });
         }
         
         function renderRequisicoesTable(requisicoes) {
@@ -1657,7 +1672,7 @@
             }
         });
 
-        document.getElementById('requisicao-form').addEventListener('submit', e => {
+        document.getElementById('requisicao-form').addEventListener('submit', async e => {
             e.preventDefault();
             const updates = [];
             const items = [];
@@ -1678,7 +1693,7 @@
                 }
                 
                 const novoEstoque = parseFloat(lote.estoque) - quantidade;
-                updates.push({ batchId: lote.id, newStock: novoEstoque.toFixed(3) });
+                updates.push({ docRef: doc(insumosCol, lote.id), newStock: novoEstoque.toFixed(3) });
                 items.push({
                     codigo: lote.codigo,
                     nome: lote.nome,
@@ -1688,7 +1703,6 @@
             }
 
             const requisicaoData = {
-                id: `req_${Date.now()}`,
                 data: document.getElementById('requisicao-data').value,
                 responsavel: document.getElementById('requisicao-responsavel').value,
                 motivo: document.getElementById('requisicao-motivo').value,
@@ -1696,21 +1710,16 @@
                 createdAt: new Date().toISOString()
             };
 
-            updates.forEach(update => {
-                const index = insumosCache.findIndex(i => i.id === update.batchId);
-                if (index > -1) {
-                    insumosCache[index].estoque = update.newStock;
+            try {
+                for (const update of updates) {
+                    await setDoc(update.docRef, { estoque: update.newStock }, { merge: true });
                 }
-            });
-            saveToStorage(STORAGE_KEYS.insumos, insumosCache);
-
-            requisicoesCache.push(requisicaoData);
-            saveToStorage(STORAGE_KEYS.requisicoes, requisicoesCache);
-            
-            renderRequisicoesTable(requisicoesCache);
-            updateInsumosView();
-            updateDashboard(insumosCache, ordensCache);
-            document.getElementById('requisicao-modal').classList.remove('active');
+                await addDoc(requisicoesCol, requisicaoData);
+                document.getElementById('requisicao-modal').classList.remove('active');
+            } catch (error) {
+                console.error("Error creating requisition: ", error);
+                alert("Ocorreu um erro ao salvar a requisição.");
+            }
         });
         
         function showRequisicaoDetails(req) {
