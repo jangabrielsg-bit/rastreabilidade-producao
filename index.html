@@ -35,7 +35,7 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <p class="mt-4 text-lg font-semibold text-gray-300">Conectando ao banco de dados...</p>
+            <p class="mt-4 text-lg font-semibold text-gray-300">Conectando...</p>
         </div>
     </div>
 
@@ -85,7 +85,7 @@
         <main class="flex-1 flex flex-col overflow-hidden">
             <header class="h-20 bg-gray-800 flex items-center justify-between px-6 border-b border-gray-700">
                  <h1 id="page-title" class="text-3xl font-bold text-white">Dashboard</h1>
-                 <div id="user-info" class="text-sm text-gray-500"></div>
+                 <div id="user-info" class="text-sm text-gray-400"></div>
             </header>
             <div class="flex-1 p-6 overflow-auto bg-gray-800">
 
@@ -538,6 +538,7 @@
             getAuth, 
             onAuthStateChanged, 
             signInAnonymously,
+            signOut,
             signInWithCustomToken
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { 
@@ -574,21 +575,18 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 // User is signed in.
-                document.getElementById('user-info').textContent = `ID de Acesso Público: ${user.uid.substring(0,8)}`;
-                const dataPath = `artifacts/${appId}/public/data`; // Public path
+                const dataPath = `artifacts/${appId}/public/data`; // Public path for all users to share data
 
                 insumosCol = collection(db, `${dataPath}/insumos`);
                 produtosCol = collection(db, `${dataPath}/produtos`);
                 ordensCol = collection(db, `${dataPath}/ordens`);
                 requisicoesCol = collection(db, `${dataPath}/requisicoes`);
 
-                // Detach previous listeners if they exist to avoid duplicates
                 if (unsubscribeInsumos) unsubscribeInsumos();
                 if (unsubscribeProdutos) unsubscribeProdutos();
                 if (unsubscribeOrdens) unsubscribeOrdens();
                 if (unsubscribeRequisicoes) unsubscribeRequisicoes();
                 
-                // Load data
                 loadInsumos();
                 loadProdutos();
                 loadOrdens();
