@@ -9,6 +9,8 @@
     <!-- Bibliotecas para gerar PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <!-- Biblioteca para gerar Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .modal { display: none; }
@@ -67,14 +69,20 @@
                     </svg>
                     <span class="hidden lg:inline ml-3">Requisições</span>
                 </a>
+                 <a href="#" id="nav-ajustes" class="nav-link flex items-center py-2.5 px-4 rounded-lg hover:bg-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h3m-3-10h3m-3 4h3m-6 4h.01M12 3V2m0 20v-1m0-18a9 9 0 100 18 9 9 0 000-18z" />
+                    </svg>
+                    <span class="hidden lg:inline ml-3">Ajustes de Estoque</span>
+                </a>
             </nav>
         </aside>
 
         <!-- Main Content -->
         <main class="flex-1 flex flex-col overflow-hidden">
             <header class="h-16 bg-white shadow-md flex items-center justify-between px-6">
-                 <h1 id="page-title" class="text-2xl font-semibold text-gray-800">Dashboard</h1>
-                 <div id="user-info" class="text-sm text-gray-500" style="display: none;"></div>
+                <h1 id="page-title" class="text-2xl font-semibold text-gray-800">Dashboard</h1>
+                <div id="user-info" class="text-sm text-gray-500" style="display: none;"></div>
             </header>
             <div class="flex-1 p-6 overflow-auto">
 
@@ -133,7 +141,8 @@
                     <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
                         <input type="search" id="search-insumo" placeholder="Pesquisar por nome, código, lote..." class="p-2 border rounded-lg w-full sm:w-auto flex-grow">
                         <div class="flex space-x-2">
-                            <button id="export-stock-pdf-btn" class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700">Exportar PDF</button>
+                            <button id="manage-insumos-btn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">Gerenciar Insumos</button>
+                            <button id="export-stock-excel-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Exportar Excel</button>
                             <button id="add-insumo-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Adicionar Lote</button>
                         </div>
                     </div>
@@ -166,78 +175,104 @@
                         <button id="add-produto-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Adicionar Produto</button>
                     </div>
                      <div class="bg-white p-4 rounded-lg shadow">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="p-3">Produto</th>
-                                        <th class="p-3">Linha de Produção</th>
-                                        <th class="p-3">Receita</th>
-                                        <th class="p-3">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="produtos-table-body">
-                                    <!-- JS will populate this -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                         <div class="overflow-x-auto">
+                             <table class="w-full text-sm text-left">
+                                 <thead class="bg-gray-50">
+                                     <tr>
+                                         <th class="p-3">Produto</th>
+                                         <th class="p-3">Linha de Produção</th>
+                                         <th class="p-3">Receita</th>
+                                         <th class="p-3">Ações</th>
+                                     </tr>
+                                 </thead>
+                                 <tbody id="produtos-table-body">
+                                     <!-- JS will populate this -->
+                                 </tbody>
+                             </table>
+                         </div>
+                     </div>
                 </div>
 
                 <!-- Ordens de Produção View -->
                 <div id="view-ordens" class="page-view hidden">
                      <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold">Ordens de Produção</h2>
-                        <div class="flex space-x-2">
-                            <button id="export-pdf-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Exportar do Dia (PDF)</button>
-                            <button id="add-ordem-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Nova Ordem</button>
-                        </div>
-                    </div>
+                         <h2 class="text-xl font-semibold">Ordens de Produção</h2>
+                         <div class="flex space-x-2">
+                             <button id="export-pdf-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Exportar do Dia (PDF)</button>
+                             <button id="add-ordem-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Nova Ordem</button>
+                         </div>
+                     </div>
                      <div class="bg-white p-4 rounded-lg shadow">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="p-3">Lote do Produto</th>
-                                        <th class="p-3">Produto</th>
-                                        <th class="p-3">Data de Produção</th>
-                                        <th class="p-3">Quantidade</th>
-                                        <th class="p-3">Manipuladores</th>
-                                        <th class="p-3">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="ordens-table-body">
-                                    <!-- JS will populate this -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                         <div class="overflow-x-auto">
+                             <table class="w-full text-sm text-left">
+                                 <thead class="bg-gray-50">
+                                     <tr>
+                                         <th class="p-3">Lote do Produto</th>
+                                         <th class="p-3">Produto</th>
+                                         <th class="p-3">Data de Produção</th>
+                                         <th class="p-3">Quantidade</th>
+                                         <th class="p-3">Manipuladores</th>
+                                         <th class="p-3">Ações</th>
+                                     </tr>
+                                 </thead>
+                                 <tbody id="ordens-table-body">
+                                     <!-- JS will populate this -->
+                                 </tbody>
+                             </table>
+                         </div>
+                     </div>
                 </div>
 
                 <!-- Requisições View -->
                 <div id="view-requisicoes" class="page-view hidden">
                      <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold">Requisições de Insumos</h2>
-                        <button id="add-requisicao-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">Nova Requisição</button>
-                    </div>
+                         <h2 class="text-xl font-semibold">Requisições de Insumos</h2>
+                         <button id="add-requisicao-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">Nova Requisição</button>
+                     </div>
                      <div class="bg-white p-4 rounded-lg shadow">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="p-3">Data</th>
-                                        <th class="p-3">Responsável</th>
-                                        <th class="p-3">Motivo</th>
-                                        <th class="p-3">Itens</th>
-                                        <th class="p-3">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="requisicoes-table-body">
-                                    <!-- JS will populate this -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                         <div class="overflow-x-auto">
+                             <table class="w-full text-sm text-left">
+                                 <thead class="bg-gray-50">
+                                     <tr>
+                                         <th class="p-3">Data</th>
+                                         <th class="p-3">Responsável</th>
+                                         <th class="p-3">Motivo</th>
+                                         <th class="p-3">Itens</th>
+                                         <th class="p-3">Ações</th>
+                                     </tr>
+                                 </thead>
+                                 <tbody id="requisicoes-table-body">
+                                     <!-- JS will populate this -->
+                                 </tbody>
+                             </table>
+                         </div>
+                     </div>
+                </div>
+                
+                 <!-- Ajustes View -->
+                <div id="view-ajustes" class="page-view hidden">
+                     <div class="flex justify-between items-center mb-4">
+                         <h2 class="text-xl font-semibold">Ajustes de Estoque</h2>
+                         <button id="add-ajuste-btn" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700">Novo Ajuste</button>
+                     </div>
+                     <div class="bg-white p-4 rounded-lg shadow">
+                         <div class="overflow-x-auto">
+                             <table class="w-full text-sm text-left">
+                                 <thead class="bg-gray-50">
+                                     <tr>
+                                         <th class="p-3">Data</th>
+                                         <th class="p-3">Responsável</th>
+                                         <th class="p-3">Justificativa</th>
+                                         <th class="p-3">Itens Ajustados</th>
+                                         <th class="p-3">Ações</th>
+                                     </tr>
+                                 </thead>
+                                 <tbody id="ajustes-table-body">
+                                     <!-- JS will populate this -->
+                                 </tbody>
+                             </table>
+                         </div>
+                     </div>
                 </div>
 
             </div>
@@ -259,23 +294,23 @@
                     <input type="number" step="0.001" id="insumo-estoque" placeholder="Estoque do Lote (kg)" class="p-2 border rounded-lg" required>
                 </div>
                  <div id="stock-levels-info" class="mt-4 p-3 bg-gray-50 rounded-lg text-sm hidden">
-                    <h4 class="font-semibold mb-2">Níveis de Estoque Sugeridos (Baseado no consumo dos últimos 30 dias)</h4>
-                    <p><strong>Estoque Mínimo:</strong> <span id="sugerido-min">N/A</span> kg</p>
-                    <p><strong>Estoque Máximo:</strong> <span id="sugerido-max">N/A</span> kg</p>
-                </div>
+                     <h4 class="font-semibold mb-2">Níveis de Estoque Sugeridos (Baseado no consumo dos últimos 30 dias)</h4>
+                     <p><strong>Estoque Mínimo:</strong> <span id="sugerido-min">N/A</span> kg</p>
+                     <p><strong>Estoque Máximo:</strong> <span id="sugerido-max">N/A</span> kg</p>
+                 </div>
                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 border-t pt-4">
                      <div>
-                        <label for="insumo-data-fabricacao" class="text-sm text-gray-600">Data de Fabricação (Opcional)</label>
-                        <input type="date" id="insumo-data-fabricacao" class="w-full p-2 border rounded-lg">
-                    </div>
+                         <label for="insumo-data-fabricacao" class="text-sm text-gray-600">Data de Fabricação (Opcional)</label>
+                         <input type="date" id="insumo-data-fabricacao" class="w-full p-2 border rounded-lg">
+                     </div>
                     <div>
-                        <label for="insumo-data-recebimento" class="text-sm text-gray-600">Data de Recebimento</label>
-                        <input type="date" id="insumo-data-recebimento" class="w-full p-2 border rounded-lg" required>
-                    </div>
+                         <label for="insumo-data-recebimento" class="text-sm text-gray-600">Data de Recebimento</label>
+                         <input type="date" id="insumo-data-recebimento" class="w-full p-2 border rounded-lg">
+                     </div>
                      <div>
-                        <label for="insumo-validade" class="text-sm text-gray-600">Validade do Lote</label>
-                        <input type="date" id="insumo-validade" class="w-full p-2 border rounded-lg" required>
-                    </div>
+                         <label for="insumo-validade" class="text-sm text-gray-600">Validade do Lote</label>
+                         <input type="date" id="insumo-validade" class="w-full p-2 border rounded-lg" required>
+                     </div>
                 </div>
                 <div class="flex justify-end space-x-4 mt-6">
                     <button type="button" id="cancel-insumo-btn" class="bg-gray-300 px-4 py-2 rounded-lg">Cancelar</button>
@@ -339,36 +374,36 @@
             <h3 id="ordem-modal-title" class="text-xl font-semibold mb-4">Nova Ordem de Produção</h3>
             <form id="ordem-form" class="flex-1 overflow-y-auto pr-2">
                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50">
-                    <div>
+                     <div>
                          <label for="ordem-produto" class="text-sm font-medium">Produto</label>
                          <select id="ordem-produto" class="w-full mt-1 p-2 border rounded-lg" required></select>
-                    </div>
+                     </div>
                      <div>
                          <label for="ordem-linha" class="text-sm font-medium">Linha de Produção</label>
                          <input type="text" id="ordem-linha" class="w-full mt-1 p-2 border rounded-lg bg-gray-200" readonly>
-                    </div>
+                     </div>
                     <div>
                          <label for="ordem-receitas" class="text-sm font-medium">Quantidade (Receitas)</label>
                          <input type="number" id="ordem-receitas" class="w-full mt-1 p-2 border rounded-lg" required min="1" value="1">
-                    </div>
+                     </div>
                      <div>
                          <label for="ordem-lote" class="text-sm font-medium">Lote do Produto (Opcional)</label>
                          <input type="text" id="ordem-lote" class="w-full mt-1 p-2 border rounded-lg">
-                    </div>
+                     </div>
                      <div>
                          <label for="ordem-data-producao" class="text-sm font-medium">Data de Produção</label>
                          <input type="date" id="ordem-data-producao" class="w-full mt-1 p-2 border rounded-lg" required>
-                    </div>
+                     </div>
                      <div>
                          <label for="ordem-validade-produto" class="text-sm font-medium">Validade do Produto</label>
                          <input type="date" id="ordem-validade-produto" class="w-full mt-1 p-2 border rounded-lg" required>
-                    </div>
+                     </div>
                  </div>
                  <h4 class="font-semibold mt-6 mb-2">Insumos para a Produção</h4>
                  <div id="ordem-stock-warning" class="hidden my-2 p-3 bg-red-100 text-red-700 rounded-lg"></div>
                  <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left">
-                        <thead class="bg-gray-100">
+                     <table class="w-full text-sm text-left">
+                         <thead class="bg-gray-100">
                              <tr>
                                  <th class="p-3">Insumo</th>
                                  <th class="p-3">Qtd. a Usar (kg)</th>
@@ -376,11 +411,11 @@
                                  <th class="p-3">Fornecedor</th>
                                  <th class="p-3">Manipulador</th>
                              </tr>
-                        </thead>
-                        <tbody id="ordem-insumos-table">
-                            <!-- JS populates this based on selected product -->
-                        </tbody>
-                    </table>
+                         </thead>
+                         <tbody id="ordem-insumos-table">
+                             <!-- JS populates this based on selected product -->
+                         </tbody>
+                     </table>
                  </div>
                  
                 <div class="flex justify-end space-x-4 mt-6 sticky bottom-0 bg-white py-4">
@@ -413,21 +448,21 @@
             </div>
             <div class="flex-1 overflow-y-auto space-y-6">
                  <div id="insumo-stats" class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h4 class="font-semibold text-md mb-2 text-blue-800">Análise de Consumo (Últimos 30 dias)</h4>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-                        <div>
-                            <span class="block text-gray-500">Consumo Médio Diário</span>
-                            <strong id="stats-avg-daily" class="text-lg">0 kg</strong>
-                        </div>
-                        <div>
-                            <span class="block text-gray-500">Estoque Mínimo Sugerido</span>
-                            <strong id="stats-min" class="text-lg">0 kg</strong>
-                        </div>
-                        <div>
-                            <span class="block text-gray-500">Estoque Máximo Sugerido</span>
-                            <strong id="stats-max" class="text-lg">0 kg</strong>
-                        </div>
-                    </div>
+                     <h4 class="font-semibold text-md mb-2 text-blue-800">Análise de Consumo (Últimos 30 dias)</h4>
+                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                         <div>
+                             <span class="block text-gray-500">Consumo Médio Diário</span>
+                             <strong id="stats-avg-daily" class="text-lg">0 kg</strong>
+                         </div>
+                         <div>
+                             <span class="block text-gray-500">Estoque Mínimo Sugerido</span>
+                             <strong id="stats-min" class="text-lg">0 kg</strong>
+                         </div>
+                         <div>
+                             <span class="block text-gray-500">Estoque Máximo Sugerido</span>
+                             <strong id="stats-max" class="text-lg">0 kg</strong>
+                         </div>
+                     </div>
                 </div>
                 <div>
                     <h4 class="font-semibold text-md mb-2">Lotes Registrados (Entradas)</h4>
@@ -518,6 +553,79 @@
             </div>
         </div>
     </div>
+    
+    <!-- Insumo Definitions Modal -->
+    <div id="insumo-definitions-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <h3 class="text-xl font-semibold mb-4">Gerenciar Estoque Mínimo de Insumos</h3>
+            <p class="text-sm text-gray-600 mb-4">Defina um estoque mínimo manual para um insumo. Se deixado em branco ou com valor zero, o sistema calculará um valor dinamicamente com base no consumo.</p>
+            <form id="insumo-definitions-form" class="flex-1 overflow-y-auto pr-2">
+                 <div class="overflow-x-auto">
+                     <table class="w-full text-sm text-left">
+                         <thead class="bg-gray-100">
+                             <tr>
+                                 <th class="p-2">Código</th>
+                                 <th class="p-2">Insumo</th>
+                                 <th class="p-2">Estoque Mínimo Manual (kg) / Ação</th>
+                             </tr>
+                         </thead>
+                         <tbody id="insumo-definitions-table-body">
+                             <!-- JS populates this -->
+                         </tbody>
+                     </table>
+                 </div>
+                <div class="flex justify-end space-x-4 mt-6 sticky bottom-0 bg-white py-4">
+                    <button type="button" id="cancel-insumo-definitions-btn" class="bg-gray-300 px-4 py-2 rounded-lg">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+     <!-- Ajuste Modal -->
+    <div id="ajuste-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <h3 class="text-xl font-semibold mb-4">Novo Ajuste de Estoque</h3>
+            <form id="ajuste-form" class="flex-1 overflow-y-auto pr-2">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50">
+                    <div>
+                        <label for="ajuste-data" class="text-sm font-medium">Data do Ajuste</label>
+                        <input type="date" id="ajuste-data" class="w-full mt-1 p-2 border rounded-lg" required>
+                    </div>
+                    <div>
+                        <label for="ajuste-responsavel" class="text-sm font-medium">Responsável</label>
+                        <input type="text" id="ajuste-responsavel" class="w-full mt-1 p-2 border rounded-lg" required placeholder="Nome do responsável">
+                    </div>
+                    <div>
+                         <label for="ajuste-justificativa" class="text-sm font-medium">Justificativa</label>
+                        <input type="text" id="ajuste-justificativa" class="w-full mt-1 p-2 border rounded-lg" required placeholder="Ex: Contagem periódica">
+                    </div>
+                </div>
+                <h4 class="font-semibold mt-6 mb-2">Itens para Ajustar</h4>
+                <div id="ajuste-items-container" class="space-y-3">
+                    <!-- JS will populate this -->
+                </div>
+                <button type="button" id="add-ajuste-item-btn" class="mt-3 text-sm text-blue-600 hover:underline">+ Adicionar Item</button>
+                <div class="flex justify-end space-x-4 mt-6 sticky bottom-0 bg-white py-4">
+                    <button type="button" id="cancel-ajuste-btn" class="bg-gray-300 px-4 py-2 rounded-lg">Cancelar</button>
+                    <button type="submit" class="bg-orange-600 text-white px-4 py-2 rounded-lg">Salvar Ajuste</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- View Ajuste Modal -->
+    <div id="view-ajuste-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-3xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-start">
+                <h3 class="text-xl font-semibold mb-4">Detalhes do Ajuste de Estoque</h3>
+                <button id="close-view-ajuste-modal" class="text-gray-500 hover:text-gray-800 text-3xl leading-none">&times;</button>
+            </div>
+            <div id="view-ajuste-content" class="flex-1 overflow-y-auto">
+                <!-- Content injected by JS -->
+            </div>
+        </div>
+    </div>
 
 
     <script type="module">
@@ -526,6 +634,8 @@
         let produtosCache = [];
         let ordensCache = [];
         let requisicoesCache = [];
+        let insumoDefinitionsCache = [];
+        let ajustesCache = [];
         let tempInsumoData = null;
         let insumosSortConfig = { key: 'dataRecebimento', direction: 'desc' };
         let insumosSearchTerm = '';
@@ -535,7 +645,9 @@
             insumos: 'rastreio_insumos',
             produtos: 'rastreio_produtos',
             ordens: 'rastreio_ordens',
-            requisicoes: 'rastreio_requisicoes'
+            requisicoes: 'rastreio_requisicoes',
+            insumo_definitions: 'rastreio_insumo_definitions',
+            ajustes: 'rastreio_ajustes'
         };
 
         function loadFromStorage(key) {
@@ -561,11 +673,14 @@
             produtosCache = loadFromStorage(STORAGE_KEYS.produtos);
             ordensCache = loadFromStorage(STORAGE_KEYS.ordens);
             requisicoesCache = loadFromStorage(STORAGE_KEYS.requisicoes);
+            insumoDefinitionsCache = loadFromStorage(STORAGE_KEYS.insumo_definitions);
+            ajustesCache = loadFromStorage(STORAGE_KEYS.ajustes);
             
             updateInsumosView();
             renderProdutosTable(produtosCache);
             renderOrdensTable(ordensCache);
             renderRequisicoesTable(requisicoesCache);
+            renderAjustesTable(ajustesCache);
             updateDashboard(insumosCache, ordensCache);
 
             document.getElementById('loading-overlay').style.display = 'none';
@@ -582,7 +697,8 @@
             'nav-insumos': 'Estoque de Insumos',
             'nav-produtos': 'Produtos e Receitas',
             'nav-ordens': 'Ordens de Produção',
-            'nav-requisicoes': 'Requisições'
+            'nav-requisicoes': 'Requisições',
+            'nav-ajustes': 'Ajustes de Estoque'
         };
 
         navLinks.forEach(link => {
@@ -626,6 +742,8 @@
         setupModal('produto-modal', 'add-produto-btn', 'cancel-produto-btn');
         setupModal('ordem-modal', 'add-ordem-btn', 'cancel-ordem-btn');
         setupModal('requisicao-modal', 'add-requisicao-btn', 'cancel-requisicao-btn');
+        setupModal('insumo-definitions-modal', 'manage-insumos-btn', 'cancel-insumo-definitions-btn');
+        setupModal('ajuste-modal', 'add-ajuste-btn', 'cancel-ajuste-btn');
         
         document.getElementById('close-view-ordem-modal').addEventListener('click', () => {
             document.getElementById('view-ordem-modal').classList.remove('active');
@@ -635,6 +753,9 @@
         });
         document.getElementById('close-view-requisicao-modal').addEventListener('click', () => {
             document.getElementById('view-requisicao-modal').classList.remove('active');
+        });
+        document.getElementById('close-view-ajuste-modal').addEventListener('click', () => {
+            document.getElementById('view-ajuste-modal').classList.remove('active');
         });
 
 
@@ -756,6 +877,14 @@
         function calculateStockLevels(insumoCodigo, ordens) {
             if (!insumoCodigo) {
                 return { min: 0, max: 0, avg: 0 };
+            }
+            
+            // Check for manual override first
+            const definition = insumoDefinitionsCache.find(def => def.codigo === insumoCodigo);
+            if (definition && parseFloat(definition.estoqueMinimoManual) > 0) {
+                 const manualMin = parseFloat(definition.estoqueMinimoManual);
+                 // We can't calculate a sensible max/avg without consumption data, so return defaults for those
+                 return { min: manualMin.toFixed(3), max: (manualMin * 4).toFixed(3), avg: 'N/A' };
             }
 
             const thirtyDaysAgo = new Date();
@@ -908,7 +1037,7 @@
                  const remainingShelfLife = daysBetween(valDate, recDate);
                  
                  if (totalShelfLife > 0) {
-                    shelfLifePercentual = (remainingShelfLife / totalShelfLife) * 100;
+                     shelfLifePercentual = (remainingShelfLife / totalShelfLife) * 100;
                  }
              }
              
@@ -1053,38 +1182,38 @@
             } else {
                  const today = new Date();
                  lotesDoInsumo.forEach(lote => {
-                    const tr = document.createElement('tr');
-                    tr.className = 'border-b';
-                    
-                    const diasRestantes = daysBetween(lote.validade, today);
-                    const shelfLifeRecebimento = lote.shelfLifePercentualRecebimento ? `${lote.shelfLifePercentualRecebimento.toFixed(1)}%` : 'N/A';
-                    
-                    let estimativaConsumo = 'N/A';
-                    let alerta = '';
-                    if (avgDailyConsumption > 0 && parseFloat(lote.estoque) > 0) {
-                        const diasParaConsumir = parseFloat(lote.estoque) / avgDailyConsumption;
-                        const dataEstimada = new Date();
-                        dataEstimada.setDate(today.getDate() + diasParaConsumir);
-                        estimativaConsumo = formatDate(dataEstimada.toISOString().split('T')[0]);
+                     const tr = document.createElement('tr');
+                     tr.className = 'border-b';
+                     
+                     const diasRestantes = daysBetween(lote.validade, today);
+                     const shelfLifeRecebimento = lote.shelfLifePercentualRecebimento ? `${lote.shelfLifePercentualRecebimento.toFixed(1)}%` : 'N/A';
+                     
+                     let estimativaConsumo = 'N/A';
+                     let alerta = '';
+                     if (avgDailyConsumption > 0 && parseFloat(lote.estoque) > 0) {
+                         const diasParaConsumir = parseFloat(lote.estoque) / avgDailyConsumption;
+                         const dataEstimada = new Date();
+                         dataEstimada.setDate(today.getDate() + diasParaConsumir);
+                         estimativaConsumo = formatDate(dataEstimada.toISOString().split('T')[0]);
 
-                        if (dataEstimada > new Date(lote.validade)) {
-                            alerta = '<span title="Risco de vencer antes do consumo total" class="ml-2">⚠️</span>';
-                        }
-                    }
+                         if (dataEstimada > new Date(lote.validade)) {
+                             alerta = '<span title="Risco de vencer antes do consumo total" class="ml-2">⚠️</span>';
+                         }
+                     }
 
-                    tr.innerHTML = `
-                        <td class="p-2">${lote.lote}</td>
-                        <td class="p-2">${parseFloat(lote.estoque).toFixed(3)}</td>
-                        <td class="p-2">${shelfLifeRecebimento}</td>
-                        <td class="p-2">${formatDate(lote.validade)}</td>
-                        <td class="p-2 ${diasRestantes < 30 ? 'text-yellow-600' : ''} ${diasRestantes <= 0 ? 'text-red-600 font-bold' : ''}">${diasRestantes > 0 ? diasRestantes : 'Vencido'}</td>
-                        <td class="p-2">${estimativaConsumo} ${alerta}</td>
-                    `;
-                    entradasBody.appendChild(tr);
-                });
+                     tr.innerHTML = `
+                         <td class="p-2">${lote.lote}</td>
+                         <td class="p-2">${parseFloat(lote.estoque).toFixed(3)}</td>
+                         <td class="p-2">${shelfLifeRecebimento}</td>
+                         <td class="p-2">${formatDate(lote.validade)}</td>
+                         <td class="p-2 ${diasRestantes < 30 ? 'text-yellow-600' : ''} ${diasRestantes <= 0 ? 'text-red-600 font-bold' : ''}">${diasRestantes > 0 ? diasRestantes : 'Vencido'}</td>
+                         <td class="p-2">${estimativaConsumo} ${alerta}</td>
+                     `;
+                     entradasBody.appendChild(tr);
+                 });
             }
-           
-            // Combine saidas from Ordens and Requisições
+            
+            // Combine saidas from Ordens, Requisições and Ajustes
             const saidas = [];
             ordensCache.forEach(ordem => {
                 ordem.insumosUtilizados.forEach(insumoUsado => {
@@ -1102,11 +1231,25 @@
             requisicoesCache.forEach(req => {
                 req.items.forEach(item => {
                      if (item.codigo === insumoCodigo) {
+                         saidas.push({
+                             data: req.data,
+                             tipo: 'Requisição',
+                             destino: req.motivo,
+                             quantidade: item.quantidade,
+                             lote: item.lote
+                         });
+                     }
+                });
+            });
+            ajustesCache.forEach(ajuste => {
+                ajuste.items.forEach(item => {
+                    if (item.codigo === insumoCodigo) {
+                        const diff = parseFloat(item.estoqueNovo) - parseFloat(item.estoqueAnterior);
                         saidas.push({
-                            data: req.data,
-                            tipo: 'Requisição',
-                            destino: req.motivo,
-                            quantidade: item.quantidade,
+                            data: ajuste.data,
+                            tipo: `Ajuste (${diff > 0 ? '+' : ''}${diff.toFixed(3)})`,
+                            destino: ajuste.justificativa,
+                            quantidade: `${item.estoqueAnterior} -> ${item.estoqueNovo}`,
                             lote: item.lote
                         });
                     }
@@ -1220,7 +1363,7 @@
                  linha: document.getElementById('produto-linha').value,
                  receita: receita
              };
-             
+            
             if (id) {
                 const index = produtosCache.findIndex(p => p.id === id);
                 if (index > -1) {
@@ -1249,9 +1392,9 @@
                  document.getElementById('produto-modal').classList.add('active');
             } else if (e.target.classList.contains('delete-produto-btn')) {
                  if(confirm('Tem certeza que deseja excluir este produto?')) {
-                    produtosCache = produtosCache.filter(p => p.id !== produtoId);
-                    saveToStorage(STORAGE_KEYS.produtos, produtosCache);
-                    renderProdutosTable(produtosCache);
+                     produtosCache = produtosCache.filter(p => p.id !== produtoId);
+                     saveToStorage(STORAGE_KEYS.produtos, produtosCache);
+                     renderProdutosTable(produtosCache);
                  }
             }
         });
@@ -1316,36 +1459,36 @@
              let allStockSufficient = true;
              
              for (const item of produto.receita) {
-                let requiredQuantity = parseFloat(item.dosagem) * quantidade;
-                
-                const availableBatches = insumosCache
-                    .filter(i => i.codigo === item.insumoCodigo && parseFloat(i.estoque) > 0)
-                    .sort((a,b) => new Date(a.validade) - new Date(b.validade));
+                 let requiredQuantity = parseFloat(item.dosagem) * quantidade;
+                 
+                 const availableBatches = insumosCache
+                     .filter(i => i.codigo === item.insumoCodigo && parseFloat(i.estoque) > 0)
+                     .sort((a,b) => new Date(a.validade) - new Date(b.validade));
 
-                const insumoInfo = availableBatches[0] || insumosCache.find(i => i.codigo === item.insumoCodigo) || {nome: "Desconhecido"};
-                
-                if (availableBatches.length === 0) {
-                    warningDiv.textContent += `Estoque esgotado para ${insumoInfo.nome} (Cód: ${item.insumoCodigo}). `;
-                    allStockSufficient = false;
-                    continue;
-                }
+                 const insumoInfo = availableBatches[0] || insumosCache.find(i => i.codigo === item.insumoCodigo) || {nome: "Desconhecido"};
+                 
+                 if (availableBatches.length === 0) {
+                     warningDiv.textContent += `Estoque esgotado para ${insumoInfo.nome} (Cód: ${item.insumoCodigo}). `;
+                     allStockSufficient = false;
+                     continue;
+                 }
 
-                let remainingRequired = requiredQuantity;
-                for (const batch of availableBatches) {
-                    if (remainingRequired <= 0) break;
-                    
-                    const quantityToUse = Math.min(remainingRequired, parseFloat(batch.estoque));
-                    addOrdemInsumoRow(insumoInfo, quantityToUse, batch, availableBatches);
-                    remainingRequired -= quantityToUse;
-                }
+                 let remainingRequired = requiredQuantity;
+                 for (const batch of availableBatches) {
+                     if (remainingRequired <= 0) break;
+                     
+                     const quantityToUse = Math.min(remainingRequired, parseFloat(batch.estoque));
+                     addOrdemInsumoRow(insumoInfo, quantityToUse, batch, availableBatches);
+                     remainingRequired -= quantityToUse;
+                 }
 
-                if (remainingRequired > 0.001) { 
-                    warningDiv.textContent += `Estoque insuficiente para ${insumoInfo.nome}. Necessário: ${requiredQuantity.toFixed(3)}kg. Disponível: ${(requiredQuantity - remainingRequired).toFixed(3)}kg. `;
-                    allStockSufficient = false;
-                }
+                 if (remainingRequired > 0.001) { 
+                     warningDiv.textContent += `Estoque insuficiente para ${insumoInfo.nome}. Necessário: ${requiredQuantity.toFixed(3)}kg. Disponível: ${(requiredQuantity - remainingRequired).toFixed(3)}kg. `;
+                     allStockSufficient = false;
+                 }
              }
              if (!allStockSufficient) {
-                warningDiv.classList.remove('hidden');
+                 warningDiv.classList.remove('hidden');
              }
         }
         
@@ -1356,22 +1499,22 @@
              tr.dataset.insumoCodigo = insumoInfo.codigo;
 
              const batchOptions = allAvailableBatches.map(b => 
-                `<option value="${b.id}" ${b.id === selectedBatch.id ? 'selected' : ''}>
-                    Lote: ${b.lote} (Estoque: ${b.estoque}kg, Val: ${formatDate(b.validade)})
-                 </option>`
+                 `<option value="${b.id}" ${b.id === selectedBatch.id ? 'selected' : ''}>
+                      Lote: ${b.lote} (Estoque: ${b.estoque}kg, Val: ${formatDate(b.validade)})
+                  </option>`
              ).join('');
 
              tr.innerHTML = `
                  <td class="p-2">${insumoInfo.nome}</td>
                  <td class="p-2">
-                    <input type="number" step="0.001" class="w-24 p-1 border rounded-md text-sm ordem-insumo-qty" value="${quantityToUse.toFixed(3)}" required>
+                     <input type="number" step="0.001" class="w-24 p-1 border rounded-md text-sm ordem-insumo-qty" value="${quantityToUse.toFixed(3)}" required>
                  </td>
                  <td class="p-2">
-                    <select class="w-full p-1 border rounded-md text-sm ordem-insumo-lote">${batchOptions}</select>
+                     <select class="w-full p-1 border rounded-md text-sm ordem-insumo-lote">${batchOptions}</select>
                  </td>
                  <td class="p-2">${selectedBatch.fornecedor}</td>
                  <td class="p-2">
-                    <input type="text" class="w-full p-1 border rounded-md text-sm ordem-insumo-manipulador" placeholder="Nome (Opcional)">
+                     <input type="text" class="w-full p-1 border rounded-md text-sm ordem-insumo-manipulador" placeholder="Nome (Opcional)">
                  </td>
              `;
              tbody.appendChild(tr);
@@ -1632,7 +1775,7 @@
                 const availableBatches = insumosCache.filter(i => i.codigo === insumoCodigo && parseFloat(i.estoque) > 0);
                 if (availableBatches.length > 0) {
                      loteSelect.innerHTML = '<option value="">Selecione o lote...</option>' + availableBatches.map(b => 
-                        `<option value="${b.id}">Lote: ${b.lote} (Estoque: ${b.estoque} kg)</option>`
+                         `<option value="${b.id}">Lote: ${b.lote} (Estoque: ${b.estoque} kg)</option>`
                      ).join('');
                      loteSelect.disabled = false;
                      qtyInput.disabled = false;
@@ -1712,33 +1855,323 @@
 
             contentDiv.innerHTML = `
                  <div class="space-y-4">
-                    <div class="grid grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50 text-sm">
-                        <div><strong class="block text-gray-500">Data:</strong> ${formatDate(req.data)}</div>
-                        <div><strong class="block text-gray-500">Responsável:</strong> ${req.responsavel}</div>
-                        <div><strong class="block text-gray-500">Motivo:</strong> ${req.motivo}</div>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold text-md mt-4 mb-2">Itens Requisitados</h4>
-                        <table class="w-full text-sm text-left">
-                           <thead class="bg-gray-100">
-                               <tr>
-                                   <th class="p-2">Código</th>
-                                   <th class="p-2">Insumo</th>
-                                   <th class="p-2">Lote</th>
-                                   <th class="p-2">Quantidade</th>
-                               </tr>
-                           </thead>
-                           <tbody>${itemsHtml}</tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
+                     <div class="grid grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50 text-sm">
+                         <div><strong class="block text-gray-500">Data:</strong> ${formatDate(req.data)}</div>
+                         <div><strong class="block text-gray-500">Responsável:</strong> ${req.responsavel}</div>
+                         <div><strong class="block text-gray-500">Motivo:</strong> ${req.motivo}</div>
+                     </div>
+                     <div>
+                         <h4 class="font-semibold text-md mt-4 mb-2">Itens Requisitados</h4>
+                         <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="p-2">Código</th>
+                                    <th class="p-2">Insumo</th>
+                                    <th class="p-2">Lote</th>
+                                    <th class="p-2">Quantidade</th>
+                                </tr>
+                            </thead>
+                            <tbody>${itemsHtml}</tbody>
+                         </table>
+                     </div>
+                 </div>
+             `;
             document.getElementById('view-requisicao-modal').classList.add('active');
         }
 
+        // --- INSUMO DEFINITIONS (MIN STOCK) ---
+        document.getElementById('manage-insumos-btn').addEventListener('click', () => {
+            populateInsumoDefinitionsTable();
+        });
+
+        function populateInsumoDefinitionsTable() {
+            const tbody = document.getElementById('insumo-definitions-table-body');
+            tbody.innerHTML = '';
+            const uniqueInsumos = [...new Map(insumosCache.map(item => [item['codigo'], item])).values()];
+
+            uniqueInsumos.sort((a, b) => a.nome.localeCompare(b.nome));
+
+            uniqueInsumos.forEach(insumo => {
+                const definition = insumoDefinitionsCache.find(def => def.codigo === insumo.codigo);
+                const manualMin = definition ? definition.estoqueMinimoManual : '';
+                const tr = document.createElement('tr');
+                tr.className = 'border-b';
+                tr.innerHTML = `
+                    <td class="p-2">${insumo.codigo}</td>
+                    <td class="p-2">${insumo.nome}</td>
+                    <td class="p-2">
+                        <div class="flex items-center gap-2">
+                            <input type="number" step="0.01" data-codigo="${insumo.codigo}" class="insumo-min-stock-input w-full p-1 border rounded-md bg-gray-100" value="${manualMin}" placeholder="Automático" readonly>
+                            <button type="button" class="edit-min-stock-btn text-blue-600 hover:underline px-3 py-1">Editar</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('insumo-definitions-table-body').addEventListener('click', e => {
+            if (e.target.classList.contains('edit-min-stock-btn')) {
+                const row = e.target.closest('tr');
+                const input = row.querySelector('.insumo-min-stock-input');
+                input.readOnly = false;
+                input.classList.remove('bg-gray-100');
+                input.focus();
+                input.select();
+            }
+        });
+
+        document.getElementById('insumo-definitions-form').addEventListener('submit', e => {
+            e.preventDefault();
+            const inputs = document.querySelectorAll('.insumo-min-stock-input');
+
+            inputs.forEach(input => {
+                const codigo = input.dataset.codigo;
+                const valor = input.value.trim();
+                const existingDefIndex = insumoDefinitionsCache.findIndex(def => def.codigo === codigo);
+
+                if (valor !== '' && parseFloat(valor) >= 0) {
+                    const newDef = {
+                        codigo: codigo,
+                        estoqueMinimoManual: parseFloat(valor)
+                    };
+                    if (existingDefIndex > -1) {
+                        insumoDefinitionsCache[existingDefIndex] = newDef;
+                    } else {
+                        insumoDefinitionsCache.push(newDef);
+                    }
+                } else {
+                    if (existingDefIndex > -1) {
+                        insumoDefinitionsCache.splice(existingDefIndex, 1);
+                    }
+                }
+            });
+
+            saveToStorage(STORAGE_KEYS.insumo_definitions, insumoDefinitionsCache);
+            updateDashboard(insumosCache, ordensCache);
+            alert('Estoques mínimos atualizados com sucesso!');
+            document.getElementById('insumo-definitions-modal').classList.remove('active');
+        });
 
 
-        // --- PDF EXPORT ---
+        // --- AJUSTES DE ESTOQUE ---
+        function renderAjustesTable(ajustes) {
+            const tbody = document.getElementById('ajustes-table-body');
+            tbody.innerHTML = '';
+            if (!ajustes || ajustes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-gray-500">Nenhum ajuste de estoque encontrado.</td></tr>';
+                return;
+            }
+            ajustes.sort((a, b) => new Date(b.data) - new Date(a.data));
+            ajustes.forEach(ajuste => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b';
+                const itemsSummary = ajuste.items.map(i => `${i.nome} (Lote: ${i.lote})`).join(', ');
+                tr.innerHTML = `
+                    <td class="p-3">${formatDate(ajuste.data)}</td>
+                    <td class="p-3">${ajuste.responsavel}</td>
+                    <td class="p-3">${ajuste.justificativa}</td>
+                    <td class="p-3 text-xs">${itemsSummary}</td>
+                    <td class="p-3">
+                        <button class="view-ajuste-btn text-blue-600 hover:underline" data-id='${ajuste.id}'>Ver Detalhes</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.querySelectorAll('.view-ajuste-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const ajuste = ajustesCache.find(a => a.id === btn.dataset.id);
+                    showAjusteDetails(ajuste);
+                });
+            });
+        }
+
+        document.getElementById('add-ajuste-btn').addEventListener('click', () => {
+            document.getElementById('ajuste-form').reset();
+            document.getElementById('ajuste-data').value = getToday();
+            document.getElementById('ajuste-items-container').innerHTML = '';
+            addAjusteItem();
+            document.getElementById('ajuste-modal').classList.add('active');
+        });
+
+        document.getElementById('add-ajuste-item-btn').addEventListener('click', addAjusteItem);
+
+        function addAjusteItem() {
+            const container = document.getElementById('ajuste-items-container');
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'grid grid-cols-[1fr,1fr,auto,auto] gap-3 p-3 border rounded-lg items-end';
+
+            const uniqueInsumos = [...new Map(insumosCache.map(item => [item['codigo'], item])).values()];
+
+            itemDiv.innerHTML = `
+                <div>
+                    <label class="text-xs">Insumo</label>
+                    <select class="ajuste-item-insumo w-full p-1 border rounded-md text-sm">
+                        <option value="">Selecione...</option>
+                        ${uniqueInsumos.map(i => `<option value="${i.codigo}">${i.nome} (Cód: ${i.codigo})</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs">Lote</label>
+                    <select class="ajuste-item-lote w-full p-1 border rounded-md text-sm" disabled>
+                        <option value="">Escolha um insumo...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs">Nova Quantidade (kg)</label>
+                    <input type="number" step="0.001" class="ajuste-item-qty w-full p-1 border rounded-md text-sm" placeholder="Estoque Correto" disabled>
+                </div>
+                <button type="button" class="remove-ajuste-item-btn text-red-500 ml-2 px-2 h-8 hover:bg-red-100 rounded">X</button>
+            `;
+            container.appendChild(itemDiv);
+        }
+
+        document.getElementById('ajuste-items-container').addEventListener('change', e => {
+            if (e.target.classList.contains('ajuste-item-insumo')) {
+                const insumoCodigo = e.target.value;
+                const row = e.target.closest('.grid');
+                const loteSelect = row.querySelector('.ajuste-item-lote');
+                const qtyInput = row.querySelector('.ajuste-item-qty');
+                loteSelect.innerHTML = '<option value="">Carregando...</option>';
+                loteSelect.disabled = true;
+                qtyInput.disabled = true;
+                qtyInput.value = '';
+
+                if (!insumoCodigo) {
+                    loteSelect.innerHTML = '<option value="">Escolha um insumo...</option>';
+                    return;
+                }
+                const availableBatches = insumosCache.filter(i => i.codigo === insumoCodigo);
+                if (availableBatches.length > 0) {
+                    loteSelect.innerHTML = '<option value="">Selecione o lote...</option>' + availableBatches.map(b =>
+                        `<option value="${b.id}">Lote: ${b.lote} (Estoque Atual: ${b.estoque} kg)</option>`
+                    ).join('');
+                    loteSelect.disabled = false;
+                } else {
+                    loteSelect.innerHTML = '<option value="">Nenhum lote</option>';
+                }
+            } else if (e.target.classList.contains('ajuste-item-lote')) {
+                const row = e.target.closest('.grid');
+                const qtyInput = row.querySelector('.ajuste-item-qty');
+                qtyInput.disabled = !e.target.value;
+            }
+        });
+
+        document.getElementById('ajuste-items-container').addEventListener('click', e => {
+            if (e.target.classList.contains('remove-ajuste-item-btn')) {
+                e.target.closest('.grid').remove();
+            }
+        });
+
+        document.getElementById('ajuste-form').addEventListener('submit', e => {
+            e.preventDefault();
+            const updates = [];
+            const items = [];
+
+            for (const itemRow of document.querySelectorAll('#ajuste-items-container .grid')) {
+                const loteId = itemRow.querySelector('.ajuste-item-lote').value;
+                const novaQuantidadeStr = itemRow.querySelector('.ajuste-item-qty').value;
+
+                if (!loteId || novaQuantidadeStr === '') {
+                    alert('Por favor, preencha todos os campos dos itens para ajuste.');
+                    return;
+                }
+
+                const novaQuantidade = parseFloat(novaQuantidadeStr);
+                if (isNaN(novaQuantidade) || novaQuantidade < 0) {
+                    alert('Por favor, insira uma quantidade válida.');
+                    return;
+                }
+
+                const lote = insumosCache.find(i => i.id === loteId);
+                const estoqueAnterior = lote.estoque;
+
+                updates.push({ batchId: lote.id, newStock: novaQuantidade.toFixed(3) });
+                items.push({
+                    codigo: lote.codigo,
+                    nome: lote.nome,
+                    lote: lote.lote,
+                    estoqueAnterior: estoqueAnterior,
+                    estoqueNovo: novaQuantidade.toFixed(3)
+                });
+            }
+
+            if (items.length === 0) {
+                alert('Adicione pelo menos um item para ajustar.');
+                return;
+            }
+
+            const ajusteData = {
+                id: `ajuste_${Date.now()}`,
+                data: document.getElementById('ajuste-data').value,
+                responsavel: document.getElementById('ajuste-responsavel').value.trim(),
+                justificativa: document.getElementById('ajuste-justificativa').value.trim(),
+                items: items,
+                createdAt: new Date().toISOString()
+            };
+
+            updates.forEach(update => {
+                const index = insumosCache.findIndex(i => i.id === update.batchId);
+                if (index > -1) {
+                    insumosCache[index].estoque = update.newStock;
+                }
+            });
+            saveToStorage(STORAGE_KEYS.insumos, insumosCache);
+
+            ajustesCache.push(ajusteData);
+            saveToStorage(STORAGE_KEYS.ajustes, ajustesCache);
+
+            renderAjustesTable(ajustesCache);
+            updateInsumosView();
+            updateDashboard(insumosCache, ordensCache);
+            document.getElementById('ajuste-modal').classList.remove('active');
+        });
+
+        function showAjusteDetails(ajuste) {
+            const contentDiv = document.getElementById('view-ajuste-content');
+
+            const itemsHtml = ajuste.items.map(item => `
+                <tr class="border-b">
+                    <td class="p-2">${item.codigo}</td>
+                    <td class="p-2">${item.nome}</td>
+                    <td class="p-2">${item.lote}</td>
+                    <td class="p-2">${item.estoqueAnterior} kg</td>
+                    <td class="p-2">${item.estoqueNovo} kg</td>
+                </tr>
+            `).join('');
+
+            contentDiv.innerHTML = `
+                 <div class="space-y-4">
+                     <div class="grid grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50 text-sm">
+                         <div><strong class="block text-gray-500">Data:</strong> ${formatDate(ajuste.data)}</div>
+                         <div><strong class="block text-gray-500">Responsável:</strong> ${ajuste.responsavel}</div>
+                         <div><strong class="block text-gray-500">Justificativa:</strong> ${ajuste.justificativa}</div>
+                     </div>
+                     <div>
+                         <h4 class="font-semibold text-md mt-4 mb-2">Itens Ajustados</h4>
+                         <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="p-2">Código</th>
+                                    <th class="p-2">Insumo</th>
+                                    <th class="p-2">Lote</th>
+                                    <th class="p-2">Estoque Anterior</th>
+                                    <th class="p-2">Estoque Novo</th>
+                                </tr>
+                            </thead>
+                            <tbody>${itemsHtml}</tbody>
+                         </table>
+                     </div>
+                 </div>
+             `;
+            document.getElementById('view-ajuste-modal').classList.add('active');
+        }
+
+
+        // --- EXPORTS ---
+
+        // PDF Export for Production Orders
         document.getElementById('export-pdf-btn').addEventListener('click', () => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
@@ -1755,7 +2188,7 @@
             const productionLineColors = {
                 'Pães Congelados': { bg: [235, 247, 255], text: [52, 152, 219] }, 
                 'Pães Especiais': { bg: [230, 250, 230], text: [46, 204, 113] },  
-                'Pão de Queijo': { bg: [255, 253, 230], text: [241, 196, 15] },   
+                'Pão de Queijo': { bg: [255, 253, 230], text: [241, 196, 15] },    
                 'Confeitaria': { bg: [244, 235, 247], text: [155, 89, 182] }    
             };
             
@@ -1779,8 +2212,8 @@
                     finalY = 20;
                 }
                  if (index > 0) {
-                    finalY += 10;
-                }
+                     finalY += 10;
+                 }
 
                 doc.setFillColor(colors.bg[0], colors.bg[1], colors.bg[2]);
                 doc.roundedRect(pageMargin, finalY, pageWidth - (pageMargin * 2), 10, 2, 2, 'F');
@@ -1841,57 +2274,79 @@
             doc.save(`producao_${today.replace(/-/g, '_')}.pdf`);
         });
         
-        document.getElementById('export-stock-pdf-btn').addEventListener('click', () => {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-
-            const tableColumn = ["Insumo", "Lote", "Data Receb.", "Validade", "Estoque (kg)", "Autorizado Por"];
-            const tableRows = [];
-            
-            displayedInsumos.forEach(insumo => {
-                const rowData = [
-                    insumo.nome,
-                    insumo.lote,
-                    formatDate(insumo.dataRecebimento),
-                    formatDate(insumo.validade),
-                    parseFloat(insumo.estoque).toFixed(3),
-                    insumo.quemAutorizou || 'N/A'
-                ];
-                tableRows.push(rowData);
-            });
-
-            doc.autoTable({
-                head: [tableColumn],
-                body: tableRows,
-                startY: 20,
-                theme: 'grid',
-                headStyles: { 
-                    fillColor: [41, 128, 185],
-                    textColor: 255,
-                    fontSize: 9
-                },
-                styles: {
-                    fontSize: 8,
-                    cellPadding: 2
+        // Excel Export for Stock
+        document.getElementById('export-stock-excel-btn').addEventListener('click', () => {
+             // 1. Aggregate total stock and get min stock for each unique insumo
+            const insumoData = {};
+            insumosCache.forEach(insumo => {
+                if (!insumoData[insumo.codigo]) {
+                    insumoData[insumo.codigo] = {
+                        nome: insumo.nome,
+                        totalEstoque: 0,
+                        minEstoque: parseFloat(calculateStockLevels(insumo.codigo, ordensCache).min)
+                    };
                 }
+                insumoData[insumo.codigo].totalEstoque += parseFloat(insumo.estoque);
             });
-
-            const pageCount = doc.internal.getNumberOfPages();
-            const todayStr = new Date().toLocaleDateString('pt-BR');
-            for(let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.setFontSize(14);
-                doc.text('Relatório de Estoque de Insumos', doc.internal.pageSize.getWidth() / 2, 10, { align: 'center' });
-                doc.setFontSize(10);
-                doc.text(`Gerado em: ${todayStr}`, doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
-                doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
+            
+            const lowStockCodes = new Set();
+            for(const code in insumoData){
+                if(insumoData[code].totalEstoque < insumoData[code].minEstoque){
+                    lowStockCodes.add(code);
+                }
             }
 
-            doc.save(`relatorio_estoque_${getToday().replace(/-/g, '_')}.pdf`);
+            // 2. Prepare data for the sheet
+            const headers = ["Insumo", "Lote", "Data Receb.", "Validade", "Estoque (kg)", "Autorizado Por"];
+            const data = displayedInsumos.map(insumo => ({
+                "Insumo": insumo.nome,
+                "Lote": insumo.lote,
+                "Data Receb.": formatDate(insumo.dataRecebimento),
+                "Validade": formatDate(insumo.validade),
+                "Estoque (kg)": parseFloat(insumo.estoque).toFixed(3),
+                "Autorizado Por": insumo.quemAutorizou || 'N/A',
+                "codigo": insumo.codigo // hidden column for logic
+            }));
+
+            // 3. Create worksheet and workbook
+            const ws = XLSX.utils.json_to_sheet(data, { header: headers, skipHeader: false });
+            
+            // 4. Apply conditional formatting
+            const redFill = { fgColor: { rgb: "FFFFC7CE" } };
+            const redFont = { color: { rgb: "FF9C0006" } };
+
+            data.forEach((row, index) => {
+                if (lowStockCodes.has(row.codigo)) {
+                    // +2 because Excel rows are 1-based and we have a header row
+                    const rowIndex = index + 2; 
+                    ['A', 'B', 'C', 'D', 'E', 'F'].forEach(col => {
+                        const cellAddress = `${col}${rowIndex}`;
+                        if (ws[cellAddress]) {
+                            ws[cellAddress].s = { fill: redFill, font: redFont };
+                        }
+                    });
+                }
+            });
+            
+            // Remove the helper 'codigo' column from the final sheet
+            ws['!cols'] = [{wch:25},{wch:15},{wch:12},{wch:12},{wch:12},{wch:20}];
+
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Estoque");
+
+            // 5. Generate filename with date and time
+            const now = new Date();
+            const pad = (num) => num.toString().padStart(2, '0');
+            const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+            const timeStr = `${pad(now.getHours())}h${pad(now.getMinutes())}m${pad(now.getSeconds())}s`;
+            const fileName = `relatorio_estoque_${dateStr}_${timeStr}.xlsx`;
+
+            // 6. Trigger download
+            XLSX.writeFile(wb, fileName);
         });
 
     </script>
 </body>
 </html>
-
 
