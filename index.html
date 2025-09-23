@@ -31,34 +31,11 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <p class="mt-4 text-lg font-semibold text-gray-700">Conectando...</p>
+            <p class="mt-4 text-lg font-semibold text-gray-700">Carregando dados...</p>
         </div>
     </div>
 
-    <!-- Login View -->
-    <div id="login-view" class="min-h-screen bg-gray-100 flex items-center justify-center hidden">
-        <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-            <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Acessar Sistema</h2>
-            <div id="auth-error" class="text-red-500 text-sm mb-4 text-center hidden"></div>
-            <form id="login-form">
-                <div class="mb-4">
-                    <label for="email" class="block text-gray-700 text-sm font-semibold mb-2">Email</label>
-                    <input type="email" id="email" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="mb-6">
-                    <label for="password" class="block text-gray-700 text-sm font-semibold mb-2">Senha</label>
-                    <input type="password" id="password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="flex flex-col space-y-2">
-                    <button type="submit" id="login-btn" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">Entrar</button>
-                    <button type="button" id="signup-btn" class="w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition-colors">Criar Conta</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-
-    <div id="app-container" class="flex h-screen bg-gray-200 hidden">
+    <div id="app-container" class="flex h-screen bg-gray-200">
         <!-- Sidebar -->
         <aside class="w-20 lg:w-64 bg-gray-800 text-white flex flex-col transition-all duration-300">
             <div class="h-16 flex items-center justify-center border-b border-gray-700">
@@ -91,21 +68,13 @@
                     <span class="hidden lg:inline ml-3">Requisições</span>
                 </a>
             </nav>
-            <div class="px-2 lg:px-4 py-4 border-t border-gray-700">
-                <button id="logout-btn" class="w-full flex items-center py-2.5 px-4 rounded-lg hover:bg-red-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    <span class="hidden lg:inline ml-3">Sair</span>
-                </button>
-            </div>
         </aside>
 
         <!-- Main Content -->
         <main class="flex-1 flex flex-col overflow-hidden">
             <header class="h-16 bg-white shadow-md flex items-center justify-between px-6">
                  <h1 id="page-title" class="text-2xl font-semibold text-gray-800">Dashboard</h1>
-                 <div id="user-info" class="text-sm text-gray-500"></div>
+                 <div id="user-info" class="text-sm text-gray-500" style="display: none;"></div>
             </header>
             <div class="flex-1 p-6 overflow-auto">
 
@@ -696,26 +665,21 @@
                 if (!insumoTotals[insumo.codigo]) {
                     insumoTotals[insumo.codigo] = {
                         nome: insumo.nome,
-                        estoqueMinimo: 0,
-                        totalEstoque: 0,
-                        latestBatchDate: '1970-01-01'
+                        totalEstoque: 0
                     };
                 }
                 insumoTotals[insumo.codigo].totalEstoque += parseFloat(insumo.estoque);
-                
-                const batchDate = insumo.dataRecebimento || '1970-01-01';
-                if (batchDate > insumoTotals[insumo.codigo].latestBatchDate) {
-                    insumoTotals[insumo.codigo].latestBatchDate = batchDate;
-                    insumoTotals[insumo.codigo].estoqueMinimo = parseFloat(insumo.estoqueMinimo);
-                }
             });
             
             let lowStockCount = 0;
             for (const codigo in insumoTotals) {
                 const insumo = insumoTotals[codigo];
-                if (insumo.totalEstoque <= insumo.estoqueMinimo && insumo.estoqueMinimo > 0) {
+                const levels = calculateStockLevels(codigo, ordens);
+                const estoqueMinimoSugerido = parseFloat(levels.min);
+
+                if (insumo.totalEstoque <= estoqueMinimoSugerido && estoqueMinimoSugerido > 0) {
                     const li = document.createElement('li');
-                    li.innerHTML = `<button class="alert-item-btn text-left w-full text-sm text-red-700 hover:underline" data-codigo="${codigo}" data-nome="${insumo.nome}">${insumo.nome} (${insumo.totalEstoque.toFixed(3)} kg / min: ${insumo.estoqueMinimo.toFixed(3)} kg)</button>`;
+                    li.innerHTML = `<button class="alert-item-btn text-left w-full text-sm text-red-700 hover:underline" data-codigo="${codigo}" data-nome="${insumo.nome}">${insumo.nome} (${insumo.totalEstoque.toFixed(3)} kg / min: ${estoqueMinimoSugerido.toFixed(3)} kg)</button>`;
                     lowStockList.appendChild(li);
                     lowStockCount++;
                 }
@@ -1929,4 +1893,5 @@
     </script>
 </body>
 </html>
+
 
