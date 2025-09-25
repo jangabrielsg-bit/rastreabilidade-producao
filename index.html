@@ -33,7 +33,7 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <p class="mt-4 text-lg font-semibold text-gray-700">Carregando dados...</p>
+            <p class="mt-4 text-lg font-semibold text-gray-700">Conectando ao banco de dados...</p>
         </div>
     </div>
 
@@ -82,7 +82,7 @@
         <main class="flex-1 flex flex-col overflow-hidden">
             <header class="h-16 bg-white shadow-md flex items-center justify-between px-6">
                 <h1 id="page-title" class="text-2xl font-semibold text-gray-800">Dashboard</h1>
-                <div id="user-info" class="text-sm text-gray-500" style="display: none;"></div>
+                <div id="user-info" class="text-sm text-gray-500"></div>
             </header>
             <div class="flex-1 p-6 overflow-auto">
 
@@ -281,7 +281,7 @@
 
     <!-- Modals -->
     <!-- Insumo Modal -->
-    <div id="insumo-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+    <div id="insumo-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-30">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
             <h3 id="insumo-modal-title" class="text-xl font-semibold mb-4">Adicionar Lote de Insumo</h3>
             <form id="insumo-form">
@@ -339,7 +339,7 @@
     </div>
 
     <!-- Produto Modal -->
-    <div id="produto-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+    <div id="produto-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-30">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
             <h3 id="produto-modal-title" class="text-xl font-semibold mb-4">Adicionar Novo Produto</h3>
             <form id="produto-form">
@@ -369,7 +369,7 @@
     </div>
     
      <!-- Ordem de Produção Modal -->
-    <div id="ordem-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+    <div id="ordem-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-30">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-5xl max-h-[90vh] flex flex-col">
             <h3 id="ordem-modal-title" class="text-xl font-semibold mb-4">Nova Ordem de Produção</h3>
             <form id="ordem-form" class="flex-1 overflow-y-auto pr-2">
@@ -427,7 +427,7 @@
     </div>
     
     <!-- View Ordem Modal -->
-    <div id="view-ordem-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+    <div id="view-ordem-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-30">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-start">
                 <h3 class="text-xl font-semibold mb-4">Detalhes da Ordem de Produção</h3>
@@ -440,7 +440,7 @@
     </div>
 
     <!-- Insumo History Modal -->
-    <div id="insumo-history-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+    <div id="insumo-history-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-30">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-6xl max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-start mb-4">
                 <h3 id="insumo-history-title" class="text-xl font-semibold">Histórico do Insumo</h3>
@@ -504,7 +504,7 @@
     </div>
 
     <!-- Requisição Modal -->
-    <div id="requisicao-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+    <div id="requisicao-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-30">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl max-h-[90vh] flex flex-col">
             <h3 class="text-xl font-semibold mb-4">Nova Requisição de Insumos</h3>
             <form id="requisicao-form" class="flex-1 overflow-y-auto pr-2">
@@ -542,7 +542,7 @@
     </div>
 
     <!-- View Requisição Modal -->
-    <div id="view-requisicao-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+    <div id="view-requisicao-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-30">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-3xl max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-start">
                 <h3 class="text-xl font-semibold mb-4">Detalhes da Requisição</h3>
@@ -555,7 +555,7 @@
     </div>
     
     <!-- Insumo Definitions Modal -->
-    <div id="insumo-definitions-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+    <div id="insumo-definitions-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-30">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl max-h-[90vh] flex flex-col">
             <h3 class="text-xl font-semibold mb-4">Gerenciar Estoque Mínimo de Insumos</h3>
             <p class="text-sm text-gray-600 mb-4">Defina um estoque mínimo manual para um insumo. Se deixado em branco ou com valor zero, o sistema calculará um valor dinamicamente com base no consumo.</p>
@@ -583,7 +583,7 @@
     </div>
     
      <!-- Ajuste Modal -->
-    <div id="ajuste-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+    <div id="ajuste-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-30">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl max-h-[90vh] flex flex-col">
             <h3 class="text-xl font-semibold mb-4">Novo Ajuste de Estoque</h3>
             <form id="ajuste-form" class="flex-1 overflow-y-auto pr-2">
@@ -615,7 +615,7 @@
     </div>
     
     <!-- View Ajuste Modal -->
-    <div id="view-ajuste-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+    <div id="view-ajuste-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-30">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-3xl max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-start">
                 <h3 class="text-xl font-semibold mb-4">Detalhes do Ajuste de Estoque</h3>
@@ -629,7 +629,38 @@
 
 
     <script type="module">
-        // --- INITIALIZATION & STORAGE ---
+        // --- SDKs FIREBASE ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, addDoc, setDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+        // --- CONFIGURAÇÃO E INICIALIZAÇÃO FIREBASE ---
+        let firebaseConfig;
+        try {
+            firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        } catch (e) {
+            console.error("Erro ao analisar a configuração do Firebase:", e);
+            firebaseConfig = {};
+        }
+
+        if (!firebaseConfig.apiKey) {
+            document.getElementById('loading-overlay').innerHTML = `
+                <div class="text-center text-red-600 p-4">
+                    <h3 class="font-semibold text-lg">Erro de Configuração</h3>
+                    <p>A configuração do Firebase não foi encontrada ou é inválida. A aplicação não pode ser iniciada.</p>
+                </div>
+            `;
+            throw new Error("Firebase config not found or invalid.");
+        }
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        let userId = null;
+        let unsubscribeListeners = []; // Para limpar os listeners ao deslogar
+
+        // --- CACHE DE DADOS EM MEMÓRIA ---
         let insumosCache = [];
         let produtosCache = [];
         let ordensCache = [];
@@ -641,53 +672,93 @@
         let insumosSearchTerm = '';
         let displayedInsumos = [];
 
-        const STORAGE_KEYS = {
-            insumos: 'rastreio_insumos',
-            produtos: 'rastreio_produtos',
-            ordens: 'rastreio_ordens',
-            requisicoes: 'rastreio_requisicoes',
-            insumo_definitions: 'rastreio_insumo_definitions',
-            ajustes: 'rastreio_ajustes'
-        };
-
-        function loadFromStorage(key) {
+        // --- AUTENTICAÇÃO E INICIALIZAÇÃO DA APLICAÇÃO ---
+        async function initializeAndAuthenticate() {
             try {
-                const data = localStorage.getItem(key);
-                return data ? JSON.parse(data) : [];
-            } catch (e) {
-                console.error(`Error loading ${key} from storage`, e);
-                return [];
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    console.log("Autenticando com token customizado...");
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    console.log("Autenticando anonimamente...");
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Erro na autenticação inicial:", error);
+                document.getElementById('loading-overlay').innerHTML = `<p class="text-red-500">Falha na autenticação. Por favor, recarregue a página.</p>`;
+                return;
             }
         }
 
-        function saveToStorage(key, data) {
-            try {
-                localStorage.setItem(key, JSON.stringify(data));
-            } catch (e) {
-                console.error(`Error saving ${key} to storage`, e);
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                // This will be called after signIn succeeds.
+                if (!userId) { // Prevent re-initialization on token refresh
+                    console.log("Usuário autenticado com sucesso:", user.uid);
+                    userId = user.uid;
+                    document.getElementById('user-info').textContent = `ID do Usuário: ${userId}`;
+                    setupFirestoreListeners();
+                }
+            } else {
+                // This case is unlikely in this app's flow but good to handle.
+                console.log("Usuário não está autenticado.");
+                userId = null;
+                unsubscribeListeners.forEach(unsub => unsub());
+                unsubscribeListeners = [];
+                document.getElementById('loading-overlay').style.display = 'flex';
+                document.getElementById('loading-overlay').innerHTML = `<p class="text-red-500">Sessão encerrada. Por favor, recarregue a página.</p>`;
             }
-        }
+        });
 
-        function initializeApp() {
-            insumosCache = loadFromStorage(STORAGE_KEYS.insumos);
-            produtosCache = loadFromStorage(STORAGE_KEYS.produtos);
-            ordensCache = loadFromStorage(STORAGE_KEYS.ordens);
-            requisicoesCache = loadFromStorage(STORAGE_KEYS.requisicoes);
-            insumoDefinitionsCache = loadFromStorage(STORAGE_KEYS.insumo_definitions);
-            ajustesCache = loadFromStorage(STORAGE_KEYS.ajustes);
+        initializeAndAuthenticate();
+        
+        function setupFirestoreListeners() {
+            // Limpa listeners antigos para evitar duplicação
+            unsubscribeListeners.forEach(unsub => unsub());
+            unsubscribeListeners = [];
+
+            const collections = ['insumos', 'produtos', 'ordens', 'requisicoes', 'insumo_definitions', 'ajustes'];
+            const caches = {
+                insumos: (data) => insumosCache = data,
+                produtos: (data) => produtosCache = data,
+                ordens: (data) => ordensCache = data,
+                requisicoes: (data) => requisicoesCache = data,
+                insumo_definitions: (data) => insumoDefinitionsCache = data,
+                ajustes: (data) => ajustesCache = data,
+            };
+
+            let loadedCollections = 0;
             
-            updateInsumosView();
-            renderProdutosTable(produtosCache);
-            renderOrdensTable(ordensCache);
-            renderRequisicoesTable(requisicoesCache);
-            renderAjustesTable(ajustesCache);
-            updateDashboard(insumosCache, ordensCache);
+            collections.forEach(colName => {
+                const collRef = collection(db, `artifacts/${appId}/public/data/${colName}`);
+                const unsubscribe = onSnapshot(collRef, (snapshot) => {
+                    const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                    caches[colName](data);
+                    
+                    // Re-renderiza a view relevante após a atualização dos dados
+                    switch(colName) {
+                        case 'insumos': 
+                        case 'insumo_definitions':
+                            updateInsumosView(); 
+                            break;
+                        case 'produtos': renderProdutosTable(produtosCache); break;
+                        case 'ordens': renderOrdensTable(ordensCache); break;
+                        case 'requisicoes': renderRequisicoesTable(requisicoesCache); break;
+                        case 'ajustes': renderAjustesTable(ajustesCache); break;
+                    }
+                    updateDashboard(insumosCache, ordensCache);
 
-            document.getElementById('loading-overlay').style.display = 'none';
+                }, (error) => {
+                    console.error(`Erro ao carregar coleção ${colName}:`, error);
+                });
+                unsubscribeListeners.push(unsubscribe);
+            });
+            
+            // Simula um tempo para garantir que os dados iniciais sejam carregados
+            setTimeout(() => {
+                 document.getElementById('loading-overlay').style.display = 'none';
+                 console.log("Aplicativo pronto.");
+            }, 1500);
         }
-
-        window.onload = initializeApp;
-
 
         // --- UI NAVIGATION ---
         const navLinks = document.querySelectorAll('.nav-link');
@@ -758,7 +829,6 @@
             document.getElementById('view-ajuste-modal').classList.remove('active');
         });
 
-
         // --- DASHBOARD ---
         document.getElementById('view-dashboard').addEventListener('click', (e) => {
             const target = e.target.closest('.alert-item-btn');
@@ -766,6 +836,14 @@
                 const insumoCodigo = target.dataset.codigo;
                 const insumoNome = target.dataset.nome;
                 showInsumoHistory(insumoCodigo, insumoNome);
+            }
+            const shortcut = e.target.closest('.new-order-shortcut');
+            if (shortcut) {
+                const line = shortcut.dataset.line;
+                document.getElementById('nav-ordens').click();
+                resetOrdemForm();
+                populateProdutoSelectForOrdem(line);
+                document.getElementById('ordem-modal').classList.add('active');
             }
         });
 
@@ -879,11 +957,9 @@
                 return { min: 0, max: 0, avg: 0 };
             }
             
-            // Check for manual override first
             const definition = insumoDefinitionsCache.find(def => def.codigo === insumoCodigo);
             if (definition && parseFloat(definition.estoqueMinimoManual) > 0) {
                  const manualMin = parseFloat(definition.estoqueMinimoManual);
-                 // We can't calculate a sensible max/avg without consumption data, so return defaults for those
                  return { min: manualMin.toFixed(3), max: (manualMin * 4).toFixed(3), avg: 'N/A' };
             }
 
@@ -916,8 +992,6 @@
         
         function updateInsumosView() {
             let filteredInsumos = [...insumosCache];
-
-            // Apply search filter
             if (insumosSearchTerm) {
                 const lowerCaseTerm = insumosSearchTerm.toLowerCase();
                 filteredInsumos = filteredInsumos.filter(insumo =>
@@ -927,20 +1001,14 @@
                 );
             }
             
-            // Apply sorting
             filteredInsumos.sort((a, b) => {
                 const key = insumosSortConfig.key;
                 const direction = insumosSortConfig.direction === 'asc' ? 1 : -1;
-
                 const valA = a[key];
                 const valB = b[key];
 
-                if (key === 'estoque') {
-                    return (parseFloat(valA) - parseFloat(valB)) * direction;
-                }
-                if (key === 'validade' || key === 'dataRecebimento') {
-                    return (new Date(valA) - new Date(valB)) * direction;
-                }
+                if (key === 'estoque') return (parseFloat(valA) - parseFloat(valB)) * direction;
+                if (key === 'validade' || key === 'dataRecebimento') return (new Date(valA) - new Date(valB)) * direction;
                 return String(valA).localeCompare(String(valB)) * direction;
             });
 
@@ -948,12 +1016,9 @@
             renderInsumosTable(displayedInsumos);
         }
 
-
         function renderInsumosTable(insumos) {
             const tbody = document.getElementById('insumos-table-body');
             tbody.innerHTML = '';
-
-            // Update sort indicators in headers
             document.querySelectorAll('#view-insumos .sortable').forEach(th => {
                 th.classList.remove('sort-asc', 'sort-desc');
                 if (th.dataset.sort === insumosSortConfig.key) {
@@ -969,7 +1034,6 @@
             insumos.forEach(insumo => {
                 const tr = document.createElement('tr');
                 tr.className = 'border-b';
-                
                 const isExpired = new Date(insumo.validade + 'T00:00:00') < new Date();
                 
                 tr.innerHTML = `
@@ -990,27 +1054,19 @@
             });
         }
         
-        function saveInsumoData(id, data) {
+        async function saveInsumoData(id, data) {
             try {
+                const collRef = collection(db, `artifacts/${appId}/public/data/insumos`);
                 if (id) {
-                    const index = insumosCache.findIndex(i => i.id === id);
-                    if (index > -1) {
-                         insumosCache[index] = { ...insumosCache[index], ...data };
-                    }
+                    await setDoc(doc(collRef, id), data);
                 } else {
-                    data.id = `insumo_${Date.now()}_${Math.random()}`; // Simple unique ID
-                    insumosCache.push(data);
+                    await addDoc(collRef, data);
                 }
-                saveToStorage(STORAGE_KEYS.insumos, insumosCache);
-                
-                updateInsumosView();
-                updateDashboard(insumosCache, ordensCache);
-
                 document.getElementById('insumo-form').reset();
                 document.getElementById('insumo-modal').classList.remove('active');
                 document.getElementById('shelf-life-alert-modal').classList.remove('active');
             } catch(error) {
-                 console.error("Error saving insumo batch: ", error);
+                 console.error("Erro ao salvar o insumo: ", error);
                  alert("Erro ao salvar o insumo.");
             } finally {
                 tempInsumoData = null;
@@ -1032,13 +1088,9 @@
                  const fabDate = new Date(dataFabricacao + 'T00:00:00');
                  const valDate = new Date(validade + 'T00:00:00');
                  const recDate = new Date(dataRecebimento + 'T00:00:00');
-
                  const totalShelfLife = daysBetween(valDate, fabDate);
                  const remainingShelfLife = daysBetween(valDate, recDate);
-                 
-                 if (totalShelfLife > 0) {
-                     shelfLifePercentual = (remainingShelfLife / totalShelfLife) * 100;
-                 }
+                 if (totalShelfLife > 0) shelfLifePercentual = (remainingShelfLife / totalShelfLife) * 100;
              }
              
              const insumoData = {
@@ -1061,8 +1113,7 @@
                      return;
                  }
                  tempInsumoData = { id, data: insumoData };
-                 const alertMessage = document.getElementById('shelf-life-alert-message');
-                 alertMessage.querySelector('strong').textContent = `${shelfLifePercentual.toFixed(1)}%`;
+                 document.getElementById('shelf-life-alert-message').querySelector('strong').textContent = `${shelfLifePercentual.toFixed(1)}%`;
                  document.getElementById('shelf-life-authorizer').value = '';
                  document.getElementById('shelf-life-alert-modal').classList.add('active');
                  return; 
@@ -1107,7 +1158,6 @@
         document.querySelector('#view-insumos thead').addEventListener('click', (e) => {
             const header = e.target.closest('[data-sort]');
             if (!header) return;
-
             const sortKey = header.dataset.sort;
             if (insumosSortConfig.key === sortKey) {
                 insumosSortConfig.direction = insumosSortConfig.direction === 'asc' ? 'desc' : 'asc';
@@ -1118,8 +1168,7 @@
             updateInsumosView();
         });
 
-
-        document.getElementById('insumos-table-body').addEventListener('click', e => {
+        document.getElementById('insumos-table-body').addEventListener('click', async e => {
             const target = e.target;
             const insumoId = target.dataset.id;
             
@@ -1139,10 +1188,12 @@
                 document.getElementById('insumo-modal').classList.add('active');
             } else if (target.classList.contains('delete-insumo-btn')) {
                 if(confirm('Tem certeza que deseja excluir este lote de insumo?')) {
-                    insumosCache = insumosCache.filter(i => i.id !== insumoId);
-                    saveToStorage(STORAGE_KEYS.insumos, insumosCache);
-                    updateInsumosView();
-                    updateDashboard(insumosCache, ordensCache);
+                    try {
+                        await deleteDoc(doc(db, `artifacts/${appId}/public/data/insumos`, insumoId));
+                    } catch (error) {
+                        console.error("Erro ao excluir insumo:", error);
+                        alert("Não foi possível excluir o insumo.");
+                    }
                 }
             } else if (target.classList.contains('view-history-btn')) {
                 const insumoCodigo = target.dataset.codigo;
@@ -1184,10 +1235,8 @@
                  lotesDoInsumo.forEach(lote => {
                      const tr = document.createElement('tr');
                      tr.className = 'border-b';
-                     
                      const diasRestantes = daysBetween(lote.validade, today);
                      const shelfLifeRecebimento = lote.shelfLifePercentualRecebimento ? `${lote.shelfLifePercentualRecebimento.toFixed(1)}%` : 'N/A';
-                     
                      let estimativaConsumo = 'N/A';
                      let alerta = '';
                      if (avgDailyConsumption > 0 && parseFloat(lote.estoque) > 0) {
@@ -1195,12 +1244,8 @@
                          const dataEstimada = new Date();
                          dataEstimada.setDate(today.getDate() + diasParaConsumir);
                          estimativaConsumo = formatDate(dataEstimada.toISOString().split('T')[0]);
-
-                         if (dataEstimada > new Date(lote.validade)) {
-                             alerta = '<span title="Risco de vencer antes do consumo total" class="ml-2">⚠️</span>';
-                         }
+                         if (dataEstimada > new Date(lote.validade)) alerta = '<span title="Risco de vencer antes do consumo total" class="ml-2">⚠️</span>';
                      }
-
                      tr.innerHTML = `
                          <td class="p-2">${lote.lote}</td>
                          <td class="p-2">${parseFloat(lote.estoque).toFixed(3)}</td>
@@ -1213,49 +1258,25 @@
                  });
             }
             
-            // Combine saidas from Ordens, Requisições and Ajustes
             const saidas = [];
             ordensCache.forEach(ordem => {
                 ordem.insumosUtilizados.forEach(insumoUsado => {
-                    if (insumoUsado.codigo === insumoCodigo) {
-                        saidas.push({
-                            data: ordem.dataProducao,
-                            tipo: 'Produção',
-                            destino: ordem.produtoNome,
-                            quantidade: insumoUsado.dosagemTotal,
-                            lote: insumoUsado.lote
-                        });
-                    }
+                    if (insumoUsado.codigo === insumoCodigo) saidas.push({ data: ordem.dataProducao, tipo: 'Produção', destino: ordem.produtoNome, quantidade: insumoUsado.dosagemTotal, lote: insumoUsado.lote });
                 });
             });
             requisicoesCache.forEach(req => {
                 req.items.forEach(item => {
-                     if (item.codigo === insumoCodigo) {
-                         saidas.push({
-                             data: req.data,
-                             tipo: 'Requisição',
-                             destino: req.motivo,
-                             quantidade: item.quantidade,
-                             lote: item.lote
-                         });
-                     }
+                     if (item.codigo === insumoCodigo) saidas.push({ data: req.data, tipo: 'Requisição', destino: req.motivo, quantidade: item.quantidade, lote: item.lote });
                 });
             });
             ajustesCache.forEach(ajuste => {
                 ajuste.items.forEach(item => {
                     if (item.codigo === insumoCodigo) {
                         const diff = parseFloat(item.estoqueNovo) - parseFloat(item.estoqueAnterior);
-                        saidas.push({
-                            data: ajuste.data,
-                            tipo: `Ajuste (${diff > 0 ? '+' : ''}${diff.toFixed(3)})`,
-                            destino: ajuste.justificativa,
-                            quantidade: `${item.estoqueAnterior} -> ${item.estoqueNovo}`,
-                            lote: item.lote
-                        });
+                        saidas.push({ data: ajuste.data, tipo: `Ajuste (${diff > 0 ? '+' : ''}${diff.toFixed(3)})`, destino: ajuste.justificativa, quantidade: `${item.estoqueAnterior} -> ${item.estoqueNovo}`, lote: item.lote });
                     }
                 });
             });
-
 
             if (saidas.length === 0) {
                 saidasBody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-gray-500">Nenhuma saída registrada para este insumo.</td></tr>';
@@ -1279,11 +1300,6 @@
         }
 
         // --- PRODUTOS E RECEITAS ---
-        function loadProdutos() {
-            produtosCache = loadFromStorage(STORAGE_KEYS.produtos);
-            renderProdutosTable(produtosCache);
-        }
-        
         function renderProdutosTable(produtos) {
             const tbody = document.getElementById('produtos-table-body');
             tbody.innerHTML = '';
@@ -1295,12 +1311,10 @@
             produtos.forEach(produto => {
                 const tr = document.createElement('tr');
                 tr.className = 'border-b';
-                
                 const receitaHtml = (produto.receita || []).map(item => {
                     const insumoInfo = uniqueInsumos.find(i => i.codigo === item.insumoCodigo);
                     return `<span class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-xs mr-1 mb-1 inline-block">${insumoInfo ? insumoInfo.nome : `Código ${item.insumoCodigo}`}: ${item.dosagem} kg</span>`;
                 }).join('');
-
                 tr.innerHTML = `
                     <td class="p-3 font-medium">${produto.nome}</td>
                     <td class="p-3">${produto.linha}</td>
@@ -1314,42 +1328,35 @@
             });
         }
         
-        document.getElementById('add-receita-item-btn').addEventListener('click', () => {
-             addReceitaItem();
-        });
+        document.getElementById('add-receita-item-btn').addEventListener('click', () => addReceitaItem());
 
         function addReceitaItem(item = { insumoCodigo: '', dosagem: '' }) {
             const container = document.getElementById('receita-container');
             const div = document.createElement('div');
             div.className = 'flex items-center space-x-2';
-
             const uniqueInsumos = [...new Map(insumosCache.map(item => [item['codigo'], item])).values()];
-
             const select = document.createElement('select');
             select.className = 'receita-insumo-select p-2 border rounded-lg flex-1';
             select.innerHTML = '<option value="">Selecione um insumo</option>' + uniqueInsumos.map(i => `<option value="${i.codigo}">${i.nome} (Cód: ${i.codigo})</option>`).join('');
             select.value = item.insumoCodigo;
-
             const input = document.createElement('input');
             input.type = 'number';
             input.step = '0.001';
             input.className = 'receita-dosagem-input p-2 border rounded-lg w-32';
             input.placeholder = 'Dosagem (kg)';
             input.value = item.dosagem;
-
             const button = document.createElement('button');
             button.type = 'button';
             button.textContent = 'Remover';
             button.className = 'text-red-500 text-sm hover:underline';
             button.onclick = () => div.remove();
-            
             div.appendChild(select);
             div.appendChild(input);
             div.appendChild(button);
             container.appendChild(div);
         }
         
-        document.getElementById('produto-form').addEventListener('submit', e => {
+        document.getElementById('produto-form').addEventListener('submit', async e => {
              e.preventDefault();
              const id = document.getElementById('produto-id').value;
              const receitaItems = document.querySelectorAll('#receita-container > div');
@@ -1357,29 +1364,26 @@
                  insumoCodigo: item.querySelector('.receita-insumo-select').value,
                  dosagem: item.querySelector('.receita-dosagem-input').value,
              })).filter(i => i.insumoCodigo && i.dosagem);
-
              const produtoData = {
                  nome: document.getElementById('produto-nome').value,
                  linha: document.getElementById('produto-linha').value,
                  receita: receita
              };
-            
-            if (id) {
-                const index = produtosCache.findIndex(p => p.id === id);
-                if (index > -1) {
-                    produtosCache[index] = { ...produtosCache[index], ...produtoData };
+            try {
+                const collRef = collection(db, `artifacts/${appId}/public/data/produtos`);
+                if (id) {
+                    await setDoc(doc(collRef, id), produtoData);
+                } else {
+                    await addDoc(collRef, produtoData);
                 }
-            } else {
-                produtoData.id = `produto_${Date.now()}`;
-                produtosCache.push(produtoData);
+                document.getElementById('produto-modal').classList.remove('active');
+            } catch (error) {
+                console.error("Erro ao salvar produto:", error);
+                alert("Não foi possível salvar o produto.");
             }
-
-            saveToStorage(STORAGE_KEYS.produtos, produtosCache);
-            renderProdutosTable(produtosCache);
-            document.getElementById('produto-modal').classList.remove('active');
         });
         
-        document.getElementById('produtos-table-body').addEventListener('click', e => {
+        document.getElementById('produtos-table-body').addEventListener('click', async e => {
             const produtoId = e.target.dataset.id;
             if (e.target.classList.contains('edit-produto-btn')) {
                  const produto = produtosCache.find(p => p.id === produtoId);
@@ -1392,9 +1396,12 @@
                  document.getElementById('produto-modal').classList.add('active');
             } else if (e.target.classList.contains('delete-produto-btn')) {
                  if(confirm('Tem certeza que deseja excluir este produto?')) {
-                     produtosCache = produtosCache.filter(p => p.id !== produtoId);
-                     saveToStorage(STORAGE_KEYS.produtos, produtosCache);
-                     renderProdutosTable(produtosCache);
+                     try {
+                         await deleteDoc(doc(db, `artifacts/${appId}/public/data/produtos`, produtoId));
+                     } catch(error) {
+                         console.error("Erro ao excluir produto:", error);
+                         alert("Não foi possível excluir o produto.");
+                     }
                  }
             }
         });
@@ -1408,11 +1415,6 @@
         });
         
         // --- ORDENS DE PRODUÇÃO ---
-        function loadOrdens() {
-            ordensCache = loadFromStorage(STORAGE_KEYS.ordens);
-            renderOrdensTable(ordensCache);
-        }
-
         function resetOrdemForm() {
             document.getElementById('ordem-form').reset();
             document.getElementById('ordem-modal-title').textContent = "Nova Ordem de Produção";
@@ -1425,7 +1427,6 @@
             const select = document.getElementById('ordem-produto');
             select.innerHTML = '<option value="">Selecione um produto...</option>';
             const filteredProdutos = filterLine ? produtosCache.filter(p => p.linha === filterLine) : produtosCache;
-
             filteredProdutos.forEach(produto => {
                 const option = document.createElement('option');
                 option.value = produto.id;
@@ -1436,11 +1437,11 @@
 
         document.getElementById('add-ordem-btn').addEventListener('click', () => {
             resetOrdemForm();
-            populateProdutoSelectForOrdem(); // show all
+            populateProdutoSelectForOrdem();
             document.getElementById('ordem-modal').classList.add('active');
         });
         
-        async function updateOrdemInsumosTable() {
+        function updateOrdemInsumosTable() {
              const produtoId = document.getElementById('ordem-produto').value;
              const quantidade = parseInt(document.getElementById('ordem-receitas').value) || 1;
              const tbody = document.getElementById('ordem-insumos-table');
@@ -1448,23 +1449,17 @@
              tbody.innerHTML = '';
              warningDiv.classList.add('hidden');
              warningDiv.textContent = '';
-             
              if (!produtoId) return;
 
              const produto = produtosCache.find(p => p.id === produtoId);
              document.getElementById('ordem-linha').value = produto.linha;
-             
              if (!produto || !produto.receita) return;
 
              let allStockSufficient = true;
              
              for (const item of produto.receita) {
                  let requiredQuantity = parseFloat(item.dosagem) * quantidade;
-                 
-                 const availableBatches = insumosCache
-                     .filter(i => i.codigo === item.insumoCodigo && parseFloat(i.estoque) > 0)
-                     .sort((a,b) => new Date(a.validade) - new Date(b.validade));
-
+                 const availableBatches = insumosCache.filter(i => i.codigo === item.insumoCodigo && parseFloat(i.estoque) > 0).sort((a,b) => new Date(a.validade) - new Date(b.validade));
                  const insumoInfo = availableBatches[0] || insumosCache.find(i => i.codigo === item.insumoCodigo) || {nome: "Desconhecido"};
                  
                  if (availableBatches.length === 0) {
@@ -1472,24 +1467,19 @@
                      allStockSufficient = false;
                      continue;
                  }
-
                  let remainingRequired = requiredQuantity;
                  for (const batch of availableBatches) {
                      if (remainingRequired <= 0) break;
-                     
                      const quantityToUse = Math.min(remainingRequired, parseFloat(batch.estoque));
                      addOrdemInsumoRow(insumoInfo, quantityToUse, batch, availableBatches);
                      remainingRequired -= quantityToUse;
                  }
-
                  if (remainingRequired > 0.001) { 
                      warningDiv.textContent += `Estoque insuficiente para ${insumoInfo.nome}. Necessário: ${requiredQuantity.toFixed(3)}kg. Disponível: ${(requiredQuantity - remainingRequired).toFixed(3)}kg. `;
                      allStockSufficient = false;
                  }
              }
-             if (!allStockSufficient) {
-                 warningDiv.classList.remove('hidden');
-             }
+             if (!allStockSufficient) warningDiv.classList.remove('hidden');
         }
         
         function addOrdemInsumoRow(insumoInfo, quantityToUse, selectedBatch, allAvailableBatches) {
@@ -1497,25 +1487,13 @@
              const tr = document.createElement('tr');
              tr.className = 'border-b';
              tr.dataset.insumoCodigo = insumoInfo.codigo;
-
-             const batchOptions = allAvailableBatches.map(b => 
-                 `<option value="${b.id}" ${b.id === selectedBatch.id ? 'selected' : ''}>
-                      Lote: ${b.lote} (Estoque: ${b.estoque}kg, Val: ${formatDate(b.validade)})
-                  </option>`
-             ).join('');
-
+             const batchOptions = allAvailableBatches.map(b => `<option value="${b.id}" ${b.id === selectedBatch.id ? 'selected' : ''}>Lote: ${b.lote} (Estoque: ${b.estoque}kg, Val: ${formatDate(b.validade)})</option>`).join('');
              tr.innerHTML = `
                  <td class="p-2">${insumoInfo.nome}</td>
-                 <td class="p-2">
-                     <input type="number" step="0.001" class="w-24 p-1 border rounded-md text-sm ordem-insumo-qty" value="${quantityToUse.toFixed(3)}" required>
-                 </td>
-                 <td class="p-2">
-                     <select class="w-full p-1 border rounded-md text-sm ordem-insumo-lote">${batchOptions}</select>
-                 </td>
-                 <td class="p-2">${selectedBatch.fornecedor}</td>
-                 <td class="p-2">
-                     <input type="text" class="w-full p-1 border rounded-md text-sm ordem-insumo-manipulador" placeholder="Nome (Opcional)">
-                 </td>
+                 <td class="p-2"><input type="number" step="0.001" class="w-24 p-1 border rounded-md text-sm ordem-insumo-qty" value="${quantityToUse.toFixed(3)}" required></td>
+                 <td class="p-2"><select class="w-full p-1 border rounded-md text-sm ordem-insumo-lote">${batchOptions}</select></td>
+                 <td class="p-2">${selectedBatch.fornecedor || ''}</td>
+                 <td class="p-2"><input type="text" class="w-full p-1 border rounded-md text-sm ordem-insumo-manipulador" placeholder="Nome (Opcional)"></td>
              `;
              tbody.appendChild(tr);
         }
@@ -1523,10 +1501,10 @@
         document.getElementById('ordem-produto').addEventListener('change', updateOrdemInsumosTable);
         document.getElementById('ordem-receitas').addEventListener('input', updateOrdemInsumosTable);
         
-        document.getElementById('ordem-form').addEventListener('submit', e => {
+        document.getElementById('ordem-form').addEventListener('submit', async e => {
             e.preventDefault();
 
-            const updates = [];
+            const batch = writeBatch(db);
             const insumosUtilizados = [];
             const insumoRows = document.querySelectorAll('#ordem-insumos-table tr');
             
@@ -1534,31 +1512,22 @@
                 const batchId = row.querySelector('.ordem-insumo-lote').value;
                 const quantityToUse = parseFloat(row.querySelector('.ordem-insumo-qty').value);
                 const manipulador = row.querySelector('.ordem-insumo-manipulador').value.trim();
-                
-                const batch = insumosCache.find(i => i.id === batchId);
-
-                if (quantityToUse > parseFloat(batch.estoque)) {
-                     alert(`Estoque insuficiente para o lote ${batch.lote} de ${batch.nome}. Tentando usar: ${quantityToUse}kg, Disponível: ${batch.estoque}kg.`);
+                const insumo = insumosCache.find(i => i.id === batchId);
+                if (quantityToUse > parseFloat(insumo.estoque)) {
+                     alert(`Estoque insuficiente para o lote ${insumo.lote} de ${insumo.nome}.`);
                      return;
                 }
-
-                const novoEstoque = parseFloat(batch.estoque) - quantityToUse;
-                updates.push({ batchId: batch.id, newStock: novoEstoque.toFixed(3) });
+                const novoEstoque = parseFloat(insumo.estoque) - quantityToUse;
+                const insumoDocRef = doc(db, `artifacts/${appId}/public/data/insumos`, insumo.id);
+                batch.update(insumoDocRef, { estoque: novoEstoque });
                 
                 insumosUtilizados.push({
-                    insumoId: batch.id,
-                    codigo: batch.codigo,
-                    nome: batch.nome,
-                    lote: batch.lote,
-                    fornecedor: batch.fornecedor,
-                    validade: batch.validade,
-                    dosagemTotal: quantityToUse.toFixed(3),
-                    manipulador: manipulador
+                    insumoId: insumo.id, codigo: insumo.codigo, nome: insumo.nome, lote: insumo.lote, fornecedor: insumo.fornecedor,
+                    validade: insumo.validade, dosagemTotal: quantityToUse, manipulador: manipulador
                 });
             }
 
             const ordemData = {
-                id: `ordem_${Date.now()}`,
                 produtoNome: document.getElementById('ordem-produto').options[document.getElementById('ordem-produto').selectedIndex].text,
                 linhaProducao: document.getElementById('ordem-linha').value,
                 quantidadeReceitas: document.getElementById('ordem-receitas').value,
@@ -1569,24 +1538,18 @@
                 createdAt: new Date().toISOString()
             };
 
-            updates.forEach(update => {
-                const index = insumosCache.findIndex(i => i.id === update.batchId);
-                if (index > -1) {
-                    insumosCache[index].estoque = update.newStock;
-                }
-            });
-            saveToStorage(STORAGE_KEYS.insumos, insumosCache);
+            const ordensCollRef = collection(db, `artifacts/${appId}/public/data/ordens`);
+            batch.set(doc(ordensCollRef), ordemData);
 
-            ordensCache.push(ordemData);
-            saveToStorage(STORAGE_KEYS.ordens, ordensCache);
-
-            renderOrdensTable(ordensCache);
-            updateInsumosView();
-            updateDashboard(insumosCache, ordensCache);
-            document.getElementById('ordem-modal').classList.remove('active');
+            try {
+                await batch.commit();
+                document.getElementById('ordem-modal').classList.remove('active');
+            } catch (error) {
+                console.error("Erro ao salvar ordem de produção:", error);
+                alert("Não foi possível salvar a ordem de produção.");
+            }
         });
 
-        
         function renderOrdensTable(ordens) {
             const tbody = document.getElementById('ordens-table-body');
             tbody.innerHTML = '';
@@ -1594,9 +1557,7 @@
                  tbody.innerHTML = '<tr><td colspan="6" class="text-center p-4 text-gray-500">Nenhuma ordem de produção cadastrada.</td></tr>';
                  return;
             }
-
             ordens.sort((a,b) => new Date(b.dataProducao) - new Date(a.dataProducao));
-
             ordens.forEach(ordem => {
                 const tr = document.createElement('tr');
                 tr.className = 'border-b';
@@ -1607,13 +1568,10 @@
                     <td class="p-3">${formatDate(ordem.dataProducao)}</td>
                     <td class="p-3">${ordem.quantidadeReceitas}</td>
                     <td class="p-3">${manipulators || 'N/A'}</td>
-                    <td class="p-3">
-                        <button class="view-ordem-btn text-blue-600 hover:underline" data-id='${ordem.id}'>Ver Detalhes</button>
-                    </td>
+                    <td class="p-3"><button class="view-ordem-btn text-blue-600 hover:underline" data-id='${ordem.id}'>Ver Detalhes</button></td>
                 `;
                 tbody.appendChild(tr);
             });
-
             document.querySelectorAll('.view-ordem-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const ordem = ordensCache.find(o => o.id === btn.dataset.id);
@@ -1624,21 +1582,12 @@
 
         function showOrdemDetails(ordem) {
             const contentDiv = document.getElementById('view-ordem-content');
-            
-            const insumosHtml = ordem.insumosUtilizados.map(insumo => {
-                 return `
-                    <tr class="border-b">
-                        <td class="p-2">${insumo.codigo || 'N/A'}</td>
-                        <td class="p-2">${insumo.nome}</td>
-                        <td class="p-2">${insumo.dosagemTotal} kg</td>
-                        <td class="p-2">${insumo.lote}</td>
-                        <td class="p-2">${formatDate(insumo.validade)}</td>
-                        <td class="p-2">${insumo.fornecedor || 'N/A'}</td>
-                        <td class="p-2">${insumo.manipulador || 'N/A'}</td>
-                    </tr>
-                 `;
-            }).join('');
-
+            const insumosHtml = ordem.insumosUtilizados.map(insumo => `
+                <tr class="border-b">
+                    <td class="p-2">${insumo.codigo || 'N/A'}</td><td class="p-2">${insumo.nome}</td><td class="p-2">${parseFloat(insumo.dosagemTotal).toFixed(3)} kg</td>
+                    <td class="p-2">${insumo.lote}</td><td class="p-2">${formatDate(insumo.validade)}</td><td class="p-2">${insumo.fornecedor || 'N/A'}</td>
+                    <td class="p-2">${insumo.manipulador || 'N/A'}</td>
+                </tr>`).join('');
             contentDiv.innerHTML = `
                 <div class="space-y-4">
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 border rounded-lg bg-gray-50 text-sm">
@@ -1653,31 +1602,17 @@
                         <h4 class="font-semibold text-md mt-4 mb-2">Insumos Utilizados</h4>
                         <table class="w-full text-sm text-left">
                            <thead class="bg-gray-100">
-                               <tr>
-                                   <th class="p-2">Código</th>
-                                   <th class="p-2">Insumo</th>
-                                   <th class="p-2">Dosagem Total</th>
-                                   <th class="p-2">Lote Insumo</th>
-                                   <th class="p-2">Validade Insumo</th>
-                                   <th class="p-2">Fornecedor</th>
-                                   <th class="p-2">Manipulador</th>
-                               </tr>
+                               <tr><th class="p-2">Código</th><th class="p-2">Insumo</th><th class="p-2">Dosagem Total</th><th class="p-2">Lote Insumo</th>
+                                   <th class="p-2">Validade Insumo</th><th class="p-2">Fornecedor</th><th class="p-2">Manipulador</th></tr>
                            </thead>
                            <tbody>${insumosHtml}</tbody>
                         </table>
                     </div>
-                </div>
-            `;
-
+                </div>`;
             document.getElementById('view-ordem-modal').classList.add('active');
         }
 
         // --- REQUISIÇÕES ---
-        function loadRequisicoes() {
-            requisicoesCache = loadFromStorage(STORAGE_KEYS.requisicoes);
-            renderRequisicoesTable(requisicoesCache);
-        }
-        
         function renderRequisicoesTable(requisicoes) {
             const tbody = document.getElementById('requisicoes-table-body');
             tbody.innerHTML = '';
@@ -1691,17 +1626,11 @@
                 tr.className = 'border-b';
                 const itemsSummary = req.items.map(i => `${i.nome} (${i.quantidade} kg)`).join(', ');
                 tr.innerHTML = `
-                    <td class="p-3">${formatDate(req.data)}</td>
-                    <td class="p-3">${req.responsavel}</td>
-                    <td class="p-3">${req.motivo}</td>
+                    <td class="p-3">${formatDate(req.data)}</td><td class="p-3">${req.responsavel}</td><td class="p-3">${req.motivo}</td>
                     <td class="p-3 text-xs">${itemsSummary}</td>
-                    <td class="p-3">
-                         <button class="view-requisicao-btn text-blue-600 hover:underline" data-id='${req.id}'>Ver Detalhes</button>
-                    </td>
-                `;
+                    <td class="p-3"><button class="view-requisicao-btn text-blue-600 hover:underline" data-id='${req.id}'>Ver Detalhes</button></td>`;
                 tbody.appendChild(tr);
             });
-            
             document.querySelectorAll('.view-requisicao-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const req = requisicoesCache.find(r => r.id === btn.dataset.id);
@@ -1722,22 +1651,17 @@
             const container = document.getElementById('requisicao-items-container');
             const itemDiv = document.createElement('div');
             itemDiv.className = 'grid grid-cols-3 gap-3 p-3 border rounded-lg';
-
             const uniqueInsumos = [...new Map(insumosCache.map(item => [item['codigo'], item])).values()];
-
             itemDiv.innerHTML = `
                 <div>
                     <label class="text-xs">Insumo</label>
                     <select class="req-item-insumo w-full p-1 border rounded-md text-sm">
-                        <option value="">Selecione...</option>
-                        ${uniqueInsumos.map(i => `<option value="${i.codigo}">${i.nome} (Cód: ${i.codigo})</option>`).join('')}
+                        <option value="">Selecione...</option>${uniqueInsumos.map(i => `<option value="${i.codigo}">${i.nome} (Cód: ${i.codigo})</option>`).join('')}
                     </select>
                 </div>
                 <div>
                     <label class="text-xs">Lote</label>
-                    <select class="req-item-lote w-full p-1 border rounded-md text-sm" disabled>
-                        <option value="">Escolha um insumo...</option>
-                    </select>
+                    <select class="req-item-lote w-full p-1 border rounded-md text-sm" disabled><option value="">Escolha um insumo...</option></select>
                 </div>
                  <div>
                     <label class="text-xs">Quantidade (kg)</label>
@@ -1745,19 +1669,12 @@
                         <input type="number" step="0.001" class="req-item-qty w-full p-1 border rounded-md text-sm" disabled>
                         <button type="button" class="remove-req-item-btn text-red-500 ml-2 px-2 hover:bg-red-100 rounded">X</button>
                     </div>
-                </div>
-            `;
+                </div>`;
             container.appendChild(itemDiv);
         }
         
         document.getElementById('add-requisicao-item-btn').addEventListener('click', addRequisicaoItem);
-
-        document.getElementById('requisicao-items-container').addEventListener('click', e => {
-            if (e.target.classList.contains('remove-req-item-btn')) {
-                e.target.closest('.grid').remove();
-            }
-        });
-
+        document.getElementById('requisicao-items-container').addEventListener('click', e => { if (e.target.classList.contains('remove-req-item-btn')) e.target.closest('.grid').remove(); });
         document.getElementById('requisicao-items-container').addEventListener('change', e => {
             if (e.target.classList.contains('req-item-insumo')) {
                 const insumoCodigo = e.target.value;
@@ -1767,92 +1684,53 @@
                 loteSelect.innerHTML = '<option value="">Carregando...</option>';
                 loteSelect.disabled = true;
                 qtyInput.disabled = true;
-
-                if (!insumoCodigo) {
-                    loteSelect.innerHTML = '<option value="">Escolha um insumo...</option>';
-                    return;
-                }
+                if (!insumoCodigo) { loteSelect.innerHTML = '<option value="">Escolha um insumo...</option>'; return; }
                 const availableBatches = insumosCache.filter(i => i.codigo === insumoCodigo && parseFloat(i.estoque) > 0);
                 if (availableBatches.length > 0) {
-                     loteSelect.innerHTML = '<option value="">Selecione o lote...</option>' + availableBatches.map(b => 
-                         `<option value="${b.id}">Lote: ${b.lote} (Estoque: ${b.estoque} kg)</option>`
-                     ).join('');
+                     loteSelect.innerHTML = '<option value="">Selecione o lote...</option>' + availableBatches.map(b => `<option value="${b.id}">Lote: ${b.lote} (Estoque: ${b.estoque} kg)</option>`).join('');
                      loteSelect.disabled = false;
                      qtyInput.disabled = false;
-                } else {
-                     loteSelect.innerHTML = '<option value="">Sem estoque</option>';
-                }
+                } else { loteSelect.innerHTML = '<option value="">Sem estoque</option>'; }
             }
         });
 
-        document.getElementById('requisicao-form').addEventListener('submit', e => {
+        document.getElementById('requisicao-form').addEventListener('submit', async e => {
             e.preventDefault();
-            const updates = [];
+            const batch = writeBatch(db);
             const items = [];
             
             for(const itemRow of document.querySelectorAll('#requisicao-items-container .grid')) {
                 const loteId = itemRow.querySelector('.req-item-lote').value;
                 const quantidade = parseFloat(itemRow.querySelector('.req-item-qty').value);
-                
-                if (!loteId || !quantidade || quantidade <= 0) {
-                    alert('Por favor, preencha todos os campos dos itens da requisição.');
-                    return;
-                }
-                
+                if (!loteId || !quantidade || quantidade <= 0) { alert('Preencha todos os campos dos itens da requisição.'); return; }
                 const lote = insumosCache.find(i => i.id === loteId);
-                if (quantidade > parseFloat(lote.estoque)) {
-                     alert(`Estoque insuficiente para o lote ${lote.lote} de ${lote.nome}.`);
-                     return;
-                }
-                
+                if (quantidade > parseFloat(lote.estoque)) { alert(`Estoque insuficiente para o lote ${lote.lote} de ${lote.nome}.`); return; }
                 const novoEstoque = parseFloat(lote.estoque) - quantidade;
-                updates.push({ batchId: lote.id, newStock: novoEstoque.toFixed(3) });
-                items.push({
-                    codigo: lote.codigo,
-                    nome: lote.nome,
-                    lote: lote.lote,
-                    quantidade: quantidade.toFixed(3)
-                });
+                batch.update(doc(db, `artifacts/${appId}/public/data/insumos`, lote.id), { estoque: novoEstoque });
+                items.push({ codigo: lote.codigo, nome: lote.nome, lote: lote.lote, quantidade: quantidade });
             }
 
             const requisicaoData = {
-                id: `req_${Date.now()}`,
                 data: document.getElementById('requisicao-data').value,
                 responsavel: document.getElementById('requisicao-responsavel').value,
                 motivo: document.getElementById('requisicao-motivo').value,
                 items: items,
                 createdAt: new Date().toISOString()
             };
-
-            updates.forEach(update => {
-                const index = insumosCache.findIndex(i => i.id === update.batchId);
-                if (index > -1) {
-                    insumosCache[index].estoque = update.newStock;
-                }
-            });
-            saveToStorage(STORAGE_KEYS.insumos, insumosCache);
-
-            requisicoesCache.push(requisicaoData);
-            saveToStorage(STORAGE_KEYS.requisicoes, requisicoesCache);
-            
-            renderRequisicoesTable(requisicoesCache);
-            updateInsumosView();
-            updateDashboard(insumosCache, ordensCache);
-            document.getElementById('requisicao-modal').classList.remove('active');
+            batch.set(doc(collection(db, `artifacts/${appId}/public/data/requisicoes`)), requisicaoData);
+            try {
+                await batch.commit();
+                document.getElementById('requisicao-modal').classList.remove('active');
+            } catch (error) {
+                console.error("Erro ao salvar requisição:", error);
+                alert("Não foi possível salvar a requisição.");
+            }
         });
         
         function showRequisicaoDetails(req) {
             const contentDiv = document.getElementById('view-requisicao-content');
-            
             const itemsHtml = req.items.map(item => `
-                <tr class="border-b">
-                    <td class="p-2">${item.codigo}</td>
-                    <td class="p-2">${item.nome}</td>
-                    <td class="p-2">${item.lote}</td>
-                    <td class="p-2">${item.quantidade} kg</td>
-                </tr>
-            `).join('');
-
+                <tr class="border-b"><td class="p-2">${item.codigo}</td><td class="p-2">${item.nome}</td><td class="p-2">${item.lote}</td><td class="p-2">${parseFloat(item.quantidade).toFixed(3)} kg</td></tr>`).join('');
             contentDiv.innerHTML = `
                  <div class="space-y-4">
                      <div class="grid grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50 text-sm">
@@ -1863,49 +1741,34 @@
                      <div>
                          <h4 class="font-semibold text-md mt-4 mb-2">Itens Requisitados</h4>
                          <table class="w-full text-sm text-left">
-                            <thead class="bg-gray-100">
-                                <tr>
-                                    <th class="p-2">Código</th>
-                                    <th class="p-2">Insumo</th>
-                                    <th class="p-2">Lote</th>
-                                    <th class="p-2">Quantidade</th>
-                                </tr>
-                            </thead>
+                            <thead class="bg-gray-100"><tr><th class="p-2">Código</th><th class="p-2">Insumo</th><th class="p-2">Lote</th><th class="p-2">Quantidade</th></tr></thead>
                             <tbody>${itemsHtml}</tbody>
                          </table>
                      </div>
-                 </div>
-             `;
+                 </div>`;
             document.getElementById('view-requisicao-modal').classList.add('active');
         }
 
         // --- INSUMO DEFINITIONS (MIN STOCK) ---
-        document.getElementById('manage-insumos-btn').addEventListener('click', () => {
-            populateInsumoDefinitionsTable();
-        });
-
+        document.getElementById('manage-insumos-btn').addEventListener('click', () => populateInsumoDefinitionsTable());
         function populateInsumoDefinitionsTable() {
             const tbody = document.getElementById('insumo-definitions-table-body');
             tbody.innerHTML = '';
             const uniqueInsumos = [...new Map(insumosCache.map(item => [item['codigo'], item])).values()];
-
             uniqueInsumos.sort((a, b) => a.nome.localeCompare(b.nome));
-
             uniqueInsumos.forEach(insumo => {
                 const definition = insumoDefinitionsCache.find(def => def.codigo === insumo.codigo);
                 const manualMin = definition ? definition.estoqueMinimoManual : '';
                 const tr = document.createElement('tr');
                 tr.className = 'border-b';
                 tr.innerHTML = `
-                    <td class="p-2">${insumo.codigo}</td>
-                    <td class="p-2">${insumo.nome}</td>
+                    <td class="p-2">${insumo.codigo}</td><td class="p-2">${insumo.nome}</td>
                     <td class="p-2">
                         <div class="flex items-center gap-2">
                             <input type="number" step="0.01" data-codigo="${insumo.codigo}" class="insumo-min-stock-input w-full p-1 border rounded-md bg-gray-100" value="${manualMin}" placeholder="Automático" readonly>
                             <button type="button" class="edit-min-stock-btn text-blue-600 hover:underline px-3 py-1">Editar</button>
                         </div>
-                    </td>
-                `;
+                    </td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -1921,36 +1784,33 @@
             }
         });
 
-        document.getElementById('insumo-definitions-form').addEventListener('submit', e => {
+        document.getElementById('insumo-definitions-form').addEventListener('submit', async e => {
             e.preventDefault();
             const inputs = document.querySelectorAll('.insumo-min-stock-input');
+            const batch = writeBatch(db);
+            const collRef = collection(db, `artifacts/${appId}/public/data/insumo_definitions`);
 
             inputs.forEach(input => {
                 const codigo = input.dataset.codigo;
                 const valor = input.value.trim();
-                const existingDefIndex = insumoDefinitionsCache.findIndex(def => def.codigo === codigo);
+                const existingDef = insumoDefinitionsCache.find(def => def.codigo === codigo);
+                const docRef = existingDef ? doc(collRef, existingDef.id) : doc(collRef, codigo); // Use code as ID for simplicity
 
                 if (valor !== '' && parseFloat(valor) >= 0) {
-                    const newDef = {
-                        codigo: codigo,
-                        estoqueMinimoManual: parseFloat(valor)
-                    };
-                    if (existingDefIndex > -1) {
-                        insumoDefinitionsCache[existingDefIndex] = newDef;
-                    } else {
-                        insumoDefinitionsCache.push(newDef);
-                    }
-                } else {
-                    if (existingDefIndex > -1) {
-                        insumoDefinitionsCache.splice(existingDefIndex, 1);
-                    }
+                    batch.set(docRef, { codigo: codigo, estoqueMinimoManual: parseFloat(valor) });
+                } else if (existingDef) {
+                    batch.delete(docRef);
                 }
             });
 
-            saveToStorage(STORAGE_KEYS.insumo_definitions, insumoDefinitionsCache);
-            updateDashboard(insumosCache, ordensCache);
-            alert('Estoques mínimos atualizados com sucesso!');
-            document.getElementById('insumo-definitions-modal').classList.remove('active');
+            try {
+                await batch.commit();
+                alert('Estoques mínimos atualizados com sucesso!');
+                document.getElementById('insumo-definitions-modal').classList.remove('active');
+            } catch (error) {
+                console.error("Erro ao atualizar estoques mínimos:", error);
+                alert("Não foi possível atualizar os estoques mínimos.");
+            }
         });
 
 
@@ -1968,17 +1828,11 @@
                 tr.className = 'border-b';
                 const itemsSummary = ajuste.items.map(i => `${i.nome} (Lote: ${i.lote})`).join(', ');
                 tr.innerHTML = `
-                    <td class="p-3">${formatDate(ajuste.data)}</td>
-                    <td class="p-3">${ajuste.responsavel}</td>
-                    <td class="p-3">${ajuste.justificativa}</td>
+                    <td class="p-3">${formatDate(ajuste.data)}</td><td class="p-3">${ajuste.responsavel}</td><td class="p-3">${ajuste.justificativa}</td>
                     <td class="p-3 text-xs">${itemsSummary}</td>
-                    <td class="p-3">
-                        <button class="view-ajuste-btn text-blue-600 hover:underline" data-id='${ajuste.id}'>Ver Detalhes</button>
-                    </td>
-                `;
+                    <td class="p-3"><button class="view-ajuste-btn text-blue-600 hover:underline" data-id='${ajuste.id}'>Ver Detalhes</button></td>`;
                 tbody.appendChild(tr);
             });
-
             document.querySelectorAll('.view-ajuste-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const ajuste = ajustesCache.find(a => a.id === btn.dataset.id);
@@ -1994,153 +1848,85 @@
             addAjusteItem();
             document.getElementById('ajuste-modal').classList.add('active');
         });
-
         document.getElementById('add-ajuste-item-btn').addEventListener('click', addAjusteItem);
-
         function addAjusteItem() {
             const container = document.getElementById('ajuste-items-container');
             const itemDiv = document.createElement('div');
             itemDiv.className = 'grid grid-cols-[1fr,1fr,auto,auto] gap-3 p-3 border rounded-lg items-end';
-
             const uniqueInsumos = [...new Map(insumosCache.map(item => [item['codigo'], item])).values()];
-
             itemDiv.innerHTML = `
                 <div>
                     <label class="text-xs">Insumo</label>
                     <select class="ajuste-item-insumo w-full p-1 border rounded-md text-sm">
-                        <option value="">Selecione...</option>
-                        ${uniqueInsumos.map(i => `<option value="${i.codigo}">${i.nome} (Cód: ${i.codigo})</option>`).join('')}
+                        <option value="">Selecione...</option>${uniqueInsumos.map(i => `<option value="${i.codigo}">${i.nome} (Cód: ${i.codigo})</option>`).join('')}
                     </select>
                 </div>
                 <div>
                     <label class="text-xs">Lote</label>
-                    <select class="ajuste-item-lote w-full p-1 border rounded-md text-sm" disabled>
-                        <option value="">Escolha um insumo...</option>
-                    </select>
+                    <select class="ajuste-item-lote w-full p-1 border rounded-md text-sm" disabled><option value="">Escolha um insumo...</option></select>
                 </div>
                 <div>
                     <label class="text-xs">Nova Quantidade (kg)</label>
                     <input type="number" step="0.001" class="ajuste-item-qty w-full p-1 border rounded-md text-sm" placeholder="Estoque Correto" disabled>
                 </div>
-                <button type="button" class="remove-ajuste-item-btn text-red-500 ml-2 px-2 h-8 hover:bg-red-100 rounded">X</button>
-            `;
+                <button type="button" class="remove-ajuste-item-btn text-red-500 ml-2 px-2 h-8 hover:bg-red-100 rounded">X</button>`;
             container.appendChild(itemDiv);
         }
 
         document.getElementById('ajuste-items-container').addEventListener('change', e => {
             if (e.target.classList.contains('ajuste-item-insumo')) {
-                const insumoCodigo = e.target.value;
-                const row = e.target.closest('.grid');
-                const loteSelect = row.querySelector('.ajuste-item-lote');
-                const qtyInput = row.querySelector('.ajuste-item-qty');
+                const insumoCodigo = e.target.value, row = e.target.closest('.grid'), loteSelect = row.querySelector('.ajuste-item-lote'), qtyInput = row.querySelector('.ajuste-item-qty');
                 loteSelect.innerHTML = '<option value="">Carregando...</option>';
-                loteSelect.disabled = true;
-                qtyInput.disabled = true;
-                qtyInput.value = '';
-
-                if (!insumoCodigo) {
-                    loteSelect.innerHTML = '<option value="">Escolha um insumo...</option>';
-                    return;
-                }
+                loteSelect.disabled = true; qtyInput.disabled = true; qtyInput.value = '';
+                if (!insumoCodigo) { loteSelect.innerHTML = '<option value="">Escolha um insumo...</option>'; return; }
                 const availableBatches = insumosCache.filter(i => i.codigo === insumoCodigo);
                 if (availableBatches.length > 0) {
-                    loteSelect.innerHTML = '<option value="">Selecione o lote...</option>' + availableBatches.map(b =>
-                        `<option value="${b.id}">Lote: ${b.lote} (Estoque Atual: ${b.estoque} kg)</option>`
-                    ).join('');
+                    loteSelect.innerHTML = '<option value="">Selecione o lote...</option>' + availableBatches.map(b => `<option value="${b.id}">Lote: ${b.lote} (Estoque Atual: ${b.estoque} kg)</option>`).join('');
                     loteSelect.disabled = false;
-                } else {
-                    loteSelect.innerHTML = '<option value="">Nenhum lote</option>';
-                }
+                } else { loteSelect.innerHTML = '<option value="">Nenhum lote</option>'; }
             } else if (e.target.classList.contains('ajuste-item-lote')) {
-                const row = e.target.closest('.grid');
-                const qtyInput = row.querySelector('.ajuste-item-qty');
+                const row = e.target.closest('.grid'), qtyInput = row.querySelector('.ajuste-item-qty');
                 qtyInput.disabled = !e.target.value;
             }
         });
-
-        document.getElementById('ajuste-items-container').addEventListener('click', e => {
-            if (e.target.classList.contains('remove-ajuste-item-btn')) {
-                e.target.closest('.grid').remove();
-            }
-        });
-
-        document.getElementById('ajuste-form').addEventListener('submit', e => {
+        document.getElementById('ajuste-items-container').addEventListener('click', e => { if (e.target.classList.contains('remove-ajuste-item-btn')) e.target.closest('.grid').remove(); });
+        document.getElementById('ajuste-form').addEventListener('submit', async e => {
             e.preventDefault();
-            const updates = [];
+            const batch = writeBatch(db);
             const items = [];
-
             for (const itemRow of document.querySelectorAll('#ajuste-items-container .grid')) {
                 const loteId = itemRow.querySelector('.ajuste-item-lote').value;
                 const novaQuantidadeStr = itemRow.querySelector('.ajuste-item-qty').value;
-
-                if (!loteId || novaQuantidadeStr === '') {
-                    alert('Por favor, preencha todos os campos dos itens para ajuste.');
-                    return;
-                }
-
+                if (!loteId || novaQuantidadeStr === '') { alert('Preencha todos os campos dos itens para ajuste.'); return; }
                 const novaQuantidade = parseFloat(novaQuantidadeStr);
-                if (isNaN(novaQuantidade) || novaQuantidade < 0) {
-                    alert('Por favor, insira uma quantidade válida.');
-                    return;
-                }
-
+                if (isNaN(novaQuantidade) || novaQuantidade < 0) { alert('Insira uma quantidade válida.'); return; }
                 const lote = insumosCache.find(i => i.id === loteId);
-                const estoqueAnterior = lote.estoque;
-
-                updates.push({ batchId: lote.id, newStock: novaQuantidade.toFixed(3) });
-                items.push({
-                    codigo: lote.codigo,
-                    nome: lote.nome,
-                    lote: lote.lote,
-                    estoqueAnterior: estoqueAnterior,
-                    estoqueNovo: novaQuantidade.toFixed(3)
-                });
+                batch.update(doc(db, `artifacts/${appId}/public/data/insumos`, lote.id), { estoque: novaQuantidade });
+                items.push({ codigo: lote.codigo, nome: lote.nome, lote: lote.lote, estoqueAnterior: lote.estoque, estoqueNovo: novaQuantidade });
             }
-
-            if (items.length === 0) {
-                alert('Adicione pelo menos um item para ajustar.');
-                return;
-            }
-
+            if (items.length === 0) { alert('Adicione pelo menos um item para ajustar.'); return; }
             const ajusteData = {
-                id: `ajuste_${Date.now()}`,
                 data: document.getElementById('ajuste-data').value,
                 responsavel: document.getElementById('ajuste-responsavel').value.trim(),
                 justificativa: document.getElementById('ajuste-justificativa').value.trim(),
                 items: items,
                 createdAt: new Date().toISOString()
             };
-
-            updates.forEach(update => {
-                const index = insumosCache.findIndex(i => i.id === update.batchId);
-                if (index > -1) {
-                    insumosCache[index].estoque = update.newStock;
-                }
-            });
-            saveToStorage(STORAGE_KEYS.insumos, insumosCache);
-
-            ajustesCache.push(ajusteData);
-            saveToStorage(STORAGE_KEYS.ajustes, ajustesCache);
-
-            renderAjustesTable(ajustesCache);
-            updateInsumosView();
-            updateDashboard(insumosCache, ordensCache);
-            document.getElementById('ajuste-modal').classList.remove('active');
+            batch.set(doc(collection(db, `artifacts/${appId}/public/data/ajustes`)), ajusteData);
+            try {
+                await batch.commit();
+                document.getElementById('ajuste-modal').classList.remove('active');
+            } catch (error) {
+                console.error("Erro ao salvar ajuste:", error);
+                alert("Não foi possível salvar o ajuste.");
+            }
         });
 
         function showAjusteDetails(ajuste) {
             const contentDiv = document.getElementById('view-ajuste-content');
-
             const itemsHtml = ajuste.items.map(item => `
-                <tr class="border-b">
-                    <td class="p-2">${item.codigo}</td>
-                    <td class="p-2">${item.nome}</td>
-                    <td class="p-2">${item.lote}</td>
-                    <td class="p-2">${item.estoqueAnterior} kg</td>
-                    <td class="p-2">${item.estoqueNovo} kg</td>
-                </tr>
-            `).join('');
-
+                <tr class="border-b"><td class="p-2">${item.codigo}</td><td class="p-2">${item.nome}</td><td class="p-2">${item.lote}</td>
+                <td class="p-2">${parseFloat(item.estoqueAnterior).toFixed(3)} kg</td><td class="p-2">${parseFloat(item.estoqueNovo).toFixed(3)} kg</td></tr>`).join('');
             contentDiv.innerHTML = `
                  <div class="space-y-4">
                      <div class="grid grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50 text-sm">
@@ -2151,199 +1937,82 @@
                      <div>
                          <h4 class="font-semibold text-md mt-4 mb-2">Itens Ajustados</h4>
                          <table class="w-full text-sm text-left">
-                            <thead class="bg-gray-100">
-                                <tr>
-                                    <th class="p-2">Código</th>
-                                    <th class="p-2">Insumo</th>
-                                    <th class="p-2">Lote</th>
-                                    <th class="p-2">Estoque Anterior</th>
-                                    <th class="p-2">Estoque Novo</th>
-                                </tr>
-                            </thead>
+                            <thead class="bg-gray-100"><tr><th class="p-2">Código</th><th class="p-2">Insumo</th><th class="p-2">Lote</th><th class="p-2">Estoque Anterior</th><th class="p-2">Estoque Novo</th></tr></thead>
                             <tbody>${itemsHtml}</tbody>
                          </table>
                      </div>
-                 </div>
-             `;
+                 </div>`;
             document.getElementById('view-ajuste-modal').classList.add('active');
         }
 
-
         // --- EXPORTS ---
-
-        // PDF Export for Production Orders
         document.getElementById('export-pdf-btn').addEventListener('click', () => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
             const today = getToday();
             const todayFormatted = new Date().toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-
             const dailyOrders = ordensCache.filter(ordem => ordem.dataProducao === today);
-
-            if (dailyOrders.length === 0) {
-                alert('Nenhuma ordem de produção encontrada para a data de hoje.');
-                return;
-            }
-
+            if (dailyOrders.length === 0) { alert('Nenhuma ordem de produção encontrada para a data de hoje.'); return; }
             const productionLineColors = {
                 'Pães Congelados': { bg: [235, 247, 255], text: [52, 152, 219] }, 
                 'Pães Especiais': { bg: [230, 250, 230], text: [46, 204, 113] },  
                 'Pão de Queijo': { bg: [255, 253, 230], text: [241, 196, 15] },    
                 'Confeitaria': { bg: [244, 235, 247], text: [155, 89, 182] }    
             };
-            
-            let finalY = 25; 
-            const pageMargin = 15;
-            const pageWidth = doc.internal.pageSize.getWidth();
-
-            doc.setFontSize(18);
-            doc.setTextColor(40);
-            doc.text(`Relatório de Produção`, pageWidth / 2, 15, { align: 'center' });
-            doc.setFontSize(11);
-            doc.setTextColor(150);
-            doc.text(todayFormatted, pageWidth / 2, 21, { align: 'center' });
-
-
+            let finalY = 25, pageMargin = 15, pageWidth = doc.internal.pageSize.getWidth();
+            doc.setFontSize(18); doc.setTextColor(40); doc.text(`Relatório de Produção`, pageWidth / 2, 15, { align: 'center' });
+            doc.setFontSize(11); doc.setTextColor(150); doc.text(todayFormatted, pageWidth / 2, 21, { align: 'center' });
             dailyOrders.forEach((ordem, index) => {
                 const colors = productionLineColors[ordem.linhaProducao] || { bg: [240, 240, 240], text: [80, 80, 80] };
-
-                if (finalY > 220) { 
-                    doc.addPage();
-                    finalY = 20;
-                }
-                 if (index > 0) {
-                     finalY += 10;
-                 }
-
+                if (finalY > 220) { doc.addPage(); finalY = 20; }
+                 if (index > 0) finalY += 10;
                 doc.setFillColor(colors.bg[0], colors.bg[1], colors.bg[2]);
                 doc.roundedRect(pageMargin, finalY, pageWidth - (pageMargin * 2), 10, 2, 2, 'F');
-                doc.setFontSize(14);
-                doc.setTextColor(colors.text[0], colors.text[1], colors.text[2]);
-                doc.setFont('helvetica', 'bold');
-                doc.text(ordem.produtoNome, pageMargin + 4, finalY + 7);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(100);
-                doc.setFontSize(10);
+                doc.setFontSize(14); doc.setTextColor(colors.text[0], colors.text[1], colors.text[2]); doc.setFont('helvetica', 'bold');
+                doc.text(ordem.produtoNome, pageMargin + 4, finalY + 7); doc.setFont('helvetica', 'normal'); doc.setTextColor(100); doc.setFontSize(10);
                 doc.text(`Lote: ${ordem.loteProduto || 'N/A'}`, pageWidth - pageMargin - 4, finalY + 7, { align: 'right'});
-
                 finalY += 15;
-
-                doc.setFontSize(9);
-                doc.setTextColor(80);
-                doc.text(`Linha: ${ordem.linhaProducao}`, pageMargin, finalY);
-                doc.text(`Quantidade: ${ordem.quantidadeReceitas} receitas`, pageWidth / 2, finalY);
-                finalY += 5;
-                doc.text(`Produzido em: ${formatDate(ordem.dataProducao)}`, pageMargin, finalY);
-                doc.text(`Validade: ${formatDate(ordem.validadeProduto)}`, pageWidth / 2, finalY);
-                
+                doc.setFontSize(9); doc.setTextColor(80);
+                doc.text(`Linha: ${ordem.linhaProducao}`, pageMargin, finalY); doc.text(`Quantidade: ${ordem.quantidadeReceitas} receitas`, pageWidth / 2, finalY);
+                finalY += 5; doc.text(`Produzido em: ${formatDate(ordem.dataProducao)}`, pageMargin, finalY); doc.text(`Validade: ${formatDate(ordem.validadeProduto)}`, pageWidth / 2, finalY);
                 finalY += 8;
-
-                const tableColumn = ["Insumo", "Dosagem (kg)", "Lote", "Manipulador"];
-                const tableRows = [];
-
-                ordem.insumosUtilizados.forEach(insumo => {
-                    const rowData = [
-                        insumo.nome,
-                        insumo.dosagemTotal,
-                        insumo.lote,
-                        insumo.manipulador
-                    ];
-                    tableRows.push(rowData);
-                });
-
-                doc.autoTable({
-                    head: [tableColumn],
-                    body: tableRows,
-                    startY: finalY,
-                    theme: 'grid',
-                    headStyles: { 
-                        fillColor: colors.text,
-                        textColor: 255,
-                        fontSize: 9
-                    },
-                    styles: {
-                        fontSize: 8,
-                        cellPadding: 2
-                    },
-                    margin: { left: pageMargin, right: pageMargin }
-                });
-
+                const tableColumn = ["Insumo", "Dosagem (kg)", "Lote", "Manipulador"], tableRows = [];
+                ordem.insumosUtilizados.forEach(insumo => tableRows.push([insumo.nome, parseFloat(insumo.dosagemTotal).toFixed(3), insumo.lote, insumo.manipulador]));
+                doc.autoTable({ head: [tableColumn], body: tableRows, startY: finalY, theme: 'grid',
+                    headStyles: { fillColor: colors.text, textColor: 255, fontSize: 9 }, styles: { fontSize: 8, cellPadding: 2 }, margin: { left: pageMargin, right: pageMargin } });
                 finalY = doc.autoTable.previous.finalY;
             });
-
             doc.save(`producao_${today.replace(/-/g, '_')}.pdf`);
         });
         
-        // Excel Export for Stock
         document.getElementById('export-stock-excel-btn').addEventListener('click', () => {
-             // 1. Aggregate total stock and get min stock for each unique insumo
             const insumoData = {};
             insumosCache.forEach(insumo => {
-                if (!insumoData[insumo.codigo]) {
-                    insumoData[insumo.codigo] = {
-                        nome: insumo.nome,
-                        totalEstoque: 0,
-                        minEstoque: parseFloat(calculateStockLevels(insumo.codigo, ordensCache).min)
-                    };
-                }
+                if (!insumoData[insumo.codigo]) insumoData[insumo.codigo] = { nome: insumo.nome, totalEstoque: 0, minEstoque: parseFloat(calculateStockLevels(insumo.codigo, ordensCache).min) };
                 insumoData[insumo.codigo].totalEstoque += parseFloat(insumo.estoque);
             });
-            
             const lowStockCodes = new Set();
-            for(const code in insumoData){
-                if(insumoData[code].totalEstoque < insumoData[code].minEstoque){
-                    lowStockCodes.add(code);
-                }
-            }
-
-            // 2. Prepare data for the sheet
+            for(const code in insumoData) if(insumoData[code].totalEstoque < insumoData[code].minEstoque) lowStockCodes.add(code);
             const headers = ["Insumo", "Lote", "Data Receb.", "Validade", "Estoque (kg)", "Autorizado Por"];
-            const data = displayedInsumos.map(insumo => ({
-                "Insumo": insumo.nome,
-                "Lote": insumo.lote,
-                "Data Receb.": formatDate(insumo.dataRecebimento),
-                "Validade": formatDate(insumo.validade),
-                "Estoque (kg)": parseFloat(insumo.estoque).toFixed(3),
-                "Autorizado Por": insumo.quemAutorizou || 'N/A',
-                "codigo": insumo.codigo // hidden column for logic
-            }));
-
-            // 3. Create worksheet and workbook
+            const data = displayedInsumos.map(insumo => ({ "Insumo": insumo.nome, "Lote": insumo.lote, "Data Receb.": formatDate(insumo.dataRecebimento), "Validade": formatDate(insumo.validade),
+                "Estoque (kg)": parseFloat(insumo.estoque).toFixed(3), "Autorizado Por": insumo.quemAutorizou || 'N/A', "codigo": insumo.codigo }));
             const ws = XLSX.utils.json_to_sheet(data, { header: headers, skipHeader: false });
-            
-            // 4. Apply conditional formatting
-            const redFill = { fgColor: { rgb: "FFFFC7CE" } };
-            const redFont = { color: { rgb: "FF9C0006" } };
-
+            const redFill = { fgColor: { rgb: "FFFFC7CE" } }, redFont = { color: { rgb: "FF9C0006" } };
             data.forEach((row, index) => {
                 if (lowStockCodes.has(row.codigo)) {
-                    // +2 because Excel rows are 1-based and we have a header row
                     const rowIndex = index + 2; 
                     ['A', 'B', 'C', 'D', 'E', 'F'].forEach(col => {
                         const cellAddress = `${col}${rowIndex}`;
-                        if (ws[cellAddress]) {
-                            ws[cellAddress].s = { fill: redFill, font: redFont };
-                        }
+                        if (ws[cellAddress]) ws[cellAddress].s = { fill: redFill, font: redFont };
                     });
                 }
             });
-            
-            // Remove the helper 'codigo' column from the final sheet
             ws['!cols'] = [{wch:25},{wch:15},{wch:12},{wch:12},{wch:12},{wch:20}];
-
-
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Estoque");
-
-            // 5. Generate filename with date and time
-            const now = new Date();
-            const pad = (num) => num.toString().padStart(2, '0');
-            const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-            const timeStr = `${pad(now.getHours())}h${pad(now.getMinutes())}m${pad(now.getSeconds())}s`;
-            const fileName = `relatorio_estoque_${dateStr}_${timeStr}.xlsx`;
-
-            // 6. Trigger download
-            XLSX.writeFile(wb, fileName);
+            const now = new Date(), pad = (num) => num.toString().padStart(2, '0');
+            const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`, timeStr = `${pad(now.getHours())}h${pad(now.getMinutes())}m${pad(now.getSeconds())}s`;
+            XLSX.writeFile(wb, `relatorio_estoque_${dateStr}_${timeStr}.xlsx`);
         });
 
     </script>
