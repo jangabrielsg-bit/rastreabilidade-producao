@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rastreabilidade de Produção - IMAC</title>
+    <title>Rastreabilidade de Produção</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bibliotecas para gerar PDF -->
@@ -17,62 +17,51 @@
         .tab-content.active { display: block; }
         .sidebar-icon { transition: all 0.2s ease-in-out; }
         .sidebar-icon:hover { background-color: #3b82f6; color: white; }
-        .sortable:hover { background-color: #374151; }
+        .sortable:hover { background-color: #f3f4f6; }
         .sort-asc::after { content: ' ▲'; font-size: 0.8em; }
         .sort-desc::after { content: ' ▼'; font-size: 0.8em; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #1f2937; }
-        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
     </style>
 </head>
-<body class="bg-gray-800 text-gray-200">
+<body class="bg-gray-100 text-gray-800">
 
     <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-95 flex items-center justify-center z-50">
+    <div id="loading-overlay" class="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50">
         <div class="text-center">
-            <svg class="animate-spin h-10 w-10 text-yellow-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg class="animate-spin h-10 w-10 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <p class="mt-4 text-lg font-semibold text-gray-300">Conectando...</p>
+            <p class="mt-4 text-lg font-semibold text-gray-700">Carregando dados...</p>
         </div>
     </div>
 
-    <div id="app-container" class="flex h-screen bg-gray-900 hidden">
+    <div id="app-container" class="flex h-screen bg-gray-200">
         <!-- Sidebar -->
-        <aside class="w-20 lg:w-64 bg-gray-900 text-white flex flex-col transition-all duration-300 border-r border-gray-700">
-            <div class="h-20 flex items-center justify-center">
-                 <div class="p-1 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600">
-                    <div class="bg-gray-900 rounded-full p-2 flex items-center justify-center">
-                         <svg width="40" height="40" viewBox="0 0 100 100" class="w-10 h-10">
-                            <text x="50" y="55" font-family="Inter, sans-serif" font-size="38" font-weight="bold" fill="#FBBF24" text-anchor="middle">IMAC</text>
-                            <path d="M35 25 Q50 35 65 25" stroke="#FBBF24" stroke-width="5" fill="none" />
-                            <circle cx="35" cy="15" r="4" fill="#FBBF24" />
-                            <circle cx="65" cy="15" r="4" fill="#FBBF24" />
-                        </svg>
-                    </div>
-                 </div>
-                 <span class="hidden lg:inline ml-3 text-xl font-bold tracking-wider">IMAC</span>
+        <aside class="w-20 lg:w-64 bg-gray-800 text-white flex flex-col transition-all duration-300">
+            <div class="h-16 flex items-center justify-center border-b border-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                <span class="hidden lg:inline ml-3 text-lg font-semibold">Rastreio PRO</span>
             </div>
             <nav class="flex-1 px-2 lg:px-4 py-4 space-y-2">
-                <a href="#" id="nav-dashboard" class="nav-link flex items-center py-2.5 px-4 rounded-lg bg-yellow-600 text-gray-900 font-semibold">
+                <a href="#" id="nav-dashboard" class="nav-link flex items-center py-2.5 px-4 rounded-lg bg-blue-600">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
                     <span class="hidden lg:inline ml-3">Dashboard</span>
                 </a>
-                <a href="#" id="nav-insumos" class="nav-link flex items-center py-2.5 px-4 rounded-lg hover:bg-gray-700 text-gray-300">
+                <a href="#" id="nav-insumos" class="nav-link flex items-center py-2.5 px-4 rounded-lg hover:bg-gray-700">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-14L4 7m0 10l8 4m0-14L4 7" /></svg>
                     <span class="hidden lg:inline ml-3">Estoque de Insumos</span>
                 </a>
-                <a href="#" id="nav-produtos" class="nav-link flex items-center py-2.5 px-4 rounded-lg hover:bg-gray-700 text-gray-300">
+                <a href="#" id="nav-produtos" class="nav-link flex items-center py-2.5 px-4 rounded-lg hover:bg-gray-700">
                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
                     <span class="hidden lg:inline ml-3">Produtos e Receitas</span>
                 </a>
-                <a href="#" id="nav-ordens" class="nav-link flex items-center py-2.5 px-4 rounded-lg hover:bg-gray-700 text-gray-300">
+                <a href="#" id="nav-ordens" class="nav-link flex items-center py-2.5 px-4 rounded-lg hover:bg-gray-700">
                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
                     <span class="hidden lg:inline ml-3">Ordens de Produção</span>
                 </a>
-                 <a href="#" id="nav-requisicoes" class="nav-link flex items-center py-2.5 px-4 rounded-lg hover:bg-gray-700 text-gray-300">
+                <a href="#" id="nav-requisicoes" class="nav-link flex items-center py-2.5 px-4 rounded-lg hover:bg-gray-700">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
@@ -83,58 +72,58 @@
 
         <!-- Main Content -->
         <main class="flex-1 flex flex-col overflow-hidden">
-            <header class="h-20 bg-gray-800 flex items-center justify-between px-6 border-b border-gray-700">
-                 <h1 id="page-title" class="text-3xl font-bold text-white">Dashboard</h1>
-                 <div id="user-info" class="text-sm text-gray-400"></div>
+            <header class="h-16 bg-white shadow-md flex items-center justify-between px-6">
+                 <h1 id="page-title" class="text-2xl font-semibold text-gray-800">Dashboard</h1>
+                 <div id="user-info" class="text-sm text-gray-500" style="display: none;"></div>
             </header>
-            <div class="flex-1 p-6 overflow-auto bg-gray-800">
+            <div class="flex-1 p-6 overflow-auto">
 
                 <!-- Dashboard View -->
                 <div id="view-dashboard" class="page-view">
-                    <h2 class="text-xl font-semibold mb-4 text-gray-300">Alertas Críticos</h2>
+                    <h2 class="text-xl font-semibold mb-4">Alertas Críticos</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                        <div class="bg-gray-900 p-4 rounded-lg shadow-lg border border-gray-700">
-                            <h3 class="font-semibold text-red-400 mb-2">Insumos com Estoque Baixo</h3>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="font-semibold text-red-600 mb-2">Insumos com Estoque Baixo</h3>
                             <ul id="low-stock-list" class="space-y-2">
                                 <li class="text-gray-500">Nenhum alerta de estoque baixo.</li>
                             </ul>
                         </div>
-                        <div class="bg-gray-900 p-4 rounded-lg shadow-lg border border-gray-700">
-                            <h3 class="font-semibold text-yellow-400 mb-2">Insumos Próximos da Validade (30 dias)</h3>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="font-semibold text-yellow-600 mb-2">Insumos Próximos da Validade (30 dias)</h3>
                             <ul id="expiring-list" class="space-y-2">
                                 <li class="text-gray-500">Nenhum insumo próximo do vencimento.</li>
                             </ul>
                         </div>
-                         <div class="bg-gray-900 p-4 rounded-lg shadow-lg border border-gray-700">
-                            <h3 class="font-semibold text-orange-400 mb-2">Risco de Vencimento por Baixo Consumo</h3>
+                         <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="font-semibold text-orange-600 mb-2">Risco de Vencimento por Baixo Consumo</h3>
                             <ul id="risco-vencimento-list" class="space-y-2">
                                 <li class="text-gray-500">Nenhum item com risco de vencimento.</li>
                             </ul>
                         </div>
-                         <div class="bg-gray-900 p-4 rounded-lg shadow-lg border border-gray-700">
-                            <h3 class="font-semibold text-purple-400 mb-2">Insumos Sem Uso Recente (30 dias)</h3>
+                         <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="font-semibold text-purple-600 mb-2">Insumos Sem Uso Recente (30 dias)</h3>
                             <ul id="sem-uso-list" class="space-y-2">
                                 <li class="text-gray-500">Todos os insumos foram utilizados recentemente.</li>
                             </ul>
                         </div>
                     </div>
-                     <h2 class="text-xl font-semibold mt-8 mb-4 text-gray-300">Linhas de Produção</h2>
+                     <h2 class="text-xl font-semibold mt-8 mb-4">Linhas de Produção</h2>
                      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                         <div class="bg-gray-900 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer new-order-shortcut border border-gray-700 hover:border-yellow-500" data-line="Pães Congelados">
-                             <h3 class="font-semibold text-lg text-blue-400">Pães Congelados</h3>
-                             <p class="text-gray-400 mt-2">Iniciar nova ordem de produção.</p>
+                         <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer new-order-shortcut" data-line="Pães Congelados">
+                             <h3 class="font-semibold text-lg text-blue-700">Pães Congelados</h3>
+                             <p class="text-gray-600 mt-2">Iniciar nova ordem de produção.</p>
                          </div>
-                         <div class="bg-gray-900 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer new-order-shortcut border border-gray-700 hover:border-yellow-500" data-line="Pães Especiais">
-                             <h3 class="font-semibold text-lg text-green-400">Pães Especiais</h3>
-                             <p class="text-gray-400 mt-2">Iniciar nova ordem de produção.</p>
+                         <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer new-order-shortcut" data-line="Pães Especiais">
+                             <h3 class="font-semibold text-lg text-green-700">Pães Especiais</h3>
+                             <p class="text-gray-600 mt-2">Iniciar nova ordem de produção.</p>
                          </div>
-                         <div class="bg-gray-900 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer new-order-shortcut border border-gray-700 hover:border-yellow-500" data-line="Pão de Queijo">
-                             <h3 class="font-semibold text-lg text-yellow-400">Pão de Queijo</h3>
-                             <p class="text-gray-400 mt-2">Iniciar nova ordem de produção.</p>
+                         <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer new-order-shortcut" data-line="Pão de Queijo">
+                             <h3 class="font-semibold text-lg text-yellow-700">Pão de Queijo</h3>
+                             <p class="text-gray-600 mt-2">Iniciar nova ordem de produção.</p>
                          </div>
-                         <div class="bg-gray-900 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer new-order-shortcut border border-gray-700 hover:border-yellow-500" data-line="Confeitaria">
-                             <h3 class="font-semibold text-lg text-purple-400">Confeitaria</h3>
-                             <p class="text-gray-400 mt-2">Iniciar nova ordem de produção.</p>
+                         <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer new-order-shortcut" data-line="Confeitaria">
+                             <h3 class="font-semibold text-lg text-purple-700">Confeitaria</h3>
+                             <p class="text-gray-600 mt-2">Iniciar nova ordem de produção.</p>
                          </div>
                      </div>
                 </div>
@@ -142,16 +131,16 @@
                 <!-- Insumos View -->
                 <div id="view-insumos" class="page-view hidden">
                     <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
-                        <input type="search" id="search-insumo" placeholder="Pesquisar por nome, código, lote..." class="p-2 border border-gray-600 bg-gray-700 text-white rounded-lg w-full sm:w-auto flex-grow focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                        <input type="search" id="search-insumo" placeholder="Pesquisar por nome, código, lote..." class="p-2 border rounded-lg w-full sm:w-auto flex-grow">
                         <div class="flex space-x-2">
-                            <button id="export-stock-pdf-btn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">Exportar PDF</button>
-                            <button id="add-insumo-btn" class="bg-yellow-600 text-gray-900 font-semibold px-4 py-2 rounded-lg hover:bg-yellow-500">Adicionar Lote</button>
+                            <button id="export-stock-pdf-btn" class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700">Exportar PDF</button>
+                            <button id="add-insumo-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Adicionar Lote</button>
                         </div>
                     </div>
-                    <div class="bg-gray-900 p-4 rounded-lg shadow-lg border border-gray-700">
+                    <div class="bg-white p-4 rounded-lg shadow">
                         <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left text-gray-300">
-                                <thead class="bg-gray-800 text-gray-400 uppercase text-xs">
+                            <table class="w-full text-sm text-left">
+                                <thead class="bg-gray-50">
                                     <tr>
                                         <th class="p-3 sortable cursor-pointer" data-sort="nome">Insumo</th>
                                         <th class="p-3 sortable cursor-pointer" data-sort="lote">Lote</th>
@@ -173,13 +162,13 @@
                 <!-- Produtos e Receitas View -->
                 <div id="view-produtos" class="page-view hidden">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold text-white">Produtos e Receitas</h2>
-                        <button id="add-produto-btn" class="bg-yellow-600 text-gray-900 font-semibold px-4 py-2 rounded-lg hover:bg-yellow-500">Adicionar Produto</button>
+                        <h2 class="text-xl font-semibold">Produtos e Receitas</h2>
+                        <button id="add-produto-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Adicionar Produto</button>
                     </div>
-                     <div class="bg-gray-900 p-4 rounded-lg shadow-lg border border-gray-700">
+                     <div class="bg-white p-4 rounded-lg shadow">
                         <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left text-gray-300">
-                                <thead class="bg-gray-800 text-gray-400 uppercase text-xs">
+                            <table class="w-full text-sm text-left">
+                                <thead class="bg-gray-50">
                                     <tr>
                                         <th class="p-3">Produto</th>
                                         <th class="p-3">Linha de Produção</th>
@@ -198,16 +187,16 @@
                 <!-- Ordens de Produção View -->
                 <div id="view-ordens" class="page-view hidden">
                      <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold text-white">Ordens de Produção</h2>
+                        <h2 class="text-xl font-semibold">Ordens de Produção</h2>
                         <div class="flex space-x-2">
-                            <button id="export-pdf-btn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">Exportar do Dia (PDF)</button>
-                            <button id="add-ordem-btn" class="bg-yellow-600 text-gray-900 font-semibold px-4 py-2 rounded-lg hover:bg-yellow-500">Nova Ordem</button>
+                            <button id="export-pdf-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Exportar do Dia (PDF)</button>
+                            <button id="add-ordem-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Nova Ordem</button>
                         </div>
                     </div>
-                     <div class="bg-gray-900 p-4 rounded-lg shadow-lg border border-gray-700">
+                     <div class="bg-white p-4 rounded-lg shadow">
                         <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left text-gray-300">
-                                <thead class="bg-gray-800 text-gray-400 uppercase text-xs">
+                            <table class="w-full text-sm text-left">
+                                <thead class="bg-gray-50">
                                     <tr>
                                         <th class="p-3">Lote do Produto</th>
                                         <th class="p-3">Produto</th>
@@ -228,13 +217,13 @@
                 <!-- Requisições View -->
                 <div id="view-requisicoes" class="page-view hidden">
                      <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold text-white">Requisições de Insumos</h2>
-                        <button id="add-requisicao-btn" class="bg-yellow-600 text-gray-900 font-semibold px-4 py-2 rounded-lg hover:bg-yellow-500">Nova Requisição</button>
+                        <h2 class="text-xl font-semibold">Requisições de Insumos</h2>
+                        <button id="add-requisicao-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">Nova Requisição</button>
                     </div>
-                     <div class="bg-gray-900 p-4 rounded-lg shadow-lg border border-gray-700">
+                     <div class="bg-white p-4 rounded-lg shadow">
                         <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left text-gray-300">
-                                <thead class="bg-gray-800 text-gray-400 uppercase text-xs">
+                            <table class="w-full text-sm text-left">
+                                <thead class="bg-gray-50">
                                     <tr>
                                         <th class="p-3">Data</th>
                                         <th class="p-3">Responsável</th>
@@ -257,72 +246,72 @@
 
     <!-- Modals -->
     <!-- Insumo Modal -->
-    <div id="insumo-modal" class="modal fixed inset-0 bg-black bg-opacity-75 items-center justify-center">
-        <div class="bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-6 w-full max-w-2xl">
-            <h3 id="insumo-modal-title" class="text-xl font-semibold mb-4 text-white">Adicionar Lote de Insumo</h3>
+    <div id="insumo-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
+            <h3 id="insumo-modal-title" class="text-xl font-semibold mb-4">Adicionar Lote de Insumo</h3>
             <form id="insumo-form">
                 <input type="hidden" id="insumo-id">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" id="insumo-codigo" placeholder="Código do Insumo (Ex: 101)" class="p-2 bg-gray-700 border border-gray-600 rounded-lg text-white" required>
-                    <input type="text" id="insumo-nome" placeholder="Nome do Insumo (Ex: Farinha de Trigo)" class="p-2 bg-gray-700 border border-gray-600 rounded-lg text-white" required>
-                    <input type="text" id="insumo-lote" placeholder="Lote do Fornecedor" class="p-2 bg-gray-700 border border-gray-600 rounded-lg text-white" required>
-                    <input type="text" id="insumo-fornecedor" placeholder="Fornecedor" class="p-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
-                    <input type="number" step="0.001" id="insumo-estoque" placeholder="Estoque do Lote (kg)" class="p-2 bg-gray-700 border border-gray-600 rounded-lg text-white" required>
+                    <input type="text" id="insumo-codigo" placeholder="Código do Insumo (Ex: 101)" class="p-2 border rounded-lg" required>
+                    <input type="text" id="insumo-nome" placeholder="Nome do Insumo (Ex: Farinha de Trigo)" class="p-2 border rounded-lg" required>
+                    <input type="text" id="insumo-lote" placeholder="Lote do Fornecedor" class="p-2 border rounded-lg" required>
+                    <input type="text" id="insumo-fornecedor" placeholder="Fornecedor" class="p-2 border rounded-lg">
+                    <input type="number" step="0.001" id="insumo-estoque" placeholder="Estoque do Lote (kg)" class="p-2 border rounded-lg" required>
                 </div>
-                 <div id="stock-levels-info" class="mt-4 p-3 bg-gray-700 rounded-lg text-sm hidden text-gray-300">
-                    <h4 class="font-semibold mb-2 text-white">Níveis de Estoque Sugeridos</h4>
+                 <div id="stock-levels-info" class="mt-4 p-3 bg-gray-50 rounded-lg text-sm hidden">
+                    <h4 class="font-semibold mb-2">Níveis de Estoque Sugeridos (Baseado no consumo dos últimos 30 dias)</h4>
                     <p><strong>Estoque Mínimo:</strong> <span id="sugerido-min">N/A</span> kg</p>
                     <p><strong>Estoque Máximo:</strong> <span id="sugerido-max">N/A</span> kg</p>
                 </div>
-                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 border-t border-gray-700 pt-4">
+                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 border-t pt-4">
                      <div>
-                        <label for="insumo-data-fabricacao" class="text-sm text-gray-400">Data de Fabricação (Opcional)</label>
-                        <input type="date" id="insumo-data-fabricacao" class="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                        <label for="insumo-data-fabricacao" class="text-sm text-gray-600">Data de Fabricação (Opcional)</label>
+                        <input type="date" id="insumo-data-fabricacao" class="w-full p-2 border rounded-lg">
                     </div>
                     <div>
-                        <label for="insumo-data-recebimento" class="text-sm text-gray-400">Data de Recebimento</label>
-                        <input type="date" id="insumo-data-recebimento" class="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg text-white" required>
+                        <label for="insumo-data-recebimento" class="text-sm text-gray-600">Data de Recebimento</label>
+                        <input type="date" id="insumo-data-recebimento" class="w-full p-2 border rounded-lg" required>
                     </div>
                      <div>
-                        <label for="insumo-validade" class="text-sm text-gray-400">Validade do Lote</label>
-                        <input type="date" id="insumo-validade" class="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg text-white" required>
+                        <label for="insumo-validade" class="text-sm text-gray-600">Validade do Lote</label>
+                        <input type="date" id="insumo-validade" class="w-full p-2 border rounded-lg" required>
                     </div>
                 </div>
                 <div class="flex justify-end space-x-4 mt-6">
-                    <button type="button" id="cancel-insumo-btn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">Cancelar</button>
-                    <button type="submit" class="bg-yellow-600 text-gray-900 font-semibold px-4 py-2 rounded-lg hover:bg-yellow-500">Salvar</button>
+                    <button type="button" id="cancel-insumo-btn" class="bg-gray-300 px-4 py-2 rounded-lg">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Salvar</button>
                 </div>
             </form>
         </div>
     </div>
     
     <!-- Shelf Life Alert Modal -->
-    <div id="shelf-life-alert-modal" class="modal fixed inset-0 bg-black bg-opacity-75 items-center justify-center z-40">
-        <div class="bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-6 w-full max-w-md">
-            <h3 class="text-xl font-semibold text-yellow-400 mb-4">Alerta de Shelf Life</h3>
-            <p id="shelf-life-alert-message" class="mb-4 text-gray-300">O shelf life restante deste lote é de <strong class="text-yellow-300"></strong>, o que é inferior a 75%. Para confirmar o recebimento, por favor, insira o nome do responsável pela autorização.</p>
+    <div id="shelf-life-alert-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-40">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h3 class="text-xl font-semibold text-yellow-600 mb-4">Alerta de Shelf Life</h3>
+            <p id="shelf-life-alert-message" class="mb-4 text-gray-700">O shelf life restante deste lote é de <strong class="text-yellow-800"></strong>, o que é inferior a 75%. Para confirmar o recebimento, por favor, insira o nome do responsável pela autorização.</p>
             <div class="space-y-4">
                 <div>
-                    <label for="shelf-life-authorizer" class="text-sm font-medium text-gray-300">Autorizado por:</label>
-                    <input type="text" id="shelf-life-authorizer" class="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg text-white" required placeholder="Nome completo">
+                    <label for="shelf-life-authorizer" class="text-sm font-medium">Autorizado por:</label>
+                    <input type="text" id="shelf-life-authorizer" class="w-full mt-1 p-2 border rounded-lg" required placeholder="Nome completo">
                 </div>
             </div>
             <div class="flex justify-end space-x-4 mt-6">
-                <button type="button" id="cancel-shelf-life-btn" class="bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-700">Cancelar Recebimento</button>
-                <button type="button" id="confirm-shelf-life-btn" class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600">Confirmar Recebimento</button>
+                <button type="button" id="cancel-shelf-life-btn" class="bg-gray-300 px-4 py-2 rounded-lg">Cancelar Recebimento</button>
+                <button type="button" id="confirm-shelf-life-btn" class="bg-yellow-500 text-white px-4 py-2 rounded-lg">Confirmar Recebimento</button>
             </div>
         </div>
     </div>
 
     <!-- Produto Modal -->
-    <div id="produto-modal" class="modal fixed inset-0 bg-black bg-opacity-75 items-center justify-center">
-        <div class="bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-6 w-full max-w-2xl">
-            <h3 id="produto-modal-title" class="text-xl font-semibold mb-4 text-white">Adicionar Novo Produto</h3>
+    <div id="produto-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
+            <h3 id="produto-modal-title" class="text-xl font-semibold mb-4">Adicionar Novo Produto</h3>
             <form id="produto-form">
                 <input type="hidden" id="produto-id">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <input type="text" id="produto-nome" placeholder="Nome do Produto" class="p-2 bg-gray-700 border border-gray-600 rounded-lg text-white" required>
-                    <select id="produto-linha" class="p-2 bg-gray-700 border border-gray-600 rounded-lg text-white" required>
+                    <input type="text" id="produto-nome" placeholder="Nome do Produto" class="p-2 border rounded-lg" required>
+                    <select id="produto-linha" class="p-2 border rounded-lg" required>
                         <option value="">Selecione a Linha de Produção</option>
                         <option value="Pães Congelados">Pães Congelados</option>
                         <option value="Pães Especiais">Pães Especiais</option>
@@ -330,56 +319,56 @@
                         <option value="Confeitaria">Confeitaria</option>
                     </select>
                 </div>
-                <h4 class="font-semibold mt-4 mb-2 text-white">Receita</h4>
+                <h4 class="font-semibold mt-4 mb-2">Receita</h4>
                 <div id="receita-container" class="space-y-2 max-h-60 overflow-y-auto pr-2">
                     <!-- JS will populate this -->
                 </div>
-                <button type="button" id="add-receita-item-btn" class="mt-2 text-sm text-yellow-400 hover:underline">+ Adicionar insumo à receita</button>
+                <button type="button" id="add-receita-item-btn" class="mt-2 text-sm text-blue-600 hover:underline">+ Adicionar insumo à receita</button>
                 
                 <div class="flex justify-end space-x-4 mt-6">
-                    <button type="button" id="cancel-produto-btn" class="bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-700">Cancelar</button>
-                    <button type="submit" class="bg-yellow-600 text-gray-900 font-semibold px-4 py-2 rounded-lg hover:bg-yellow-500">Salvar</button>
+                    <button type="button" id="cancel-produto-btn" class="bg-gray-300 px-4 py-2 rounded-lg">Cancelar</button>
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg">Salvar</button>
                 </div>
             </form>
         </div>
     </div>
     
      <!-- Ordem de Produção Modal -->
-    <div id="ordem-modal" class="modal fixed inset-0 bg-black bg-opacity-75 items-center justify-center">
-        <div class="bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-6 w-full max-w-5xl max-h-[90vh] flex flex-col">
-            <h3 id="ordem-modal-title" class="text-xl font-semibold mb-4 text-white">Nova Ordem de Produção</h3>
+    <div id="ordem-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-5xl max-h-[90vh] flex flex-col">
+            <h3 id="ordem-modal-title" class="text-xl font-semibold mb-4">Nova Ordem de Produção</h3>
             <form id="ordem-form" class="flex-1 overflow-y-auto pr-2">
-                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 border border-gray-700 rounded-lg bg-gray-900">
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50">
                     <div>
-                         <label for="ordem-produto" class="text-sm font-medium text-gray-300">Produto</label>
-                         <select id="ordem-produto" class="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg text-white" required></select>
+                         <label for="ordem-produto" class="text-sm font-medium">Produto</label>
+                         <select id="ordem-produto" class="w-full mt-1 p-2 border rounded-lg" required></select>
                     </div>
                      <div>
-                         <label for="ordem-linha" class="text-sm font-medium text-gray-300">Linha de Produção</label>
-                         <input type="text" id="ordem-linha" class="w-full mt-1 p-2 bg-gray-600 border border-gray-500 rounded-lg" readonly>
+                         <label for="ordem-linha" class="text-sm font-medium">Linha de Produção</label>
+                         <input type="text" id="ordem-linha" class="w-full mt-1 p-2 border rounded-lg bg-gray-200" readonly>
                     </div>
                     <div>
-                         <label for="ordem-receitas" class="text-sm font-medium text-gray-300">Quantidade (Receitas)</label>
-                         <input type="number" id="ordem-receitas" class="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg text-white" required min="1" value="1">
+                         <label for="ordem-receitas" class="text-sm font-medium">Quantidade (Receitas)</label>
+                         <input type="number" id="ordem-receitas" class="w-full mt-1 p-2 border rounded-lg" required min="1" value="1">
                     </div>
                      <div>
-                         <label for="ordem-lote" class="text-sm font-medium text-gray-300">Lote do Produto (Opcional)</label>
-                         <input type="text" id="ordem-lote" class="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                         <label for="ordem-lote" class="text-sm font-medium">Lote do Produto (Opcional)</label>
+                         <input type="text" id="ordem-lote" class="w-full mt-1 p-2 border rounded-lg">
                     </div>
                      <div>
-                         <label for="ordem-data-producao" class="text-sm font-medium text-gray-300">Data de Produção</label>
-                         <input type="date" id="ordem-data-producao" class="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg text-white" required>
+                         <label for="ordem-data-producao" class="text-sm font-medium">Data de Produção</label>
+                         <input type="date" id="ordem-data-producao" class="w-full mt-1 p-2 border rounded-lg" required>
                     </div>
                      <div>
-                         <label for="ordem-validade-produto" class="text-sm font-medium text-gray-300">Validade do Produto</label>
-                         <input type="date" id="ordem-validade-produto" class="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg text-white" required>
+                         <label for="ordem-validade-produto" class="text-sm font-medium">Validade do Produto</label>
+                         <input type="date" id="ordem-validade-produto" class="w-full mt-1 p-2 border rounded-lg" required>
                     </div>
                  </div>
-                 <h4 class="font-semibold mt-6 mb-2 text-white">Insumos para a Produção</h4>
-                 <div id="ordem-stock-warning" class="hidden my-2 p-3 bg-red-900 bg-opacity-50 text-red-300 border border-red-700 rounded-lg"></div>
+                 <h4 class="font-semibold mt-6 mb-2">Insumos para a Produção</h4>
+                 <div id="ordem-stock-warning" class="hidden my-2 p-3 bg-red-100 text-red-700 rounded-lg"></div>
                  <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-gray-300">
-                        <thead class="bg-gray-700 text-gray-400 text-xs uppercase">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-100">
                              <tr>
                                  <th class="p-3">Insumo</th>
                                  <th class="p-3">Qtd. a Usar (kg)</th>
@@ -394,20 +383,20 @@
                     </table>
                  </div>
                  
-                <div class="flex justify-end space-x-4 mt-6 sticky bottom-0 bg-gray-800 py-4">
-                    <button type="button" id="cancel-ordem-btn" class="bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-700">Cancelar</button>
-                    <button type="submit" class="bg-yellow-600 text-gray-900 font-semibold px-4 py-2 rounded-lg hover:bg-yellow-500">Salvar Ordem</button>
+                <div class="flex justify-end space-x-4 mt-6 sticky bottom-0 bg-white py-4">
+                    <button type="button" id="cancel-ordem-btn" class="bg-gray-300 px-4 py-2 rounded-lg">Cancelar</button>
+                    <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg">Salvar Ordem</button>
                 </div>
             </form>
         </div>
     </div>
     
     <!-- View Ordem Modal -->
-    <div id="view-ordem-modal" class="modal fixed inset-0 bg-black bg-opacity-75 items-center justify-center">
-        <div class="bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-6 w-full max-w-4xl max-h-[90vh] flex flex-col">
+    <div id="view-ordem-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-start">
-                <h3 class="text-xl font-semibold mb-4 text-white">Detalhes da Ordem de Produção</h3>
-                <button id="close-view-ordem-modal" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+                <h3 class="text-xl font-semibold mb-4">Detalhes da Ordem de Produção</h3>
+                <button id="close-view-ordem-modal" class="text-gray-500 hover:text-gray-800 text-3xl leading-none">&times;</button>
             </div>
             <div id="view-ordem-content" class="flex-1 overflow-y-auto">
                 <!-- Content injected by JS -->
@@ -416,35 +405,35 @@
     </div>
 
     <!-- Insumo History Modal -->
-    <div id="insumo-history-modal" class="modal fixed inset-0 bg-black bg-opacity-75 items-center justify-center">
-        <div class="bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-6 w-full max-w-6xl max-h-[90vh] flex flex-col">
+    <div id="insumo-history-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-6xl max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-start mb-4">
-                <h3 id="insumo-history-title" class="text-xl font-semibold text-white">Histórico do Insumo</h3>
-                <button id="close-insumo-history-modal" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+                <h3 id="insumo-history-title" class="text-xl font-semibold">Histórico do Insumo</h3>
+                <button id="close-insumo-history-modal" class="text-gray-500 hover:text-gray-800 text-3xl leading-none">&times;</button>
             </div>
-            <div class="flex-1 overflow-y-auto space-y-6 text-gray-300">
-                 <div id="insumo-stats" class="p-4 bg-gray-900 border border-gray-700 rounded-lg">
-                    <h4 class="font-semibold text-md mb-2 text-yellow-400">Análise de Consumo (Últimos 30 dias)</h4>
+            <div class="flex-1 overflow-y-auto space-y-6">
+                 <div id="insumo-stats" class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 class="font-semibold text-md mb-2 text-blue-800">Análise de Consumo (Últimos 30 dias)</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                         <div>
-                            <span class="block text-gray-400">Consumo Médio Diário</span>
-                            <strong id="stats-avg-daily" class="text-lg text-white">0 kg</strong>
+                            <span class="block text-gray-500">Consumo Médio Diário</span>
+                            <strong id="stats-avg-daily" class="text-lg">0 kg</strong>
                         </div>
                         <div>
-                            <span class="block text-gray-400">Estoque Mínimo Sugerido</span>
-                            <strong id="stats-min" class="text-lg text-white">0 kg</strong>
+                            <span class="block text-gray-500">Estoque Mínimo Sugerido</span>
+                            <strong id="stats-min" class="text-lg">0 kg</strong>
                         </div>
                         <div>
-                            <span class="block text-gray-400">Estoque Máximo Sugerido</span>
-                            <strong id="stats-max" class="text-lg text-white">0 kg</strong>
+                            <span class="block text-gray-500">Estoque Máximo Sugerido</span>
+                            <strong id="stats-max" class="text-lg">0 kg</strong>
                         </div>
                     </div>
                 </div>
                 <div>
-                    <h4 class="font-semibold text-md mb-2 text-white">Lotes Registrados (Entradas)</h4>
-                    <div class="overflow-x-auto border border-gray-700 rounded-lg">
+                    <h4 class="font-semibold text-md mb-2">Lotes Registrados (Entradas)</h4>
+                    <div class="overflow-x-auto border rounded-lg">
                         <table class="w-full text-sm text-left">
-                           <thead class="bg-gray-700 text-gray-400 uppercase text-xs">
+                           <thead class="bg-gray-100">
                                <tr>
                                    <th class="p-2">Lote</th>
                                    <th class="p-2">Estoque (kg)</th>
@@ -454,15 +443,15 @@
                                    <th class="p-2">Estimativa de Consumo</th>
                                </tr>
                            </thead>
-                           <tbody id="insumo-history-entradas-body" class="bg-gray-900"></tbody>
+                           <tbody id="insumo-history-entradas-body"></tbody>
                         </table>
                     </div>
                 </div>
                 <div>
-                    <h4 class="font-semibold text-md mb-2 text-white">Histórico de Uso (Saídas)</h4>
-                    <div class="overflow-x-auto border border-gray-700 rounded-lg">
+                    <h4 class="font-semibold text-md mb-2">Histórico de Uso (Saídas)</h4>
+                    <div class="overflow-x-auto border rounded-lg">
                         <table class="w-full text-sm text-left">
-                           <thead class="bg-gray-700 text-gray-400 uppercase text-xs">
+                           <thead class="bg-gray-100">
                                <tr>
                                    <th class="p-2">Data</th>
                                    <th class="p-2">Tipo</th>
@@ -471,7 +460,7 @@
                                    <th class="p-2">Lote do Insumo</th>
                                </tr>
                            </thead>
-                           <tbody id="insumo-history-saidas-body" class="bg-gray-900"></tbody>
+                           <tbody id="insumo-history-saidas-body"></tbody>
                         </table>
                     </div>
                 </div>
@@ -480,22 +469,22 @@
     </div>
 
     <!-- Requisição Modal -->
-    <div id="requisicao-modal" class="modal fixed inset-0 bg-black bg-opacity-75 items-center justify-center">
-        <div class="bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-6 w-full max-w-4xl max-h-[90vh] flex flex-col">
-            <h3 class="text-xl font-semibold mb-4 text-white">Nova Requisição de Insumos</h3>
+    <div id="requisicao-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <h3 class="text-xl font-semibold mb-4">Nova Requisição de Insumos</h3>
             <form id="requisicao-form" class="flex-1 overflow-y-auto pr-2">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border border-gray-700 rounded-lg bg-gray-900">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50">
                     <div>
-                        <label for="requisicao-data" class="text-sm font-medium text-gray-300">Data da Requisição</label>
-                        <input type="date" id="requisicao-data" class="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg text-white" required>
+                        <label for="requisicao-data" class="text-sm font-medium">Data da Requisição</label>
+                        <input type="date" id="requisicao-data" class="w-full mt-1 p-2 border rounded-lg" required>
                     </div>
                     <div>
-                        <label for="requisicao-responsavel" class="text-sm font-medium text-gray-300">Responsável</label>
-                        <input type="text" id="requisicao-responsavel" class="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg text-white" required placeholder="Nome do solicitante">
+                        <label for="requisicao-responsavel" class="text-sm font-medium">Responsável</label>
+                        <input type="text" id="requisicao-responsavel" class="w-full mt-1 p-2 border rounded-lg" required placeholder="Nome do solicitante">
                     </div>
                     <div>
-                        <label for="requisicao-motivo" class="text-sm font-medium text-gray-300">Motivo</label>
-                        <select id="requisicao-motivo" class="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg text-white" required>
+                        <label for="requisicao-motivo" class="text-sm font-medium">Motivo</label>
+                        <select id="requisicao-motivo" class="w-full mt-1 p-2 border rounded-lg" required>
                             <option value="Amostra">Amostra</option>
                             <option value="Teste de Qualidade">Teste de Qualidade</option>
                             <option value="Perda">Perda</option>
@@ -504,25 +493,25 @@
                         </select>
                     </div>
                 </div>
-                <h4 class="font-semibold mt-6 mb-2 text-white">Itens Requisitados</h4>
+                <h4 class="font-semibold mt-6 mb-2">Itens Requisitados</h4>
                 <div id="requisicao-items-container" class="space-y-3">
                     <!-- JS will populate this -->
                 </div>
-                <button type="button" id="add-requisicao-item-btn" class="mt-3 text-sm text-yellow-400 hover:underline">+ Adicionar Item</button>
-                <div class="flex justify-end space-x-4 mt-6 sticky bottom-0 bg-gray-800 py-4">
-                    <button type="button" id="cancel-requisicao-btn" class="bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-700">Cancelar</button>
-                    <button type="submit" class="bg-yellow-600 text-gray-900 font-semibold px-4 py-2 rounded-lg hover:bg-yellow-500">Salvar Requisição</button>
+                <button type="button" id="add-requisicao-item-btn" class="mt-3 text-sm text-blue-600 hover:underline">+ Adicionar Item</button>
+                <div class="flex justify-end space-x-4 mt-6 sticky bottom-0 bg-white py-4">
+                    <button type="button" id="cancel-requisicao-btn" class="bg-gray-300 px-4 py-2 rounded-lg">Cancelar</button>
+                    <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">Salvar Requisição</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- View Requisição Modal -->
-    <div id="view-requisicao-modal" class="modal fixed inset-0 bg-black bg-opacity-75 items-center justify-center">
-        <div class="bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-6 w-full max-w-3xl max-h-[90vh] flex flex-col">
+    <div id="view-requisicao-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-3xl max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-start">
-                <h3 class="text-xl font-semibold mb-4 text-white">Detalhes da Requisição</h3>
-                <button id="close-view-requisicao-modal" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+                <h3 class="text-xl font-semibold mb-4">Detalhes da Requisição</h3>
+                <button id="close-view-requisicao-modal" class="text-gray-500 hover:text-gray-800 text-3xl leading-none">&times;</button>
             </div>
             <div id="view-requisicao-content" class="flex-1 overflow-y-auto">
                 <!-- Content injected by JS -->
@@ -532,32 +521,7 @@
 
 
     <script type="module">
-        // Import Firebase modules
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged, 
-            signInAnonymously,
-            signOut,
-            signInWithCustomToken
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { 
-            getFirestore, collection, onSnapshot, doc, addDoc, setDoc, deleteDoc, query
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- CONFIG & INITIALIZATION ---
-        
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { 
-            apiKey: "YOUR_API_KEY", 
-            authDomain: "YOUR_AUTH_DOMAIN", 
-            projectId: "YOUR_PROJECT_ID" 
-        };
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        
+        // --- INITIALIZATION & STORAGE ---
         let insumosCache = [];
         let produtosCache = [];
         let ordensCache = [];
@@ -567,47 +531,47 @@
         let insumosSearchTerm = '';
         let displayedInsumos = [];
 
+        const STORAGE_KEYS = {
+            insumos: 'rastreio_insumos',
+            produtos: 'rastreio_produtos',
+            ordens: 'rastreio_ordens',
+            requisicoes: 'rastreio_requisicoes'
+        };
 
-        let insumosCol, produtosCol, ordensCol, requisicoesCol;
-        let unsubscribeInsumos, unsubscribeProdutos, unsubscribeOrdens, unsubscribeRequisicoes;
-
-        // --- AUTHENTICATION ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                // User is signed in.
-                const dataPath = `artifacts/${appId}/public/data`; // Public path for all users to share data
-
-                insumosCol = collection(db, `${dataPath}/insumos`);
-                produtosCol = collection(db, `${dataPath}/produtos`);
-                ordensCol = collection(db, `${dataPath}/ordens`);
-                requisicoesCol = collection(db, `${dataPath}/requisicoes`);
-
-                if (unsubscribeInsumos) unsubscribeInsumos();
-                if (unsubscribeProdutos) unsubscribeProdutos();
-                if (unsubscribeOrdens) unsubscribeOrdens();
-                if (unsubscribeRequisicoes) unsubscribeRequisicoes();
-                
-                loadInsumos();
-                loadProdutos();
-                loadOrdens();
-                loadRequisicoes();
-
-                document.getElementById('app-container').classList.remove('hidden');
-                document.getElementById('loading-overlay').style.display = 'none';
-
-            } else {
-                 try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                       await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                       await signInAnonymously(auth);
-                    }
-                } catch (error) {
-                    console.error("Authentication failed:", error);
-                    document.getElementById('loading-overlay').innerHTML = `<p class="text-red-400">Falha ao conectar. Verifique a configuração do Firebase.</p>`;
-                }
+        function loadFromStorage(key) {
+            try {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : [];
+            } catch (e) {
+                console.error(`Error loading ${key} from storage`, e);
+                return [];
             }
-        });
+        }
+
+        function saveToStorage(key, data) {
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+            } catch (e) {
+                console.error(`Error saving ${key} to storage`, e);
+            }
+        }
+
+        function initializeApp() {
+            insumosCache = loadFromStorage(STORAGE_KEYS.insumos);
+            produtosCache = loadFromStorage(STORAGE_KEYS.produtos);
+            ordensCache = loadFromStorage(STORAGE_KEYS.ordens);
+            requisicoesCache = loadFromStorage(STORAGE_KEYS.requisicoes);
+            
+            updateInsumosView();
+            renderProdutosTable(produtosCache);
+            renderOrdensTable(ordensCache);
+            renderRequisicoesTable(requisicoesCache);
+            updateDashboard(insumosCache, ordensCache);
+
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        window.onload = initializeApp;
 
 
         // --- UI NAVIGATION ---
@@ -629,12 +593,8 @@
                 pageViews.forEach(view => view.classList.add('hidden'));
                 document.getElementById(targetViewId).classList.remove('hidden');
 
-                navLinks.forEach(nav => {
-                    nav.classList.remove('bg-yellow-600', 'text-gray-900', 'font-semibold');
-                    nav.classList.add('hover:bg-gray-700', 'text-gray-300');
-                });
-                e.currentTarget.classList.add('bg-yellow-600', 'text-gray-900', 'font-semibold');
-                e.currentTarget.classList.remove('hover:bg-gray-700', 'text-gray-300');
+                navLinks.forEach(nav => nav.classList.remove('bg-blue-600'));
+                e.currentTarget.classList.add('bg-blue-600');
                 
                 document.getElementById('page-title').textContent = pageTitles[e.currentTarget.id];
             });
@@ -705,21 +665,26 @@
                 if (!insumoTotals[insumo.codigo]) {
                     insumoTotals[insumo.codigo] = {
                         nome: insumo.nome,
-                        totalEstoque: 0
+                        estoqueMinimo: 0,
+                        totalEstoque: 0,
+                        latestBatchDate: '1970-01-01'
                     };
                 }
                 insumoTotals[insumo.codigo].totalEstoque += parseFloat(insumo.estoque);
+                
+                const batchDate = insumo.dataRecebimento || '1970-01-01';
+                if (batchDate > insumoTotals[insumo.codigo].latestBatchDate) {
+                    insumoTotals[insumo.codigo].latestBatchDate = batchDate;
+                    insumoTotals[insumo.codigo].estoqueMinimo = parseFloat(insumo.estoqueMinimo);
+                }
             });
             
             let lowStockCount = 0;
             for (const codigo in insumoTotals) {
                 const insumo = insumoTotals[codigo];
-                const levels = calculateStockLevels(codigo, ordens);
-                const estoqueMinimoSugerido = parseFloat(levels.min);
-
-                if (insumo.totalEstoque <= estoqueMinimoSugerido && estoqueMinimoSugerido > 0) {
+                if (insumo.totalEstoque <= insumo.estoqueMinimo && insumo.estoqueMinimo > 0) {
                     const li = document.createElement('li');
-                    li.innerHTML = `<button class="alert-item-btn text-left w-full text-sm text-red-400 hover:underline" data-codigo="${codigo}" data-nome="${insumo.nome}">${insumo.nome} (${insumo.totalEstoque.toFixed(3)} kg / min: ${estoqueMinimoSugerido.toFixed(3)} kg)</button>`;
+                    li.innerHTML = `<button class="alert-item-btn text-left w-full text-sm text-red-700 hover:underline" data-codigo="${codigo}" data-nome="${insumo.nome}">${insumo.nome} (${insumo.totalEstoque.toFixed(3)} kg / min: ${insumo.estoqueMinimo.toFixed(3)} kg)</button>`;
                     lowStockList.appendChild(li);
                     lowStockCount++;
                 }
@@ -735,7 +700,7 @@
                 const expiryDate = new Date(insumo.validade + 'T00:00:00');
                 if (expiryDate <= thirtyDaysFromNow && expiryDate >= today) {
                     const li = document.createElement('li');
-                    li.innerHTML = `<button class="alert-item-btn text-left w-full text-sm text-yellow-400 hover:underline" data-codigo="${insumo.codigo}" data-nome="${insumo.nome}">${insumo.nome} (Lote: ${insumo.lote}) - Vence em: ${formatDate(insumo.validade)}</button>`;
+                    li.innerHTML = `<button class="alert-item-btn text-left w-full text-sm text-yellow-700 hover:underline" data-codigo="${insumo.codigo}" data-nome="${insumo.nome}">${insumo.nome} (Lote: ${insumo.lote}) - Vence em: ${formatDate(insumo.validade)}</button>`;
                     expiringList.appendChild(li);
                     expiringCount++;
                 }
@@ -755,7 +720,7 @@
 
                     if (dataEstimada > new Date(lote.validade)) {
                         const li = document.createElement('li');
-                        li.innerHTML = `<button class="alert-item-btn text-left w-full text-sm text-orange-400 hover:underline" data-codigo="${lote.codigo}" data-nome="${lote.nome}">${lote.nome} (Lote: ${lote.lote}) - Val: ${formatDate(lote.validade)}, Est. Fim: ${formatDate(dataEstimada.toISOString().split('T')[0])}</button>`;
+                        li.innerHTML = `<button class="alert-item-btn text-left w-full text-sm text-orange-700 hover:underline" data-codigo="${lote.codigo}" data-nome="${lote.nome}">${lote.nome} (Lote: ${lote.lote}) - Val: ${formatDate(lote.validade)}, Est. Fim: ${formatDate(dataEstimada.toISOString().split('T')[0])}</button>`;
                         riscoVencimentoList.appendChild(li);
                         riscoVencimentoCount++;
                     }
@@ -784,7 +749,7 @@
             uniqueInsumos.forEach(insumo => {
                 if (!usedInsumoCodes.has(insumo.codigo)) {
                     const li = document.createElement('li');
-                    li.innerHTML = `<button class="alert-item-btn text-left w-full text-sm text-purple-400 hover:underline" data-codigo="${insumo.codigo}" data-nome="${insumo.nome}">${insumo.nome} (Cód: ${insumo.codigo})</button>`;
+                    li.innerHTML = `<button class="alert-item-btn text-left w-full text-sm text-purple-700 hover:underline" data-codigo="${insumo.codigo}" data-nome="${insumo.nome}">${insumo.nome} (Cód: ${insumo.codigo})</button>`;
                     semUsoList.appendChild(li);
                     semUsoCount++;
                 }
@@ -824,13 +789,6 @@
         }
 
         // --- INSUMOS (BATCHES) CRUD & RENDERING ---
-        function loadInsumos() {
-            unsubscribeInsumos = onSnapshot(query(insumosCol), snapshot => {
-                insumosCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                updateInsumosView();
-                updateDashboard(insumosCache, ordensCache);
-            });
-        }
         
         function updateInsumosView() {
             let filteredInsumos = [...insumosCache];
@@ -886,35 +844,44 @@
             
             insumos.forEach(insumo => {
                 const tr = document.createElement('tr');
-                tr.className = 'border-b border-gray-700';
+                tr.className = 'border-b';
                 
                 const isExpired = new Date(insumo.validade + 'T00:00:00') < new Date();
                 
                 tr.innerHTML = `
                     <td class="p-3 font-medium">
-                        <button class="view-history-btn text-yellow-400 hover:underline" data-codigo="${insumo.codigo}" data-nome="${insumo.nome}">${insumo.nome}</button>
+                        <button class="view-history-btn text-blue-600 hover:underline" data-codigo="${insumo.codigo}" data-nome="${insumo.nome}">${insumo.nome}</button>
                     </td>
                     <td class="p-3">${insumo.lote}</td>
                     <td class="p-3">${formatDate(insumo.dataRecebimento)}</td>
-                    <td class="p-3 ${isExpired ? 'text-red-400 font-bold' : ''}">${formatDate(insumo.validade)}</td>
+                    <td class="p-3 ${isExpired ? 'text-red-600 font-bold' : ''}">${formatDate(insumo.validade)}</td>
                     <td class="p-3">${parseFloat(insumo.estoque).toFixed(3)}</td>
-                    <td class="p-3 text-xs ${insumo.quemAutorizou ? 'text-yellow-400' : ''}">${insumo.quemAutorizou || 'N/A'}</td>
+                    <td class="p-3 text-xs ${insumo.quemAutorizou ? 'text-yellow-700' : ''}">${insumo.quemAutorizou || 'N/A'}</td>
                     <td class="p-3">
-                        <button class="edit-insumo-btn text-blue-400 hover:underline mr-2" data-id="${insumo.id}">Editar</button>
-                        <button class="delete-insumo-btn text-red-400 hover:underline" data-id="${insumo.id}">Excluir</button>
+                        <button class="edit-insumo-btn text-blue-600 hover:underline mr-2" data-id="${insumo.id}">Editar</button>
+                        <button class="delete-insumo-btn text-red-600 hover:underline" data-id="${insumo.id}">Excluir</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
         
-        async function saveInsumoData(id, data) {
+        function saveInsumoData(id, data) {
             try {
                 if (id) {
-                    await setDoc(doc(insumosCol, id), data, { merge: true });
+                    const index = insumosCache.findIndex(i => i.id === id);
+                    if (index > -1) {
+                         insumosCache[index] = { ...insumosCache[index], ...data };
+                    }
                 } else {
-                   await addDoc(insumosCol, data);
+                    data.id = `insumo_${Date.now()}_${Math.random()}`; // Simple unique ID
+                    insumosCache.push(data);
                 }
+                saveToStorage(STORAGE_KEYS.insumos, insumosCache);
+                
+                updateInsumosView();
+                updateDashboard(insumosCache, ordensCache);
+
                 document.getElementById('insumo-form').reset();
                 document.getElementById('insumo-modal').classList.remove('active');
                 document.getElementById('shelf-life-alert-modal').classList.remove('active');
@@ -1048,7 +1015,10 @@
                 document.getElementById('insumo-modal').classList.add('active');
             } else if (target.classList.contains('delete-insumo-btn')) {
                 if(confirm('Tem certeza que deseja excluir este lote de insumo?')) {
-                    deleteDoc(doc(insumosCol, insumoId));
+                    insumosCache = insumosCache.filter(i => i.id !== insumoId);
+                    saveToStorage(STORAGE_KEYS.insumos, insumosCache);
+                    updateInsumosView();
+                    updateDashboard(insumosCache, ordensCache);
                 }
             } else if (target.classList.contains('view-history-btn')) {
                 const insumoCodigo = target.dataset.codigo;
@@ -1089,7 +1059,7 @@
                  const today = new Date();
                  lotesDoInsumo.forEach(lote => {
                     const tr = document.createElement('tr');
-                    tr.className = 'border-b border-gray-700';
+                    tr.className = 'border-b';
                     
                     const diasRestantes = daysBetween(lote.validade, today);
                     const shelfLifeRecebimento = lote.shelfLifePercentualRecebimento ? `${lote.shelfLifePercentualRecebimento.toFixed(1)}%` : 'N/A';
@@ -1112,7 +1082,7 @@
                         <td class="p-2">${parseFloat(lote.estoque).toFixed(3)}</td>
                         <td class="p-2">${shelfLifeRecebimento}</td>
                         <td class="p-2">${formatDate(lote.validade)}</td>
-                        <td class="p-2 ${diasRestantes < 30 ? 'text-yellow-400' : ''} ${diasRestantes <= 0 ? 'text-red-400 font-bold' : ''}">${diasRestantes > 0 ? diasRestantes : 'Vencido'}</td>
+                        <td class="p-2 ${diasRestantes < 30 ? 'text-yellow-600' : ''} ${diasRestantes <= 0 ? 'text-red-600 font-bold' : ''}">${diasRestantes > 0 ? diasRestantes : 'Vencido'}</td>
                         <td class="p-2">${estimativaConsumo} ${alerta}</td>
                     `;
                     entradasBody.appendChild(tr);
@@ -1155,7 +1125,7 @@
                 saidas.sort((a,b) => new Date(b.data) - new Date(a.data));
                 saidas.forEach(saida => {
                     const tr = document.createElement('tr');
-                    tr.className = 'border-b border-gray-700';
+                    tr.className = 'border-b';
                     tr.innerHTML = `
                         <td class="p-2">${formatDate(saida.data)}</td>
                         <td class="p-2">${saida.tipo}</td>
@@ -1172,10 +1142,8 @@
 
         // --- PRODUTOS E RECEITAS ---
         function loadProdutos() {
-            unsubscribeProdutos = onSnapshot(query(produtosCol), snapshot => {
-                produtosCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderProdutosTable(produtosCache);
-            });
+            produtosCache = loadFromStorage(STORAGE_KEYS.produtos);
+            renderProdutosTable(produtosCache);
         }
         
         function renderProdutosTable(produtos) {
@@ -1188,11 +1156,11 @@
              const uniqueInsumos = [...new Map(insumosCache.map(item => [item['codigo'], item])).values()];
             produtos.forEach(produto => {
                 const tr = document.createElement('tr');
-                tr.className = 'border-b border-gray-700';
+                tr.className = 'border-b';
                 
                 const receitaHtml = (produto.receita || []).map(item => {
                     const insumoInfo = uniqueInsumos.find(i => i.codigo === item.insumoCodigo);
-                    return `<span class="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs mr-1 mb-1 inline-block">${insumoInfo ? insumoInfo.nome : `Código ${item.insumoCodigo}`}: ${item.dosagem} kg</span>`;
+                    return `<span class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-xs mr-1 mb-1 inline-block">${insumoInfo ? insumoInfo.nome : `Código ${item.insumoCodigo}`}: ${item.dosagem} kg</span>`;
                 }).join('');
 
                 tr.innerHTML = `
@@ -1200,8 +1168,8 @@
                     <td class="p-3">${produto.linha}</td>
                     <td class="p-3">${receitaHtml || 'Sem receita definida'}</td>
                     <td class="p-3">
-                        <button class="edit-produto-btn text-blue-400 hover:underline mr-2" data-id="${produto.id}">Editar</button>
-                        <button class="delete-produto-btn text-red-400 hover:underline" data-id="${produto.id}">Excluir</button>
+                        <button class="edit-produto-btn text-blue-600 hover:underline mr-2" data-id="${produto.id}">Editar</button>
+                        <button class="delete-produto-btn text-red-600 hover:underline" data-id="${produto.id}">Excluir</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1220,21 +1188,21 @@
             const uniqueInsumos = [...new Map(insumosCache.map(item => [item['codigo'], item])).values()];
 
             const select = document.createElement('select');
-            select.className = 'receita-insumo-select p-2 bg-gray-700 border border-gray-600 rounded-lg text-white flex-1';
+            select.className = 'receita-insumo-select p-2 border rounded-lg flex-1';
             select.innerHTML = '<option value="">Selecione um insumo</option>' + uniqueInsumos.map(i => `<option value="${i.codigo}">${i.nome} (Cód: ${i.codigo})</option>`).join('');
             select.value = item.insumoCodigo;
 
             const input = document.createElement('input');
             input.type = 'number';
             input.step = '0.001';
-            input.className = 'receita-dosagem-input p-2 bg-gray-700 border border-gray-600 rounded-lg text-white w-32';
+            input.className = 'receita-dosagem-input p-2 border rounded-lg w-32';
             input.placeholder = 'Dosagem (kg)';
             input.value = item.dosagem;
 
             const button = document.createElement('button');
             button.type = 'button';
             button.textContent = 'Remover';
-            button.className = 'text-red-400 text-sm hover:underline';
+            button.className = 'text-red-500 text-sm hover:underline';
             button.onclick = () => div.remove();
             
             div.appendChild(select);
@@ -1243,7 +1211,7 @@
             container.appendChild(div);
         }
         
-        document.getElementById('produto-form').addEventListener('submit', async e => {
+        document.getElementById('produto-form').addEventListener('submit', e => {
              e.preventDefault();
              const id = document.getElementById('produto-id').value;
              const receitaItems = document.querySelectorAll('#receita-container > div');
@@ -1259,10 +1227,17 @@
              };
              
             if (id) {
-                await setDoc(doc(produtosCol, id), produtoData);
+                const index = produtosCache.findIndex(p => p.id === id);
+                if (index > -1) {
+                    produtosCache[index] = { ...produtosCache[index], ...produtoData };
+                }
             } else {
-                await addDoc(produtosCol, produtoData);
+                produtoData.id = `produto_${Date.now()}`;
+                produtosCache.push(produtoData);
             }
+
+            saveToStorage(STORAGE_KEYS.produtos, produtosCache);
+            renderProdutosTable(produtosCache);
             document.getElementById('produto-modal').classList.remove('active');
         });
         
@@ -1279,7 +1254,9 @@
                  document.getElementById('produto-modal').classList.add('active');
             } else if (e.target.classList.contains('delete-produto-btn')) {
                  if(confirm('Tem certeza que deseja excluir este produto?')) {
-                    deleteDoc(doc(produtosCol, produtoId));
+                    produtosCache = produtosCache.filter(p => p.id !== produtoId);
+                    saveToStorage(STORAGE_KEYS.produtos, produtosCache);
+                    renderProdutosTable(produtosCache);
                  }
             }
         });
@@ -1294,11 +1271,8 @@
         
         // --- ORDENS DE PRODUÇÃO ---
         function loadOrdens() {
-            unsubscribeOrdens = onSnapshot(query(ordensCol), snapshot => {
-                ordensCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderOrdensTable(ordensCache);
-                updateDashboard(insumosCache, ordensCache);
-            });
+            ordensCache = loadFromStorage(STORAGE_KEYS.ordens);
+            renderOrdensTable(ordensCache);
         }
 
         function resetOrdemForm() {
@@ -1383,26 +1357,26 @@
         function addOrdemInsumoRow(insumoInfo, quantityToUse, selectedBatch, allAvailableBatches) {
              const tbody = document.getElementById('ordem-insumos-table');
              const tr = document.createElement('tr');
-             tr.className = 'border-b border-gray-700';
+             tr.className = 'border-b';
              tr.dataset.insumoCodigo = insumoInfo.codigo;
 
              const batchOptions = allAvailableBatches.map(b => 
                 `<option value="${b.id}" ${b.id === selectedBatch.id ? 'selected' : ''}>
-                    Lote: ${b.lote} (Estoque: ${b.estoque} kg, Val: ${formatDate(b.validade)})
+                    Lote: ${b.lote} (Estoque: ${b.estoque}kg, Val: ${formatDate(b.validade)})
                  </option>`
              ).join('');
 
              tr.innerHTML = `
                  <td class="p-2">${insumoInfo.nome}</td>
                  <td class="p-2">
-                    <input type="number" step="0.001" class="w-24 p-1 bg-gray-700 border border-gray-600 rounded-md text-sm text-white" value="${quantityToUse.toFixed(3)}" required>
+                    <input type="number" step="0.001" class="w-24 p-1 border rounded-md text-sm ordem-insumo-qty" value="${quantityToUse.toFixed(3)}" required>
                  </td>
                  <td class="p-2">
-                    <select class="w-full p-1 bg-gray-700 border border-gray-600 rounded-md text-sm text-white">${batchOptions}</select>
+                    <select class="w-full p-1 border rounded-md text-sm ordem-insumo-lote">${batchOptions}</select>
                  </td>
                  <td class="p-2">${selectedBatch.fornecedor}</td>
                  <td class="p-2">
-                    <input type="text" class="w-full p-1 bg-gray-700 border border-gray-600 rounded-md text-sm text-white" placeholder="Nome (Opcional)">
+                    <input type="text" class="w-full p-1 border rounded-md text-sm ordem-insumo-manipulador" placeholder="Nome (Opcional)">
                  </td>
              `;
              tbody.appendChild(tr);
@@ -1411,7 +1385,7 @@
         document.getElementById('ordem-produto').addEventListener('change', updateOrdemInsumosTable);
         document.getElementById('ordem-receitas').addEventListener('input', updateOrdemInsumosTable);
         
-        document.getElementById('ordem-form').addEventListener('submit', async e => {
+        document.getElementById('ordem-form').addEventListener('submit', e => {
             e.preventDefault();
 
             const updates = [];
@@ -1419,9 +1393,9 @@
             const insumoRows = document.querySelectorAll('#ordem-insumos-table tr');
             
             for (const row of insumoRows) {
-                const batchId = row.querySelector('select').value;
-                const quantityToUse = parseFloat(row.querySelector('input[type="number"]').value);
-                const manipulador = row.querySelector('input[type="text"]').value.trim();
+                const batchId = row.querySelector('.ordem-insumo-lote').value;
+                const quantityToUse = parseFloat(row.querySelector('.ordem-insumo-qty').value);
+                const manipulador = row.querySelector('.ordem-insumo-manipulador').value.trim();
                 
                 const batch = insumosCache.find(i => i.id === batchId);
 
@@ -1431,7 +1405,7 @@
                 }
 
                 const novoEstoque = parseFloat(batch.estoque) - quantityToUse;
-                updates.push({ docRef: doc(insumosCol, batch.id), newStock: novoEstoque.toFixed(3) });
+                updates.push({ batchId: batch.id, newStock: novoEstoque.toFixed(3) });
                 
                 insumosUtilizados.push({
                     insumoId: batch.id,
@@ -1446,6 +1420,7 @@
             }
 
             const ordemData = {
+                id: `ordem_${Date.now()}`,
                 produtoNome: document.getElementById('ordem-produto').options[document.getElementById('ordem-produto').selectedIndex].text,
                 linhaProducao: document.getElementById('ordem-linha').value,
                 quantidadeReceitas: document.getElementById('ordem-receitas').value,
@@ -1456,16 +1431,21 @@
                 createdAt: new Date().toISOString()
             };
 
-            try {
-                for (const update of updates) {
-                    await setDoc(update.docRef, { estoque: update.newStock }, { merge: true });
+            updates.forEach(update => {
+                const index = insumosCache.findIndex(i => i.id === update.batchId);
+                if (index > -1) {
+                    insumosCache[index].estoque = update.newStock;
                 }
-                await addDoc(ordensCol, ordemData);
-                document.getElementById('ordem-modal').classList.remove('active');
-            } catch (error) {
-                console.error("Error creating order: ", error);
-                alert("Ocorreu um erro ao salvar a ordem.");
-            }
+            });
+            saveToStorage(STORAGE_KEYS.insumos, insumosCache);
+
+            ordensCache.push(ordemData);
+            saveToStorage(STORAGE_KEYS.ordens, ordensCache);
+
+            renderOrdensTable(ordensCache);
+            updateInsumosView();
+            updateDashboard(insumosCache, ordensCache);
+            document.getElementById('ordem-modal').classList.remove('active');
         });
 
         
@@ -1481,7 +1461,7 @@
 
             ordens.forEach(ordem => {
                 const tr = document.createElement('tr');
-                tr.className = 'border-b border-gray-700';
+                tr.className = 'border-b';
                 const manipulators = [...new Set(ordem.insumosUtilizados.map(i => i.manipulador))].filter(Boolean).join(', ');
                 tr.innerHTML = `
                     <td class="p-3 font-medium">${ordem.loteProduto || 'N/A'}</td>
@@ -1490,7 +1470,7 @@
                     <td class="p-3">${ordem.quantidadeReceitas}</td>
                     <td class="p-3">${manipulators || 'N/A'}</td>
                     <td class="p-3">
-                        <button class="view-ordem-btn text-blue-400 hover:underline" data-id='${ordem.id}'>Ver Detalhes</button>
+                        <button class="view-ordem-btn text-blue-600 hover:underline" data-id='${ordem.id}'>Ver Detalhes</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1509,7 +1489,7 @@
             
             const insumosHtml = ordem.insumosUtilizados.map(insumo => {
                  return `
-                    <tr class="border-b border-gray-700">
+                    <tr class="border-b">
                         <td class="p-2">${insumo.codigo || 'N/A'}</td>
                         <td class="p-2">${insumo.nome}</td>
                         <td class="p-2">${insumo.dosagemTotal} kg</td>
@@ -1522,19 +1502,19 @@
             }).join('');
 
             contentDiv.innerHTML = `
-                <div class="space-y-4 text-gray-300">
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 border border-gray-700 rounded-lg bg-gray-900 text-sm">
-                        <div><strong class="block text-gray-400">Produto:</strong> ${ordem.produtoNome}</div>
-                        <div><strong class="block text-gray-400">Lote do Produto:</strong> ${ordem.loteProduto || 'Não informado'}</div>
-                        <div><strong class="block text-gray-400">Qtd. Receitas:</strong> ${ordem.quantidadeReceitas}</div>
-                        <div><strong class="block text-gray-400">Linha:</strong> ${ordem.linhaProducao}</div>
-                        <div><strong class="block text-gray-400">Data Produção:</strong> ${formatDate(ordem.dataProducao)}</div>
-                        <div><strong class="block text-gray-400">Validade Produto:</strong> ${formatDate(ordem.validadeProduto)}</div>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 border rounded-lg bg-gray-50 text-sm">
+                        <div><strong class="block text-gray-500">Produto:</strong> ${ordem.produtoNome}</div>
+                        <div><strong class="block text-gray-500">Lote do Produto:</strong> ${ordem.loteProduto || 'Não informado'}</div>
+                        <div><strong class="block text-gray-500">Qtd. Receitas:</strong> ${ordem.quantidadeReceitas}</div>
+                        <div><strong class="block text-gray-500">Linha:</strong> ${ordem.linhaProducao}</div>
+                        <div><strong class="block text-gray-500">Data Produção:</strong> ${formatDate(ordem.dataProducao)}</div>
+                        <div><strong class="block text-gray-500">Validade Produto:</strong> ${formatDate(ordem.validadeProduto)}</div>
                     </div>
                     <div>
-                        <h4 class="font-semibold text-md mt-4 mb-2 text-white">Insumos Utilizados</h4>
+                        <h4 class="font-semibold text-md mt-4 mb-2">Insumos Utilizados</h4>
                         <table class="w-full text-sm text-left">
-                           <thead class="bg-gray-700 text-gray-400 text-xs uppercase">
+                           <thead class="bg-gray-100">
                                <tr>
                                    <th class="p-2">Código</th>
                                    <th class="p-2">Insumo</th>
@@ -1545,7 +1525,7 @@
                                    <th class="p-2">Manipulador</th>
                                </tr>
                            </thead>
-                           <tbody class="bg-gray-900">${insumosHtml}</tbody>
+                           <tbody>${insumosHtml}</tbody>
                         </table>
                     </div>
                 </div>
@@ -1556,11 +1536,8 @@
 
         // --- REQUISIÇÕES ---
         function loadRequisicoes() {
-            unsubscribeRequisicoes = onSnapshot(query(requisicoesCol), snapshot => {
-                requisicoesCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderRequisicoesTable(requisicoesCache);
-                updateDashboard(insumosCache, ordensCache);
-            });
+            requisicoesCache = loadFromStorage(STORAGE_KEYS.requisicoes);
+            renderRequisicoesTable(requisicoesCache);
         }
         
         function renderRequisicoesTable(requisicoes) {
@@ -1573,7 +1550,7 @@
             requisicoes.sort((a,b) => new Date(b.data) - new Date(a.data));
             requisicoes.forEach(req => {
                 const tr = document.createElement('tr');
-                tr.className = 'border-b border-gray-700';
+                tr.className = 'border-b';
                 const itemsSummary = req.items.map(i => `${i.nome} (${i.quantidade} kg)`).join(', ');
                 tr.innerHTML = `
                     <td class="p-3">${formatDate(req.data)}</td>
@@ -1581,7 +1558,7 @@
                     <td class="p-3">${req.motivo}</td>
                     <td class="p-3 text-xs">${itemsSummary}</td>
                     <td class="p-3">
-                         <button class="view-requisicao-btn text-blue-400 hover:underline" data-id='${req.id}'>Ver Detalhes</button>
+                         <button class="view-requisicao-btn text-blue-600 hover:underline" data-id='${req.id}'>Ver Detalhes</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1606,29 +1583,29 @@
         function addRequisicaoItem() {
             const container = document.getElementById('requisicao-items-container');
             const itemDiv = document.createElement('div');
-            itemDiv.className = 'grid grid-cols-3 gap-3 p-3 border border-gray-700 rounded-lg';
+            itemDiv.className = 'grid grid-cols-3 gap-3 p-3 border rounded-lg';
 
             const uniqueInsumos = [...new Map(insumosCache.map(item => [item['codigo'], item])).values()];
 
             itemDiv.innerHTML = `
                 <div>
-                    <label class="text-xs text-gray-400">Insumo</label>
-                    <select class="req-item-insumo w-full p-1 bg-gray-700 border border-gray-600 rounded-md text-sm text-white">
+                    <label class="text-xs">Insumo</label>
+                    <select class="req-item-insumo w-full p-1 border rounded-md text-sm">
                         <option value="">Selecione...</option>
                         ${uniqueInsumos.map(i => `<option value="${i.codigo}">${i.nome} (Cód: ${i.codigo})</option>`).join('')}
                     </select>
                 </div>
                 <div>
-                    <label class="text-xs text-gray-400">Lote</label>
-                    <select class="req-item-lote w-full p-1 bg-gray-700 border border-gray-600 rounded-md text-sm text-white" disabled>
+                    <label class="text-xs">Lote</label>
+                    <select class="req-item-lote w-full p-1 border rounded-md text-sm" disabled>
                         <option value="">Escolha um insumo...</option>
                     </select>
                 </div>
                  <div>
-                    <label class="text-xs text-gray-400">Quantidade (kg)</label>
+                    <label class="text-xs">Quantidade (kg)</label>
                     <div class="flex">
-                        <input type="number" step="0.001" class="req-item-qty w-full p-1 bg-gray-700 border border-gray-600 rounded-md text-sm text-white" disabled>
-                        <button type="button" class="remove-req-item-btn text-red-400 ml-2 px-2 hover:bg-red-900 rounded">X</button>
+                        <input type="number" step="0.001" class="req-item-qty w-full p-1 border rounded-md text-sm" disabled>
+                        <button type="button" class="remove-req-item-btn text-red-500 ml-2 px-2 hover:bg-red-100 rounded">X</button>
                     </div>
                 </div>
             `;
@@ -1670,7 +1647,7 @@
             }
         });
 
-        document.getElementById('requisicao-form').addEventListener('submit', async e => {
+        document.getElementById('requisicao-form').addEventListener('submit', e => {
             e.preventDefault();
             const updates = [];
             const items = [];
@@ -1691,7 +1668,7 @@
                 }
                 
                 const novoEstoque = parseFloat(lote.estoque) - quantidade;
-                updates.push({ docRef: doc(insumosCol, lote.id), newStock: novoEstoque.toFixed(3) });
+                updates.push({ batchId: lote.id, newStock: novoEstoque.toFixed(3) });
                 items.push({
                     codigo: lote.codigo,
                     nome: lote.nome,
@@ -1701,6 +1678,7 @@
             }
 
             const requisicaoData = {
+                id: `req_${Date.now()}`,
                 data: document.getElementById('requisicao-data').value,
                 responsavel: document.getElementById('requisicao-responsavel').value,
                 motivo: document.getElementById('requisicao-motivo').value,
@@ -1708,23 +1686,28 @@
                 createdAt: new Date().toISOString()
             };
 
-            try {
-                for (const update of updates) {
-                    await setDoc(update.docRef, { estoque: update.newStock }, { merge: true });
+            updates.forEach(update => {
+                const index = insumosCache.findIndex(i => i.id === update.batchId);
+                if (index > -1) {
+                    insumosCache[index].estoque = update.newStock;
                 }
-                await addDoc(requisicoesCol, requisicaoData);
-                document.getElementById('requisicao-modal').classList.remove('active');
-            } catch (error) {
-                console.error("Error creating requisition: ", error);
-                alert("Ocorreu um erro ao salvar a requisição.");
-            }
+            });
+            saveToStorage(STORAGE_KEYS.insumos, insumosCache);
+
+            requisicoesCache.push(requisicaoData);
+            saveToStorage(STORAGE_KEYS.requisicoes, requisicoesCache);
+            
+            renderRequisicoesTable(requisicoesCache);
+            updateInsumosView();
+            updateDashboard(insumosCache, ordensCache);
+            document.getElementById('requisicao-modal').classList.remove('active');
         });
         
         function showRequisicaoDetails(req) {
             const contentDiv = document.getElementById('view-requisicao-content');
             
             const itemsHtml = req.items.map(item => `
-                <tr class="border-b border-gray-700">
+                <tr class="border-b">
                     <td class="p-2">${item.codigo}</td>
                     <td class="p-2">${item.nome}</td>
                     <td class="p-2">${item.lote}</td>
@@ -1733,16 +1716,16 @@
             `).join('');
 
             contentDiv.innerHTML = `
-                 <div class="space-y-4 text-gray-300">
-                    <div class="grid grid-cols-3 gap-4 p-4 border border-gray-700 rounded-lg bg-gray-900 text-sm">
-                        <div><strong class="block text-gray-400">Data:</strong> ${formatDate(req.data)}</div>
-                        <div><strong class="block text-gray-400">Responsável:</strong> ${req.responsavel}</div>
-                        <div><strong class="block text-gray-400">Motivo:</strong> ${req.motivo}</div>
+                 <div class="space-y-4">
+                    <div class="grid grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50 text-sm">
+                        <div><strong class="block text-gray-500">Data:</strong> ${formatDate(req.data)}</div>
+                        <div><strong class="block text-gray-500">Responsável:</strong> ${req.responsavel}</div>
+                        <div><strong class="block text-gray-500">Motivo:</strong> ${req.motivo}</div>
                     </div>
                     <div>
-                        <h4 class="font-semibold text-md mt-4 mb-2 text-white">Itens Requisitados</h4>
+                        <h4 class="font-semibold text-md mt-4 mb-2">Itens Requisitados</h4>
                         <table class="w-full text-sm text-left">
-                           <thead class="bg-gray-700 text-gray-400 uppercase text-xs">
+                           <thead class="bg-gray-100">
                                <tr>
                                    <th class="p-2">Código</th>
                                    <th class="p-2">Insumo</th>
@@ -1750,7 +1733,7 @@
                                    <th class="p-2">Quantidade</th>
                                </tr>
                            </thead>
-                           <tbody class="bg-gray-900">${itemsHtml}</tbody>
+                           <tbody>${itemsHtml}</tbody>
                         </table>
                     </div>
                 </div>
