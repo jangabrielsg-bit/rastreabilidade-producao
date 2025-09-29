@@ -7,10 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Bibliotecas para exportação -->
+    <!-- Bibliotecas para exportação e gráficos -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -25,7 +26,13 @@
             background-color: #4f46e5;
             color: white;
         }
-        .modal-backdrop {
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 50;
+            inset: 0;
+            align-items: center;
+            justify-content: center;
             background-color: rgba(0, 0, 0, 0.5);
         }
         .form-input {
@@ -67,11 +74,11 @@
     <div class="flex h-screen">
         <!-- Sidebar -->
         <aside class="w-20 bg-gray-800 text-white flex flex-col items-center py-4 space-y-6">
-            <div class="text-2xl font-bold">
-                <i class="fa-solid fa-boxes-stacked"></i>
-            </div>
+            <a href="#" id="nav-dashboard" class="sidebar-icon p-3 rounded-lg active-nav" title="Dashboard">
+                <i class="fa-solid fa-chart-pie fa-lg"></i>
+            </a>
             <nav class="flex flex-col items-center space-y-4">
-                <a href="#" id="nav-entry" class="sidebar-icon p-3 rounded-lg active-nav" title="Entrada de Mercadorias">
+                <a href="#" id="nav-entry" class="sidebar-icon p-3 rounded-lg" title="Entrada de Mercadorias">
                     <i class="fa-solid fa-dolly fa-lg"></i>
                 </a>
                 <a href="#" id="nav-inventory" class="sidebar-icon p-3 rounded-lg" title="Gerenciamento de Estoque">
@@ -84,13 +91,58 @@
                     <i class="fa-solid fa-clipboard-list fa-lg"></i>
                 </a>
             </nav>
+            <div class="mt-auto">
+                 <a href="#" id="nav-settings" class="sidebar-icon p-3 rounded-lg" title="Configurações">
+                    <i class="fa-solid fa-cog fa-lg"></i>
+                </a>
+            </div>
         </aside>
 
         <!-- Main Content -->
         <main class="flex-1 p-6 md:p-8 overflow-y-auto">
             
+            <!-- Tela da Dashboard -->
+            <div id="screen-dashboard">
+                <h1 class="text-3xl font-bold text-gray-800 mb-6">Dashboard</h1>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Coluna Esquerda -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Gráfico -->
+                        <div class="bg-white p-6 rounded-xl shadow-lg">
+                            <h2 class="text-xl font-semibold text-gray-700 mb-4">Top 5 Itens em Estoque</h2>
+                            <div class="h-80 flex items-center justify-center">
+                                <canvas id="stock-chart"></canvas>
+                            </div>
+                        </div>
+                        <!-- Últimas Entradas -->
+                        <div class="bg-white p-6 rounded-xl shadow-lg">
+                             <h2 class="text-xl font-semibold text-gray-700 mb-4">Últimas Entradas</h2>
+                             <ul id="last-entries-list" class="divide-y divide-gray-200">
+                                <!-- Preenchido por JS -->
+                             </ul>
+                        </div>
+                    </div>
+                    <!-- Coluna Direita (Alertas) -->
+                    <div class="space-y-6">
+                        <div class="bg-white p-6 rounded-xl shadow-lg">
+                             <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i class="fa-solid fa-triangle-exclamation text-yellow-500 mr-3"></i>Alertas</h2>
+                             <div id="alerts-container" class="space-y-4">
+                                <!-- Estoque Baixo -->
+                                <div id="low-stock-alert"></div>
+                                <!-- Próximo da Validade -->
+                                <div id="expiry-alert"></div>
+                                <!-- Risco de Perda -->
+                                <div id="loss-risk-alert"></div>
+                                <!-- Itens Sem Uso -->
+                                <div id="stagnant-stock-alert"></div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Tela de Registro de Entrada -->
-            <div id="screen-entry">
+            <div id="screen-entry" class="hidden">
                 <h1 class="text-3xl font-bold text-gray-800 mb-6">Registro de Entrada de Mercadorias</h1>
                 <div class="bg-white p-8 rounded-xl shadow-lg max-w-2xl mx-auto">
                     <form id="entry-form">
@@ -205,12 +257,38 @@
                     <!-- Ordens de produção serão listadas aqui -->
                 </div>
             </div>
+            
+            <!-- Tela de Configurações -->
+            <div id="screen-settings" class="hidden">
+                <h1 class="text-3xl font-bold text-gray-800 mb-6">Configurações e Backup</h1>
+                <div class="bg-white p-8 rounded-xl shadow-lg max-w-2xl mx-auto space-y-6">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-700">Backup dos Dados</h2>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Salve todos os seus dados em um arquivo para segurança ou para transferir para outro dispositivo.
+                        </p>
+                        <button id="btn-download-backup" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                            <i class="fa-solid fa-download mr-2"></i>Baixar Backup (.json)
+                        </button>
+                    </div>
+                    <div class="border-t pt-6">
+                        <h2 class="text-xl font-semibold text-gray-700">Restaurar Backup</h2>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Importe um arquivo de backup. <strong class="text-red-600">Atenção:</strong> Isso substituirá todos os dados existentes no aplicativo.
+                        </p>
+                        <button id="btn-upload-backup" class="mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                            <i class="fa-solid fa-upload mr-2"></i>Carregar Backup (.json)
+                        </button>
+                        <input type="file" id="backup-file-input" class="hidden" accept=".json">
+                    </div>
+                </div>
+            </div>
 
         </main>
     </div>
     
     <!-- Modal de Alerta de Shelf Life -->
-    <div id="shelf-life-modal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+    <div id="shelf-life-modal" class="modal">
         <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
             <div class="text-center">
                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
@@ -242,7 +320,7 @@
     </div>
     
     <!-- Modal de Detalhes e Edição do Item -->
-    <div id="item-details-modal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop p-4">
+    <div id="item-details-modal" class="modal p-4">
         <div class="bg-white rounded-lg shadow-xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold" id="details-product-name">Nome do Produto</h2>
@@ -260,9 +338,9 @@
                     <div><strong>Código:</strong> <span id="details-product-code"></span></div>
                     <div><strong>Fornecedor:</strong> <span id="details-supplier"></span></div>
                     <div><strong>Estoque Total:</strong> <span id="details-total-quantity"></span></div>
-                    <div><strong>Estoque Mínimo:</strong> <span>10</span></div>
-                    <div><strong>Estoque Máximo:</strong> <span>100</span></div>
-                    <div><strong>Consumo Diário (Est.):</strong> <span>2.5</span></div>
+                    <div><strong>Consumo Médio Diário:</strong> <span id="details-avg-consumption"></span></div>
+                    <div><strong>Estoque Mínimo (sugestão):</strong> <span id="details-min-stock"></span></div>
+                    <div><strong>Estoque Máximo (sugestão):</strong> <span id="details-max-stock"></span></div>
                 </div>
             </div>
 
@@ -315,13 +393,14 @@
     </div>
 
     <!-- Modal de Receitas -->
-    <div id="recipe-modal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop p-4">
+    <div id="recipe-modal" class="modal p-4">
         <div class="bg-white rounded-lg shadow-xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
              <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">Criar Nova Receita</h2>
+                <h2 id="recipe-modal-title" class="text-2xl font-bold">Criar Nova Receita</h2>
                 <button id="close-recipe-modal" class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
             </div>
             <form id="recipe-form">
+                <input type="hidden" id="edit-recipe-id">
                 <div class="space-y-4">
                      <div>
                         <label for="recipe-name" class="block text-sm font-medium text-gray-700">Nome da Receita</label>
@@ -348,7 +427,7 @@
                     </button>
                 </div>
                 <div class="mt-8 flex justify-end">
-                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-md">
+                    <button id="save-recipe-btn" type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-md">
                         Salvar Receita
                     </button>
                 </div>
@@ -357,13 +436,14 @@
     </div>
     
     <!-- Modal de Ordem de Produção -->
-    <div id="production-order-modal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop p-4">
+    <div id="production-order-modal" class="modal p-4">
         <div class="bg-white rounded-lg shadow-xl p-8 max-w-5xl w-full max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">Nova Ordem de Produção</h2>
+                <h2 id="production-order-modal-title" class="text-2xl font-bold">Nova Ordem de Produção</h2>
                 <button id="close-production-order-modal" class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
             </div>
             <form id="production-order-form">
+                <input type="hidden" id="edit-po-id">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                      <div class="md:col-span-2">
                         <label for="po-recipe-select" class="block text-sm font-medium text-gray-700">Selecione a Receita</label>
@@ -404,7 +484,7 @@
     </div>
 
     <!-- Modal de Confirmação de Produção -->
-    <div id="confirm-production-modal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop p-4">
+    <div id="confirm-production-modal" class="modal p-4">
         <div class="bg-white rounded-lg shadow-xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
              <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold">Confirmar Produção e Baixa de Estoque</h2>
@@ -435,6 +515,57 @@
             </div>
         </div>
     </div>
+    
+    <!-- Modal de Confirmação de Upload -->
+    <div id="confirm-upload-modal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <i class="fa-solid fa-triangle-exclamation text-red-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Confirmar Restauração</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500">
+                        Você tem certeza que deseja restaurar o backup? <strong>Todos os dados atuais serão apagados e substituídos</strong> por completo. Essa ação não pode ser desfeita.
+                    </p>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-center space-x-4">
+                <button id="cancel-upload-btn" type="button" class="py-2 px-4 bg-gray-200 text-gray-800 font-semibold rounded-lg shadow-md hover:bg-gray-300">
+                    Cancelar
+                </button>
+                <button id="confirm-upload-btn" type="button" class="py-2 px-4 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700">
+                    Sim, Substituir Tudo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação Genérica -->
+    <div id="confirm-action-modal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <i class="fa-solid fa-triangle-exclamation text-red-600 text-2xl"></i>
+                </div>
+                <h3 id="confirm-title" class="text-lg leading-6 font-medium text-gray-900 mt-4">Confirmar Ação</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p id="confirm-message" class="text-sm text-gray-500">
+                        Você tem certeza? Essa ação não pode ser desfeita.
+                    </p>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-center space-x-4">
+                <button id="cancel-action-btn" type="button" class="py-2 px-4 bg-gray-200 text-gray-800 font-semibold rounded-lg shadow-md hover:bg-gray-300">
+                    Cancelar
+                </button>
+                <button id="confirm-action-btn" type="button" class="py-2 px-4 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Modal de Notificação -->
     <div id="notification-modal" class="fixed top-5 right-5 z-[100] hidden text-white py-2 px-5 rounded-lg shadow-lg">
@@ -540,19 +671,43 @@
                 request.onerror = () => reject(request.error);
             });
         }
+        
+        async function remove(storeName, key) {
+             const db = await getDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(storeName, 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.delete(key);
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+        
+        async function clear(storeName) {
+            const db = await getDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(storeName, 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.clear();
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
 
-        return { add, get, getAll, update, getByIndex, getDB };
+        return { add, get, getAll, update, getByIndex, getDB, clear, remove };
     })();
 
     // --- STATE MANAGEMENT ---
     let localInventory = [], localBatches = [], localHistory = [], localRecipes = [], localProductionOrders = [];
     let currentSort = { key: 'name', order: 'asc' };
     let tempEntryData = null;
+    let backupFileContent = null; 
+    let stockChart = null;
 
-    // --- DOM ELEMENTS (permanecem os mesmos) ---
+    // --- DOM ELEMENTS ---
     const loadingOverlay = document.getElementById('loading-overlay');
-    const screens = { entry: document.getElementById('screen-entry'), inventory: document.getElementById('screen-inventory'), recipes: document.getElementById('screen-recipes'), production: document.getElementById('screen-production'), };
-    const navLinks = { entry: document.getElementById('nav-entry'), inventory: document.getElementById('nav-inventory'), recipes: document.getElementById('nav-recipes'), production: document.getElementById('nav-production'), };
+    const screens = { dashboard: document.getElementById('screen-dashboard'), entry: document.getElementById('screen-entry'), inventory: document.getElementById('screen-inventory'), recipes: document.getElementById('screen-recipes'), production: document.getElementById('screen-production'), settings: document.getElementById('screen-settings') };
+    const navLinks = { dashboard: document.getElementById('nav-dashboard'), entry: document.getElementById('nav-entry'), inventory: document.getElementById('nav-inventory'), recipes: document.getElementById('nav-recipes'), production: document.getElementById('nav-production'), settings: document.getElementById('nav-settings') };
     const entryForm = document.getElementById('entry-form');
     const shelfLifeModal = document.getElementById('shelf-life-modal');
     const shelfLifeValue = document.getElementById('shelf-life-value');
@@ -566,6 +721,8 @@
     const closeDetailsModalBtn = document.getElementById('close-details-modal');
     const btnNewRecipe = document.getElementById('btn-new-recipe');
     const recipeModal = document.getElementById('recipe-modal');
+    const recipeModalTitle = document.getElementById('recipe-modal-title');
+    const saveRecipeBtn = document.getElementById('save-recipe-btn');
     const closeRecipeModalBtn = document.getElementById('close-recipe-modal');
     const recipeForm = document.getElementById('recipe-form');
     const addIngredientBtn = document.getElementById('add-ingredient-btn');
@@ -578,9 +735,11 @@
     const btnCancelEdit = document.getElementById('btn-cancel-edit');
     const editItemForm = document.getElementById('edit-item-form');
     const detailsHistoryContainer = document.getElementById('details-history-container');
+    const recipesList = document.getElementById('recipes-list');
     const productionOrdersList = document.getElementById('production-orders-list');
     const btnNewProductionOrder = document.getElementById('btn-new-production-order');
     const productionOrderModal = document.getElementById('production-order-modal');
+    const productionOrderModalTitle = document.getElementById('production-order-modal-title');
     const closeProductionOrderModalBtn = document.getElementById('close-production-order-modal');
     const productionOrderForm = document.getElementById('production-order-form');
     const poRecipeSelect = document.getElementById('po-recipe-select');
@@ -595,20 +754,56 @@
     const productionDateFilter = document.getElementById('production-date-filter');
     const confirmProductionTbody = document.getElementById('confirm-production-tbody');
     const btnExecuteStockConsumption = document.getElementById('btn-execute-stock-consumption');
+    const btnDownloadBackup = document.getElementById('btn-download-backup');
+    const btnUploadBackup = document.getElementById('btn-upload-backup');
+    const backupFileInput = document.getElementById('backup-file-input');
+    const confirmUploadModal = document.getElementById('confirm-upload-modal');
+    const cancelUploadBtn = document.getElementById('cancel-upload-btn');
+    const confirmUploadBtn = document.getElementById('confirm-upload-btn');
+    const confirmActionModal = document.getElementById('confirm-action-modal');
     
     // --- FUNÇÕES AUXILIARES ---
-    function showNotification(message, isError = false) { /* ... (sem alterações) ... */ 
+    function showNotification(message, isError = false) {
         notificationMessage.textContent = message;
         notificationModal.classList.toggle('bg-green-500', !isError);
         notificationModal.classList.toggle('bg-red-500', isError);
-        notificationModal.classList.remove('hidden');
-        notificationModal.classList.remove('animate-fade-in-out');
-        void notificationModal.offsetWidth;
-        notificationModal.classList.add('animate-fade-in-out');
+        notificationModal.style.display = 'block';
+        setTimeout(() => {
+             notificationModal.style.display = 'none';
+        }, 4000);
+    }
+
+    function showModal(modalElement) {
+        modalElement.style.display = 'flex';
+    }
+
+    function hideModal(modalElement) {
+        modalElement.style.display = 'none';
+    }
+    
+    function showConfirmationModal(title, message, onConfirm) {
+        document.getElementById('confirm-title').textContent = title;
+        document.getElementById('confirm-message').innerHTML = message;
+        showModal(confirmActionModal);
+
+        const cancelBtn = document.getElementById('cancel-action-btn');
+        const confirmBtn = document.getElementById('confirm-action-btn');
+
+        const cleanup = () => {
+            hideModal(confirmActionModal);
+            confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+            cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+        };
+
+        cancelBtn.addEventListener('click', cleanup, { once: true });
+        confirmBtn.addEventListener('click', () => {
+            onConfirm();
+            cleanup();
+        }, { once: true });
     }
 
     // --- NAVIGATION ---
-    function navigateTo(screenName) { /* ... (sem alterações) ... */ 
+    function navigateTo(screenName) {
         Object.values(screens).forEach(screen => screen.classList.add('hidden'));
         screens[screenName].classList.remove('hidden');
         Object.values(navLinks).forEach(link => link.classList.remove('active-nav'));
@@ -617,7 +812,7 @@
     Object.keys(navLinks).forEach(key => { navLinks[key].addEventListener('click', (e) => { e.preventDefault(); navigateTo(key); }); });
 
     // --- ENTRY SCREEN LOGIC ---
-    function calculateShelfLife(mfg, receipt, expiry) { /* ... (sem alterações) ... */ 
+    function calculateShelfLife(mfg, receipt, expiry) {
         const mfgDate = new Date(mfg + 'T00:00:00');
         const receiptDate = new Date(receipt + 'T00:00:00');
         const expiryDate = new Date(expiry + 'T00:00:00');
@@ -641,8 +836,7 @@
         tempEntryData = data;
         if (shelfLife < 75) {
             shelfLifeValue.textContent = shelfLife;
-            shelfLifeModal.classList.remove('hidden');
-            shelfLifeModal.classList.add('flex');
+            showModal(shelfLifeModal);
         } else { saveEntry(); }
     });
 
@@ -670,14 +864,13 @@
             showNotification("Erro ao salvar entrada.", true);
         }
     }
-    function closeShelfLifeModal() { /* ... (sem alterações) ... */ 
-        shelfLifeModal.classList.add('hidden');
-        shelfLifeModal.classList.remove('flex');
+    function closeShelfLifeModal() {
+        hideModal(shelfLifeModal);
         authorizerNameInput.value = '';
         tempEntryData = null;
     }
     cancelReceiptBtn.addEventListener('click', closeShelfLifeModal);
-    confirmReceiptBtn.addEventListener('click', () => { /* ... (sem alterações) ... */ 
+    confirmReceiptBtn.addEventListener('click', () => {
         const authorizer = authorizerNameInput.value;
         if (!authorizer.trim()) {
             showNotification('Por favor, insira o nome do responsável.', true);
@@ -687,7 +880,7 @@
     });
 
     // --- INVENTORY SCREEN LOGIC ---
-    function renderInventoryTable() { /* ... (sem alterações, pois usa localInventory) ... */ 
+    function renderInventoryTable() {
         let filteredInventory = [...localInventory];
         const searchTerm = searchInput.value.toLowerCase();
         if (searchTerm) {
@@ -730,7 +923,7 @@
             inventoryTableBody.appendChild(row);
         });
     }
-    function getNextExpiry(productId) { /* ... (sem alterações) ... */ 
+    function getNextExpiry(productId) {
          const productBatches = localBatches.filter(b => b.productId === productId && b.quantity > 0);
         if (productBatches.length === 0) return null;
         return productBatches.sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate))[0].expiryDate;
@@ -739,6 +932,35 @@
     searchInput.addEventListener('input', renderInventoryTable);
     
     // --- ITEM DETAILS & EDIT MODAL ---
+    function calculateConsumptionMetrics(productId) {
+        const productHistory = localHistory
+            .filter(h => h.productId === productId && h.type === 'saída')
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        if (productHistory.length < 2) {
+            return { avgConsumption: 0, minStock: 0, maxStock: 0 };
+        }
+
+        const firstConsumptionDate = new Date(productHistory[0].date);
+        const lastConsumptionDate = new Date(productHistory[productHistory.length - 1].date);
+        
+        let daysDifference = (lastConsumptionDate.getTime() - firstConsumptionDate.getTime()) / (1000 * 3600 * 24);
+        if (daysDifference < 1) {
+            daysDifference = 1; // Avoid division by zero and consider consumption within a single day
+        }
+
+        const totalConsumed = productHistory.reduce((sum, h) => sum + h.quantity, 0);
+        const avgConsumption = totalConsumed / daysDifference;
+
+        const leadTime = 7; // Tempo de reposição em dias (exemplo)
+        const replenishmentPeriod = 30; // Período de compra em dias (exemplo)
+
+        const minStock = avgConsumption * leadTime;
+        const maxStock = minStock + (avgConsumption * replenishmentPeriod);
+        
+        return { avgConsumption, minStock, maxStock };
+    }
+
     function showItemDetails(productId) {
         const product = localInventory.find(p => p.id === productId);
         if (!product) return;
@@ -747,6 +969,11 @@
         document.getElementById('details-product-code').textContent = product.code;
         document.getElementById('details-supplier').textContent = product.supplier;
         document.getElementById('details-total-quantity').textContent = product.totalQuantity.toFixed(2);
+        
+        const metrics = calculateConsumptionMetrics(productId);
+        document.getElementById('details-avg-consumption').textContent = metrics.avgConsumption.toFixed(2);
+        document.getElementById('details-min-stock').textContent = metrics.minStock.toFixed(2);
+        document.getElementById('details-max-stock').textContent = metrics.maxStock.toFixed(2);
         
         document.getElementById('edit-item-id').value = product.id;
         document.getElementById('edit-product-name').value = product.name;
@@ -782,12 +1009,11 @@
 
         itemDetailsView.classList.remove('hidden');
         itemDetailsEdit.classList.add('hidden');
-        detailsModal.classList.remove('hidden');
-        detailsModal.classList.add('flex');
+        showModal(detailsModal);
     }
-    closeDetailsModalBtn.addEventListener('click', () => { /* ... */ });
-    btnEditItem.addEventListener('click', () => { /* ... */ });
-    btnCancelEdit.addEventListener('click', () => { /* ... */ });
+    closeDetailsModalBtn.addEventListener('click', () => { hideModal(detailsModal) });
+    btnEditItem.addEventListener('click', () => { itemDetailsView.classList.add('hidden'); itemDetailsEdit.classList.remove('hidden'); });
+    btnCancelEdit.addEventListener('click', () => { itemDetailsView.classList.remove('hidden'); itemDetailsEdit.classList.add('hidden'); });
 
     editItemForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -813,32 +1039,280 @@
     });
 
     // --- RECIPES SCREEN LOGIC ---
-    function renderRecipes() { /* ... (sem alterações) ... */ }
-    btnNewRecipe.addEventListener('click', () => { /* ... */ });
-    closeRecipeModalBtn.addEventListener('click', () => recipeModal.classList.add('hidden'));
-    function addIngredientRow() { /* ... */ }
-    addIngredientBtn.addEventListener('click', addIngredientRow);
+    function renderRecipes() {
+        recipesList.innerHTML = '';
+        if (localRecipes.length === 0) {
+            recipesList.innerHTML = `<p class="text-gray-500 col-span-full">Nenhuma receita criada ainda.</p>`
+            return;
+        }
+        const categories = [...new Set(localRecipes.map(r => r.category))].sort();
+        categories.forEach(category => {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.innerHTML = `<h2 class="text-xl font-semibold mb-3 text-gray-700">${category}</h2>`;
+            const recipeCards = document.createElement('div');
+            recipeCards.className = 'space-y-4';
+            localRecipes.filter(r => r.category === category).forEach(recipe => {
+                const card = document.createElement('div');
+                card.className = 'relative bg-white p-4 rounded-lg shadow transition hover:shadow-md';
+                let ingredientsHtml = recipe.ingredients.map(ing => {
+                    const product = localInventory.find(p => p.id === ing.productId);
+                    return `<li class="text-sm text-gray-600">${product ? product.name : 'Ingrediente desconhecido'}: ${ing.quantity}</li>`;
+                }).join('');
+                card.innerHTML = `
+                    <div class="absolute top-2 right-2 flex space-x-2">
+                        <button class="edit-recipe-btn text-blue-500 hover:text-blue-700" data-recipe-id="${recipe.id}" title="Editar"><i class="fa-solid fa-pencil"></i></button>
+                        <button class="delete-recipe-btn text-red-500 hover:text-red-700" data-recipe-id="${recipe.id}" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                    <h3 class="font-bold">${recipe.name}</h3>
+                    <ul class="list-disc list-inside mt-2">${ingredientsHtml}</ul>
+                `;
+                recipeCards.appendChild(card);
+            });
+            categoryDiv.appendChild(recipeCards);
+            recipesList.appendChild(categoryDiv);
+        });
+    }
+
+    recipesList.addEventListener('click', (e) => {
+        const editBtn = e.target.closest('.edit-recipe-btn');
+        if (editBtn) {
+            handleEditRecipe(parseInt(editBtn.dataset.recipeId));
+        }
+        const deleteBtn = e.target.closest('.delete-recipe-btn');
+        if (deleteBtn) {
+            handleDeleteRecipe(parseInt(deleteBtn.dataset.recipeId));
+        }
+    });
+    
+    function handleEditRecipe(recipeId) {
+        const recipe = localRecipes.find(r => r.id === recipeId);
+        if (!recipe) return;
+        
+        document.getElementById('edit-recipe-id').value = recipe.id;
+        document.getElementById('recipe-name').value = recipe.name;
+        document.getElementById('recipe-category').value = recipe.category;
+
+        ingredientsContainer.innerHTML = '';
+        recipe.ingredients.forEach(ing => {
+            addIngredientRow(ing.productId, ing.quantity);
+        });
+
+        recipeModalTitle.textContent = "Editar Receita";
+        saveRecipeBtn.textContent = "Salvar Alterações";
+        showModal(recipeModal);
+    }
+    
+    function handleDeleteRecipe(recipeId) {
+         const recipe = localRecipes.find(r => r.id === recipeId);
+         if(!recipe) return;
+
+         showConfirmationModal(
+            "Excluir Receita",
+            `Tem certeza que deseja excluir a receita "<strong>${recipe.name}</strong>"?`,
+            async () => {
+                try {
+                    await DB.remove('recipes', recipeId);
+                    showNotification("Receita excluída com sucesso.");
+                    await refreshLocalData();
+                } catch(err) {
+                    showNotification("Erro ao excluir a receita.", true);
+                }
+            }
+        );
+    }
+
+    btnNewRecipe.addEventListener('click', () => {
+        if(localInventory.length === 0) { showNotification("Adicione itens ao estoque antes de criar uma receita.", true); return; }
+        recipeForm.reset();
+        document.getElementById('edit-recipe-id').value = '';
+        ingredientsContainer.innerHTML = '';
+        addIngredientRow();
+        recipeModalTitle.textContent = "Criar Nova Receita";
+        saveRecipeBtn.textContent = "Salvar Receita";
+        showModal(recipeModal);
+    });
+
+    closeRecipeModalBtn.addEventListener('click', () => hideModal(recipeModal));
+    
+    function addIngredientRow(selectedProductId = null, quantity = null) {
+        const row = document.createElement('div');
+        row.className = 'flex items-center space-x-2';
+        let options = localInventory.map(p => `<option value="${p.id}" ${selectedProductId === p.id ? 'selected' : ''}>${p.name} (${p.code})</option>`).join('');
+        row.innerHTML = `<select class="block w-2/3 form-input" required>${options}</select><input type="number" placeholder="Qtd" value="${quantity || ''}" min="0.01" step="0.01" class="block w-1/3 form-input" required><button type="button" class="text-red-500 hover:text-red-700 remove-ingredient-btn font-bold text-xl">&times;</button>`;
+        ingredientsContainer.appendChild(row);
+    }
+    addIngredientBtn.addEventListener('click', () => addIngredientRow());
     ingredientsContainer.addEventListener('click', (e) => { if (e.target.classList.contains('remove-ingredient-btn')) e.target.parentElement.remove(); });
+    
     recipeForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const newRecipe = {
-            name: document.getElementById('recipe-name').value, category: document.getElementById('recipe-category').value,
+        const recipeId = document.getElementById('edit-recipe-id').value;
+        const recipeData = {
+            name: document.getElementById('recipe-name').value, 
+            category: document.getElementById('recipe-category').value,
             ingredients: Array.from(ingredientsContainer.querySelectorAll('.flex')).map(row => ({
                 productId: parseInt(row.querySelector('select').value),
                 quantity: parseFloat(row.querySelector('input').value)
             }))
         };
         try {
-            await DB.add('recipes', newRecipe);
-            showNotification("Receita salva com sucesso!");
-            recipeModal.classList.add('hidden');
+            if (recipeId) {
+                recipeData.id = parseInt(recipeId);
+                await DB.update('recipes', recipeData);
+                showNotification("Receita atualizada com sucesso!");
+            } else {
+                await DB.add('recipes', recipeData);
+                showNotification("Receita salva com sucesso!");
+            }
+            hideModal(recipeModal);
             await refreshLocalData();
         } catch(error) { console.error("Erro ao salvar receita: ", error); showNotification("Erro ao salvar receita.", true); }
     });
 
     // --- PRODUCTION ORDERS LOGIC ---
-    function renderProductionOrders() { /* ... (sem alterações) ... */ }
-    btnNewProductionOrder.addEventListener('click', () => { /* ... */ });
+    function renderProductionOrders() {
+        productionOrdersList.innerHTML = '';
+        const filterDate = searchPoByDate.value;
+        
+        let filteredOrders = localProductionOrders;
+        if (filterDate) {
+            filteredOrders = localProductionOrders.filter(po => po.date === filterDate);
+        }
+
+        if (filteredOrders.length === 0) {
+            productionOrdersList.innerHTML = `<div class="bg-white p-6 rounded-lg shadow text-center text-gray-500 col-span-full">Nenhuma ordem de produção encontrada para a data selecionada.</div>`;
+            return;
+        }
+
+        [...filteredOrders].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(po => {
+             try {
+                const card = document.createElement('div');
+                card.className = 'relative bg-white rounded-xl shadow-md overflow-hidden transform hover:scale-[1.02] transition-transform duration-300';
+                
+                const statusClass = po.status === 'pendente' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800';
+                const statusBorderClass = po.status === 'pendente' ? 'border-yellow-400' : 'border-green-400';
+
+                const ingredientsHtml = po.ingredients.map(ing => {
+                    const product = localInventory.find(p => p.id === ing.productId);
+                    return `
+                    <li class="flex justify-between items-center text-sm py-1">
+                        <span class="text-gray-600"><i class="fa-solid fa-box-open mr-2 text-gray-400"></i>${product ? product.name : '...'}</span>
+                        <span class="font-medium text-gray-800">${ing.adjustedQuantity.toFixed(2)}</span>
+                    </li>`;
+                }).join('');
+
+                card.innerHTML = `
+                    <div class="p-4 border-l-4 ${statusBorderClass}">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800 pr-16">${po.recipeName} (${po.quantityProduced}x)</h3>
+                                <p class="text-sm text-gray-500 mt-1">
+                                    <i class="fa-solid fa-calendar-alt mr-1"></i>
+                                    ${new Date(po.date + 'T00:00:00').toLocaleDateString('pt-BR')}
+                                </p>
+                            </div>
+                            <div class="absolute top-3 right-3 text-right">
+                                 <span class="block text-xs font-semibold px-3 py-1 rounded-full ${statusClass}">${po.status}</span>
+                                 <div class="mt-2 flex space-x-2 justify-end">
+                                    <button class="edit-po-btn text-blue-500 hover:text-blue-700 p-1" data-po-id="${po.id}" title="Editar Ordem"><i class="fa-solid fa-pencil"></i></button>
+                                    <button class="delete-po-btn text-red-500 hover:text-red-700 p-1" data-po-id="${po.id}" title="Excluir Ordem"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-gray-50 border-t border-gray-200">
+                        <p class="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">Insumos</p>
+                        <ul class="space-y-1">${ingredientsHtml}</ul>
+                    </div>
+                `;
+                productionOrdersList.appendChild(card);
+            } catch (e) {
+                console.error('Erro ao renderizar ordem de produção:', po, e);
+            }
+        });
+    }
+
+    productionOrdersList.addEventListener('click', (e) => {
+        const editBtn = e.target.closest('.edit-po-btn');
+        if (editBtn) {
+            handleEditProductionOrder(parseInt(editBtn.dataset.poId));
+        }
+        const deleteBtn = e.target.closest('.delete-po-btn');
+        if (deleteBtn) {
+            handleDeleteProductionOrder(parseInt(deleteBtn.dataset.poId));
+        }
+    });
+
+    function handleEditProductionOrder(poId) {
+        const po = localProductionOrders.find(p => p.id === poId);
+        if (!po) return;
+
+        document.getElementById('edit-po-id').value = po.id;
+        poRecipeSelect.value = po.recipeId;
+        poQuantity.value = po.quantityProduced;
+        poDate.value = po.date;
+        
+        updatePOIngredients();
+
+        setTimeout(() => {
+            const rows = poIngredientsBody.querySelectorAll('tr');
+            if (rows.length === po.ingredients.length) {
+                rows.forEach((row, index) => {
+                    const ingredientData = po.ingredients[index];
+                    if (ingredientData) {
+                        row.querySelector('input[type="number"]').value = ingredientData.adjustedQuantity;
+                        row.querySelector('select').value = ingredientData.batchId;
+                        row.querySelector('input[type="text"]').value = ingredientData.handler;
+                    }
+                });
+            }
+        }, 100);
+
+        productionOrderModalTitle.textContent = "Editar Ordem de Produção";
+        productionOrderForm.querySelector('button[type="submit"]').textContent = "Salvar Alterações";
+        
+        showModal(productionOrderModal);
+    }
+
+    function handleDeleteProductionOrder(poId) {
+        const po = localProductionOrders.find(p => p.id === poId);
+        if (!po) return;
+
+        showConfirmationModal(
+            "Excluir Ordem de Produção",
+            `Tem certeza que deseja excluir a ordem para "<strong>${po.recipeName}</strong>" do dia ${new Date(po.date + 'T00:00:00').toLocaleDateString('pt-BR')}?`,
+            async () => {
+                try {
+                    await DB.remove('productionOrders', poId);
+                    showNotification("Ordem de produção excluída com sucesso.");
+                    await refreshLocalData();
+                } catch (err) {
+                    showNotification("Erro ao excluir a ordem de produção.", true);
+                }
+            }
+        );
+    }
+
+    btnNewProductionOrder.addEventListener('click', () => {
+        if (localRecipes.length === 0) {
+            showNotification("Crie uma receita antes de gerar uma ordem.", true);
+            return;
+        }
+        if(localInventory.length === 0) {
+            showNotification("Adicione itens ao estoque antes de gerar uma ordem.", true);
+            return;
+        }
+        productionOrderForm.reset();
+        document.getElementById('edit-po-id').value = '';
+        poRecipeSelect.innerHTML = localRecipes.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+        poQuantity.value = 1;
+        poDate.value = new Date().toISOString().split('T')[0];
+        updatePOIngredients();
+        productionOrderModalTitle.textContent = "Nova Ordem de Produção";
+        productionOrderForm.querySelector('button[type="submit"]').textContent = "Criar Ordem de Produção";
+        showModal(productionOrderModal);
+    });
+
     function updatePOIngredients() {
          const recipe = localRecipes.find(r => r.id === parseInt(poRecipeSelect.value));
         const recipeQuantity = parseInt(poQuantity.value, 10) || 1;
@@ -875,9 +1349,12 @@
     }
     poRecipeSelect.addEventListener('change', updatePOIngredients);
     poQuantity.addEventListener('input', updatePOIngredients);
-    closeProductionOrderModalBtn.addEventListener('click', () => productionOrderModal.classList.add('hidden'));
+    
+    closeProductionOrderModalBtn.addEventListener('click', () => { hideModal(productionOrderModal) });
+
     productionOrderForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const poId = document.getElementById('edit-po-id').value;
         if (poIngredientsBody.querySelectorAll('.insufficient-stock-row').length > 0) { showNotification("Estoque insuficiente.", true); return; }
         const recipe = localRecipes.find(r => r.id === parseInt(poRecipeSelect.value));
         const ingredients = Array.from(poIngredientsBody.querySelectorAll('tr')).map(row => {
@@ -891,20 +1368,34 @@
             }
         });
         if (ingredients.some(ing => !ing.batchId)) { showNotification("Lotes não disponíveis.", true); return; }
-        const newPO = {
+        const poData = {
             recipeId: recipe.id, recipeName: recipe.name, date: poDate.value,
             quantityProduced: parseInt(poQuantity.value, 10), status: 'pendente', ingredients
         };
         try {
-            await DB.add('productionOrders', newPO);
-            showNotification("Ordem de Produção criada com sucesso!");
-            productionOrderModal.classList.add('hidden');
+            if (poId) {
+                poData.id = parseInt(poId);
+                const originalPo = localProductionOrders.find(p => p.id === poData.id);
+                poData.status = originalPo.status; // Keep original status when editing
+                await DB.update('productionOrders', poData);
+                showNotification("Ordem de Produção atualizada!");
+            } else {
+                await DB.add('productionOrders', poData);
+                showNotification("Ordem de Produção criada com sucesso!");
+            }
+            hideModal(productionOrderModal);
             await refreshLocalData();
-        } catch(error) { console.error("Erro ao criar Ordem de Produção:", error); showNotification("Erro ao criar Ordem.", true); }
+        } catch(error) { console.error("Erro ao salvar Ordem de Produção:", error); showNotification("Erro ao salvar Ordem.", true); }
     });
     searchPoByDate.addEventListener('input', renderProductionOrders);
-    btnConfirmProduction.addEventListener('click', () => { /* ... */ });
-    closeConfirmProductionModalBtn.addEventListener('click', () => confirmProductionModal.classList.add('hidden'));
+    btnConfirmProduction.addEventListener('click', () => {
+         productionDateFilter.value = new Date().toISOString().split('T')[0];
+        productionDateFilter.dispatchEvent(new Event('change'));
+        showModal(confirmProductionModal);
+    });
+
+    closeConfirmProductionModalBtn.addEventListener('click', () => { hideModal(confirmProductionModal) });
+
     productionDateFilter.addEventListener('change', () => {
         const selectedDate = productionDateFilter.value;
         const pendingOrders = localProductionOrders.filter(po => po.date === selectedDate && po.status === 'pendente');
@@ -989,7 +1480,7 @@
                 await DB.update('productionOrders', po);
             }
             showNotification("Baixa de estoque realizada com sucesso!");
-            confirmProductionModal.classList.add('hidden');
+            hideModal(confirmProductionModal);
             await refreshLocalData();
         } catch (error) {
             console.error("Erro ao dar baixa no estoque: ", error);
@@ -999,8 +1490,173 @@
         }
     });
 
+    // --- BACKUP / RESTORE FUNCTIONS ---
+    async function downloadBackup() {
+        try {
+            loadingOverlay.classList.remove('hidden');
+            const backupData = {
+                inventory: await DB.getAll('inventory'),
+                batches: await DB.getAll('batches'),
+                history: await DB.getAll('history'),
+                recipes: await DB.getAll('recipes'),
+                productionOrders: await DB.getAll('productionOrders'),
+            };
+
+            const jsonString = JSON.stringify(backupData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            const date = new Date().toISOString().split('T')[0];
+            a.download = `backup_estoque_${date}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification("Backup baixado com sucesso!");
+
+        } catch (error) {
+            console.error("Erro ao criar backup:", error);
+            showNotification("Falha ao criar o backup.", true);
+        } finally {
+            loadingOverlay.classList.add('hidden');
+        }
+    }
+    btnDownloadBackup.addEventListener('click', downloadBackup);
+
+    btnUploadBackup.addEventListener('click', () => {
+        backupFileInput.click();
+    });
+
+    backupFileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                backupFileContent = JSON.parse(e.target.result);
+                if (!backupFileContent.inventory || !backupFileContent.batches) {
+                    throw new Error("Arquivo de backup inválido ou corrompido.");
+                }
+                showModal(confirmUploadModal);
+            } catch (error) {
+                console.error("Erro ao ler o arquivo de backup:", error);
+                showNotification(error.message || "Falha ao ler o arquivo de backup.", true);
+                backupFileContent = null;
+            }
+        };
+        reader.onerror = () => {
+             showNotification("Erro ao ler o arquivo.", true);
+             backupFileContent = null;
+        };
+        reader.readAsText(file);
+        
+        backupFileInput.value = '';
+    });
+
+    cancelUploadBtn.addEventListener('click', () => {
+        backupFileContent = null;
+        hideModal(confirmUploadModal);
+    });
+
+    confirmUploadBtn.addEventListener('click', () => {
+        hideModal(confirmUploadModal);
+        if (backupFileContent) {
+            importData(backupFileContent);
+        }
+    });
+    
+    async function importData(data) {
+        try {
+            loadingOverlay.classList.remove('hidden');
+            const stores = ['inventory', 'batches', 'history', 'recipes', 'productionOrders'];
+            
+            for (const storeName of stores) {
+                await DB.clear(storeName);
+            }
+
+            const idMaps = { inventory: {}, recipes: {} };
+
+            if (data.inventory) {
+                for (const item of data.inventory) {
+                    const oldId = item.id;
+                    delete item.id;
+                    const newId = await DB.add('inventory', item);
+                    idMaps.inventory[oldId] = newId;
+                }
+            }
+            
+             if (data.recipes) {
+                for (const recipe of data.recipes) {
+                    const oldId = recipe.id;
+                    delete recipe.id;
+                    if (recipe.ingredients) {
+                        recipe.ingredients.forEach(ing => {
+                            ing.productId = idMaps.inventory[ing.productId];
+                        });
+                    }
+                    const newId = await DB.add('recipes', recipe);
+                    idMaps.recipes[oldId] = newId;
+                }
+            }
+
+            if (data.batches) {
+                for (const batch of data.batches) {
+                    delete batch.id;
+                    batch.productId = idMaps.inventory[batch.productId];
+                    if (batch.productId) {
+                        await DB.add('batches', batch);
+                    }
+                }
+            }
+
+            if (data.history) {
+                 for (const record of data.history) {
+                    delete record.id;
+                    record.productId = idMaps.inventory[record.productId];
+                    if (record.productId) {
+                        await DB.add('history', record);
+                    }
+                }
+            }
+
+            if (data.productionOrders) {
+                for (const po of data.productionOrders) {
+                    delete po.id;
+                    po.recipeId = idMaps.recipes[po.recipeId];
+                    if (po.ingredients) {
+                        po.ingredients.forEach(ing => {
+                           ing.productId = idMaps.inventory[ing.productId];
+                        });
+                    }
+                    if (po.recipeId) {
+                        await DB.add('productionOrders', po);
+                    }
+                }
+            }
+
+            await refreshLocalData();
+            showNotification("Backup restaurado com sucesso!");
+
+        } catch (error) {
+            console.error("Erro ao importar dados:", error);
+            showNotification("Falha ao restaurar o backup. Verifique o arquivo.", true);
+            const stores = ['inventory', 'batches', 'history', 'recipes', 'productionOrders'];
+            for (const storeName of stores) { await DB.clear(storeName); }
+            await refreshLocalData();
+
+        } finally {
+            loadingOverlay.classList.add('hidden');
+            backupFileContent = null;
+        }
+    }
+
+
     // --- EXPORT FUNCTIONS ---
-    function exportInventoryToExcel() { /* ... (sem alterações) ... */ 
+    function exportInventoryToExcel() {
         const dataToExport = localInventory.map(item => ({
             'Código': item.code,
             'Item': item.name,
@@ -1014,7 +1670,7 @@
         showNotification("Relatório de estoque exportado!");
     }
     btnExportExcel.addEventListener('click', exportInventoryToExcel);
-    function exportOrdersToPDF() { /* ... (sem alterações) ... */ 
+    function exportOrdersToPDF() {
         const { jsPDF } = window.jspdf;
         const filterDate = searchPoByDate.value;
         if (!filterDate) {
@@ -1088,17 +1744,128 @@
             renderInventoryTable();
             renderRecipes();
             renderProductionOrders();
+            renderDashboard();
         } catch (error) {
             console.error("Erro ao carregar dados locais:", error);
             showNotification("Falha ao carregar dados do banco de dados local.", true);
         }
     }
+    
+    // --- DASHBOARD ---
+    function renderDashboard() {
+        // --- GRÁFICO ---
+        const top5Stock = [...localInventory].sort((a,b) => b.totalQuantity - a.totalQuantity).slice(0, 5);
+        const ctx = document.getElementById('stock-chart').getContext('2d');
+        if (stockChart) {
+            stockChart.destroy();
+        }
+        stockChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: top5Stock.map(item => item.name),
+                datasets: [{
+                    label: 'Quantidade em Estoque',
+                    data: top5Stock.map(item => item.totalQuantity),
+                    backgroundColor: ['#4f46e5', '#6366f1', '#818cf8', '#a5b4fc', '#c7d2fe'],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+
+        // --- ÚLTIMAS ENTRADAS ---
+        const lastEntries = [...localHistory].filter(h => h.type === 'entrada').sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0,5);
+        const lastEntriesList = document.getElementById('last-entries-list');
+        lastEntriesList.innerHTML = '';
+        if (lastEntries.length > 0) {
+            lastEntries.forEach(entry => {
+                const product = localInventory.find(p => p.id === entry.productId);
+                const li = document.createElement('li');
+                li.className = 'py-3 flex justify-between items-center text-sm';
+                li.innerHTML = `
+                    <div>
+                        <p class="font-medium text-gray-800">${product ? product.name : 'Produto desconhecido'}</p>
+                        <p class="text-gray-500">Lote: ${entry.batchCode}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-semibold text-green-600">+${entry.quantity.toFixed(2)}</p>
+                        <p class="text-gray-400">${new Date(entry.date + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
+                    </div>
+                `;
+                lastEntriesList.appendChild(li);
+            });
+        } else {
+             lastEntriesList.innerHTML = `<p class="text-center text-gray-500 py-4">Nenhuma entrada registrada.</p>`;
+        }
+        
+        // --- ALERTAS ---
+        const today = new Date();
+        const thirtyDaysFromNow = new Date();
+        thirtyDaysFromNow.setDate(today.getDate() + 30);
+        
+        const lowStockItems = localInventory.filter(i => {
+            const metrics = calculateConsumptionMetrics(i.id);
+            return i.totalQuantity < metrics.minStock && metrics.minStock > 0;
+        });
+        const expiringBatches = localBatches.filter(b => b.quantity > 0 && new Date(b.expiryDate) <= thirtyDaysFromNow);
+        
+        const lossRiskBatches = localBatches.filter(b => {
+             const expiryDate = new Date(b.expiryDate);
+             if (expiryDate <= today || b.quantity <= 0) return false;
+             
+             const metrics = calculateConsumptionMetrics(b.productId);
+             const consumptionRate = metrics.avgConsumption;
+             if (consumptionRate <= 0) return false; // Sem consumo, não há risco calculado
+
+             const daysToExpire = (expiryDate.getTime() - today.getTime()) / (1000 * 3600 * 24);
+             const estimatedConsumption = daysToExpire * consumptionRate;
+             
+             return b.quantity > estimatedConsumption;
+        });
+
+        const sixtyDaysAgo = new Date();
+        sixtyDaysAgo.setDate(today.getDate() - 60);
+        const recentOuts = [...localHistory].filter(h => h.type === 'saída' && new Date(h.date) > sixtyDaysAgo);
+        const recentOutProductIds = new Set(recentOuts.map(h => h.productId));
+        const stagnantItems = localInventory.filter(i => i.totalQuantity > 0 && !recentOutProductIds.has(i.id));
+
+        const renderAlert = (elementId, title, items, formatter) => {
+            const container = document.getElementById(elementId);
+            if(items.length > 0) {
+                container.innerHTML = `
+                    <h3 class="font-semibold text-sm text-gray-600">${title} (${items.length})</h3>
+                    <ul class="text-xs text-gray-500 mt-1 space-y-1">${items.map(formatter).join('')}</ul>`;
+            } else {
+                container.innerHTML = ``;
+            }
+        }
+        
+        renderAlert('low-stock-alert', 'Estoque Baixo', lowStockItems, item => `<li>- ${item.name} (${item.totalQuantity.toFixed(2)})</li>`);
+        renderAlert('expiry-alert', 'Próximo da Validade', expiringBatches, batch => {
+            const product = localInventory.find(p => p.id === batch.productId);
+            return `<li>- ${product.name} (L: ${batch.code}) vence em ${new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR')}</li>`;
+        });
+        renderAlert('loss-risk-alert', 'Risco de Perda', lossRiskBatches, batch => {
+            const product = localInventory.find(p => p.id === batch.productId);
+            return `<li>- ${product.name} (L: ${batch.code})</li>`;
+        });
+         renderAlert('stagnant-stock-alert', 'Itens sem Saída (>60d)', stagnantItems, item => `<li>- ${item.name}</li>`);
+    }
+
 
     async function initialize() {
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('receipt-date').value = today;
         searchPoByDate.value = today;
-        navigateTo('entry');
+        navigateTo('dashboard');
 
         try {
             await DB.getDB(); // Inicializa e abre o banco
