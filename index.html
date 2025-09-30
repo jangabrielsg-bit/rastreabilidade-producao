@@ -275,7 +275,7 @@
                                     <th scope="col" class="px-6 py-3 table-header-sortable" data-sort="name">Nome do Produto</th>
                                     <th scope="col" class="px-6 py-3 table-header-sortable" data-sort="code">Código</th>
                                     <th scope="col" class="px-6 py-3 table-header-sortable" data-sort="supplier">Fornecedor</th>
-                                    <th scope="col" class="px-6 py-3 text-right">Qtd. Total</th>
+                                    <th scope="col" class="px-6 py-3 text-right table-header-sortable" data-sort="totalQuantity">Qtd. Total</th>
                                     <th scope="col" class="px-6 py-3 table-header-sortable" data-sort="expiry">Próx. Validade</th>
                                 </tr>
                             </thead>
@@ -1217,6 +1217,15 @@
             if (valA > valB) return currentSort.order === 'asc' ? 1 : -1;
             return 0;
         });
+
+        document.querySelectorAll('.table-header-sortable i').forEach(icon => icon.remove());
+        const activeHeader = document.querySelector(`.table-header-sortable[data-sort="${currentSort.key}"]`);
+        if (activeHeader) {
+            const icon = document.createElement('i');
+            icon.className = `fa-solid ${currentSort.order === 'asc' ? 'fa-arrow-up' : 'fa-arrow-down'} ml-2`;
+            activeHeader.appendChild(icon);
+        }
+
         inventoryTableBody.innerHTML = '';
         if (filteredInventory.length === 0) {
             inventoryTableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4">Nenhum item em estoque.</td></tr>`;
@@ -1242,7 +1251,19 @@
         if (productBatches.length === 0) return null;
         return productBatches.sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate))[0].expiryDate;
     }
-    document.querySelectorAll('.table-header-sortable').forEach(header => { header.addEventListener('click', () => { /* ... */ }); });
+    document.querySelectorAll('.table-header-sortable').forEach(header => { 
+        header.addEventListener('click', () => {
+            const sortKey = header.dataset.sort;
+            if (!sortKey) return;
+            if (currentSort.key === sortKey) {
+                currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.key = sortKey;
+                currentSort.order = 'asc';
+            }
+            renderInventoryTable();
+        });
+    });
     searchInput.addEventListener('input', renderInventoryTable);
     
     // --- ITEM DETAILS & EDIT MODAL ---
