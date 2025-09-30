@@ -1515,9 +1515,24 @@
     function addIngredientRow(selectedProductId = null, quantity = null) {
         const row = document.createElement('div');
         row.className = 'flex items-center space-x-2';
-        let options = localInventory.map(p => `<option value="${p.id}" ${selectedProductId === p.id ? 'selected' : ''}>${p.name} (${p.code})</option>`).join('');
-        row.innerHTML = `<select class="block w-2/3 form-input" required>${options}</select><input type="number" placeholder="Qtd" value="${quantity || ''}" min="0.01" step="0.01" class="block w-1/3 form-input" required><button type="button" class="text-red-500 hover:text-red-700 remove-ingredient-btn font-bold text-xl">&times;</button>`;
+        row.innerHTML = `
+            <div class="searchable-container flex-1"></div>
+            <input type="number" placeholder="Qtd" value="${quantity || ''}" min="0.01" step="0.01" class="block w-1/3 form-input" required>
+            <button type="button" class="text-red-500 hover:text-red-700 remove-ingredient-btn font-bold text-xl">&times;</button>
+        `;
         ingredientsContainer.appendChild(row);
+
+        const searchableContainer = row.querySelector('.searchable-container');
+        createSearchableSelect(searchableContainer, localInventory, 'Buscar ingrediente...', null);
+
+        if (selectedProductId) {
+            const product = localInventory.find(p => p.id === selectedProductId);
+            if (product) {
+                const input = searchableContainer.querySelector('input');
+                input.value = product.name;
+                input.dataset.selectedId = product.id;
+            }
+        }
     }
     addIngredientBtn.addEventListener('click', () => addIngredientRow());
     ingredientsContainer.addEventListener('click', (e) => { if (e.target.classList.contains('remove-ingredient-btn')) e.target.parentElement.remove(); });
@@ -1525,15 +1540,25 @@
     recipeForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const recipeId = document.getElementById('edit-recipe-id').value;
-        const recipeData = {
-            name: document.getElementById('recipe-name').value, 
-            category: document.getElementById('recipe-category').value,
-            ingredients: Array.from(ingredientsContainer.querySelectorAll('.flex')).map(row => ({
-                productId: parseInt(row.querySelector('select').value),
-                quantity: parseFloat(row.querySelector('input').value)
-            }))
-        };
         try {
+            const ingredients = Array.from(ingredientsContainer.querySelectorAll('.flex')).map(row => {
+                const input = row.querySelector('.searchable-container input');
+                const productId = parseInt(input.dataset.selectedId);
+                if (!productId) {
+                    throw new Error("Produto inválido selecionado. Use a busca e clique no item desejado.");
+                }
+                return {
+                    productId: productId,
+                    quantity: parseFloat(row.querySelector('input[type="number"]').value)
+                }
+            });
+
+            const recipeData = {
+                name: document.getElementById('recipe-name').value, 
+                category: document.getElementById('recipe-category').value,
+                ingredients
+            };
+            
             if (recipeId) {
                 recipeData.id = parseInt(recipeId);
                 await DB.update('recipes', recipeData);
@@ -1544,7 +1569,7 @@
             }
             hideModal(recipeModal);
             await refreshLocalData();
-        } catch(error) { console.error("Erro ao salvar receita: ", error); showNotification("Erro ao salvar receita.", true); }
+        } catch(error) { console.error("Erro ao salvar receita: ", error); showNotification(error.message || "Erro ao salvar receita.", true); }
     });
 
     // --- PRODUCTION ORDERS LOGIC ---
@@ -2529,4 +2554,5 @@
 
 </body>
 </html>
+
 
