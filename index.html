@@ -360,6 +360,7 @@
                                 <tr>
                                     <th scope="col" class="px-6 py-3">Produto</th>
                                     <th scope="col" class="px-6 py-3 text-right">Saldo Residual</th>
+                                    <th scope="col" class="px-6 py-3 text-center">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="residual-table-body"></tbody>
@@ -604,6 +605,28 @@
         </div>
     </div>
 
+    <!-- Modal de Edição de Estoque Residual -->
+    <div id="edit-residual-modal" class="modal p-4">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Editar Saldo Residual</h2>
+                <button id="close-edit-residual-modal" class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+            </div>
+            <form id="edit-residual-form">
+                <input type="hidden" id="edit-residual-product-id">
+                <div>
+                    <p class="mb-2 text-sm">Produto: <strong id="edit-residual-product-name"></strong></p>
+                    <label for="edit-residual-quantity" class="block text-sm font-medium text-gray-700">Nova Quantidade Residual</label>
+                    <input type="number" id="edit-residual-quantity" required step="0.01" class="mt-1 block w-full form-input">
+                </div>
+                <div class="mt-8 flex justify-end">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-md">
+                        Salvar Alteração
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Modal de Receitas -->
     <div id="recipe-modal" class="modal p-4">
@@ -994,6 +1017,9 @@
     const consumptionYearFilter = document.getElementById('consumption-year-filter');
     const consumptionTableBody = document.getElementById('consumption-table-body');
     const residualTableBody = document.getElementById('residual-table-body');
+    const editResidualModal = document.getElementById('edit-residual-modal');
+    const closeEditResidualModal = document.getElementById('close-edit-residual-modal');
+    const editResidualForm = document.getElementById('edit-residual-form');
     
     // --- FUNÇÕES AUXILIARES ---
     function showNotification(message, isError = false) {
@@ -2514,7 +2540,7 @@
     function renderResidualStock() {
         residualTableBody.innerHTML = '';
         if(localResidualStock.length === 0) {
-             residualTableBody.innerHTML = `<tr><td colspan="2" class="text-center py-4">Nenhum saldo residual.</td></tr>`;
+             residualTableBody.innerHTML = `<tr><td colspan="3" class="text-center py-4">Nenhum saldo residual.</td></tr>`;
             return;
         }
 
@@ -2526,11 +2552,53 @@
                 row.innerHTML = `
                     <td class="px-6 py-4">${product.name}</td>
                     <td class="px-6 py-4 text-right font-medium ${item.quantity > 0 ? 'text-green-600' : 'text-red-600'}">${item.quantity.toFixed(2)}</td>
+                    <td class="px-6 py-4 text-center">
+                        <button class="edit-residual-btn text-blue-500 hover:text-blue-700 p-1" data-product-id="${product.id}" title="Editar Saldo"><i class="fa-solid fa-pencil"></i></button>
+                        <button class="delete-residual-btn text-red-500 hover:text-red-700 p-1" data-product-id="${product.id}" title="Zerar Saldo"><i class="fa-solid fa-trash"></i></button>
+                    </td>
                 `;
                 residualTableBody.appendChild(row);
             }
         });
     }
+
+    residualTableBody.addEventListener('click', e => {
+        const editBtn = e.target.closest('.edit-residual-btn');
+        if(editBtn) {
+            const productId = parseInt(editBtn.dataset.productId);
+            const product = localInventory.find(p => p.id === productId);
+            const residual = localResidualStock.find(r => r.productId === productId);
+            document.getElementById('edit-residual-product-id').value = productId;
+            document.getElementById('edit-residual-product-name').textContent = product.name;
+            document.getElementById('edit-residual-quantity').value = residual.quantity;
+            showModal(editResidualModal);
+        }
+
+        const deleteBtn = e.target.closest('.delete-residual-btn');
+        if(deleteBtn) {
+            const productId = parseInt(deleteBtn.dataset.productId);
+             const product = localInventory.find(p => p.id === productId);
+            showConfirmationModal('Zerar Saldo Residual', `Tem certeza que deseja zerar o saldo residual para <strong>${product.name}</strong>?`, async () => {
+                await updateResidualStock(productId, -localResidualStock.find(r => r.productId === productId).quantity);
+                await refreshLocalData();
+                showNotification('Saldo residual zerado.');
+            });
+        }
+    });
+
+    closeEditResidualModal.addEventListener('click', () => hideModal(editResidualModal));
+
+    editResidualForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        const productId = parseInt(document.getElementById('edit-residual-product-id').value);
+        const newQuantity = parseFloat(document.getElementById('edit-residual-quantity').value);
+        const residual = await DB.get('residualStock', productId);
+        const difference = newQuantity - residual.quantity;
+        await updateResidualStock(productId, difference);
+        await refreshLocalData();
+        hideModal(editResidualModal);
+        showNotification('Saldo residual atualizado.');
+    });
 
 
     async function initialize() {
@@ -2554,5 +2622,4 @@
 
 </body>
 </html>
-
 
