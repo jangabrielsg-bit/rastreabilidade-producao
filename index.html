@@ -306,7 +306,7 @@
                     <h1 class="text-3xl font-bold text-gray-800">Ordens de Produção</h1>
                     <div>
                         <button id="btn-confirm-production" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105 mr-2">
-                            <i class="fa-solid fa-check-double mr-2"></i>Confirmar Produção do Dia
+                            <i class="fa-solid fa-check-double mr-2"></i>Confirmar Selecionadas
                         </button>
                         <button id="btn-new-production-order" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
                             <i class="fa-solid fa-plus mr-2"></i>Nova Ordem
@@ -461,6 +461,15 @@
                             <i class="fa-solid fa-upload mr-2"></i>Carregar Backup (.json)
                         </button>
                         <input type="file" id="backup-file-input" class="hidden" accept=".json">
+                    </div>
+                    <div class="border-t pt-6">
+                        <h2 class="text-xl font-semibold text-red-700">Apagar Dados</h2>
+                        <p class="text-sm text-gray-500 mt-1">
+                           Esta ação é irreversível e apagará todos os dados do aplicativo.
+                        </p>
+                        <button id="btn-reset-database" class="mt-4 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                            <i class="fa-solid fa-trash-alt mr-2"></i>Apagar Todos os Dados
+                        </button>
                     </div>
                 </div>
             </div>
@@ -726,11 +735,7 @@
                 <h2 class="text-2xl font-bold">Confirmar Produção e Baixa de Estoque</h2>
                 <button id="close-confirm-production-modal" class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
             </div>
-            <div class="flex items-center space-x-4 mb-4">
-                <label for="production-date-filter" class="text-sm font-medium">Data da Produção:</label>
-                <input type="date" id="production-date-filter" class="form-input">
-            </div>
-            <p class="text-sm text-gray-600 mb-4">Resumo de todos os insumos para as ordens de produção pendentes na data selecionada.</p>
+            <p class="text-sm text-gray-600 mb-4">Resumo de todos os insumos para as ordens de produção selecionadas.</p>
              <div class="overflow-x-auto border rounded-lg">
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50">
@@ -1020,6 +1025,7 @@
     const editResidualModal = document.getElementById('edit-residual-modal');
     const closeEditResidualModal = document.getElementById('close-edit-residual-modal');
     const editResidualForm = document.getElementById('edit-residual-form');
+    const btnResetDatabase = document.getElementById('btn-reset-database');
     
     // --- FUNÇÕES AUXILIARES ---
     function showNotification(message, isError = false) {
@@ -1213,6 +1219,8 @@
                 valA = a[currentSort.key] || '';
                 valB = b[currentSort.key] || '';
             }
+             if (typeof valA === 'string') valA = valA.toLowerCase();
+            if (typeof valB === 'string') valB = valB.toLowerCase();
             if (valA < valB) return currentSort.order === 'asc' ? -1 : 1;
             if (valA > valB) return currentSort.order === 'asc' ? 1 : -1;
             return 0;
@@ -1653,7 +1661,10 @@
 
                 card.innerHTML = `
                     <div class="p-4 border-l-4 ${statusBorderClass}">
-                        <div class="flex justify-between items-start">
+                         <div class="absolute top-3 left-3">
+                            <input type="checkbox" class="po-select-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" data-po-id="${po.id}" ${po.status !== 'pendente' ? 'disabled' : ''}>
+                        </div>
+                        <div class="flex justify-between items-start ml-8">
                             <div>
                                 <h3 class="text-lg font-bold text-gray-800 pr-16">${po.recipeName} (${po.quantityProduced}x)</h3>
                                 <p class="text-sm text-gray-500 mt-1">
@@ -1855,20 +1866,24 @@
         } catch(error) { console.error("Erro ao salvar Ordem de Produção:", error); showNotification("Erro ao salvar Ordem.", true); }
     });
     searchPoByDate.addEventListener('input', renderProductionOrders);
+    
     btnConfirmProduction.addEventListener('click', () => {
-         productionDateFilter.value = new Date().toISOString().split('T')[0];
-        productionDateFilter.dispatchEvent(new Event('change'));
+        const selectedCheckboxes = document.querySelectorAll('.po-select-checkbox:checked');
+        if (selectedCheckboxes.length === 0) {
+            showNotification("Selecione pelo menos uma ordem de produção para confirmar.", true);
+            return;
+        }
+        
+        const selectedOrderIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.dataset.poId));
+        const selectedOrders = localProductionOrders.filter(po => selectedOrderIds.includes(po.id));
+
+        populateConfirmationModal(selectedOrders);
         showModal(confirmProductionModal);
     });
 
-    closeConfirmProductionModalBtn.addEventListener('click', () => { hideModal(confirmProductionModal) });
-
-    productionDateFilter.addEventListener('change', () => {
-        const selectedDate = productionDateFilter.value;
-        const pendingOrders = localProductionOrders.filter(po => po.date === selectedDate && po.status === 'pendente');
-        
+    function populateConfirmationModal(orders) {
         const aggregatedItems = {};
-        pendingOrders.forEach(po => {
+        orders.forEach(po => {
             const recipe = localRecipes.find(r => r.id === po.recipeId);
             po.ingredients.forEach(ing => {
                 const recipeIng = recipe.ingredients.find(ri => ri.productId === ing.productId);
@@ -1894,8 +1909,12 @@
                 <td class="px-4 py-2"><input type="number" value="${item.quantity.toFixed(2)}" class="w-32 form-input"></td>
             </tr>`;
         }).join('');
-        confirmProductionTbody.dataset.orders = JSON.stringify(pendingOrders.map(po => po.id));
-    });
+        confirmProductionTbody.dataset.orders = JSON.stringify(orders.map(po => po.id));
+    }
+
+
+    closeConfirmProductionModalBtn.addEventListener('click', () => { hideModal(confirmProductionModal) });
+
 
     // --- CONFIRM PRODUCTION & STOCK CONSUMPTION ---
     async function updateMonthlyConsumption(productId, consumedQuantity, date) {
@@ -1966,11 +1985,17 @@
             
             const ordersToUpdate = localProductionOrders.filter(po => orderIdsToUpdate.includes(po.id));
             for(const order of ordersToUpdate) {
-                for(const ing of order.ingredients) {
+                const recipe = localRecipes.find(r => r.id === order.recipeId);
+                const orderIngredients = order.ingredients;
+
+                for (const ing of orderIngredients) {
+                    const recipeIng = recipe.ingredients.find(ri => ri.productId === ing.productId);
+                    const requestedQty = recipeIng.quantity * order.quantityProduced;
+                    
                     const residual = localResidualStock.find(r => r.productId === ing.productId);
-                    if(residual) {
-                        // The residual was available, so now it's "consumed" from the residual stock
-                        await updateResidualStock(ing.productId, -residual.quantity);
+                    if (residual && residual.quantity > 0) {
+                        const consumedFromResidual = Math.min(residual.quantity, requestedQty);
+                        await updateResidualStock(ing.productId, -consumedFromResidual);
                     }
                 }
                 order.status = 'concluído';
@@ -2523,12 +2548,16 @@
         if (!years.includes(String(currentYear))) years.push(String(currentYear));
         years.sort((a,b) => b-a);
         
-        consumptionYearFilter.innerHTML = years.map(y => `<option value="${y}" ${y == currentYear ? 'selected' : ''}>${y}</option>`).join('');
-        consumptionMonthFilter.innerHTML = months.map((m, i) => `<option value="${i+1}" ${i == currentMonth ? 'selected' : ''}>${m}</option>`).join('');
+        const selectedYear = consumptionYearFilter.value || currentYear;
+        const selectedMonth = consumptionMonthFilter.value || (currentMonth + 1);
+
+        consumptionYearFilter.innerHTML = years.map(y => `<option value="${y}" ${y == selectedYear ? 'selected' : ''}>${y}</option>`).join('');
+        consumptionMonthFilter.innerHTML = months.map((m, i) => `<option value="${i+1}" ${i+1 == selectedMonth ? 'selected' : ''}>${m}</option>`).join('');
     }
 
     function renderConsumptionReport() {
-        populateConsumptionFilters();
+        if(consumptionYearFilter.options.length === 0) populateConsumptionFilters();
+        
         const year = consumptionYearFilter.value;
         const month = String(consumptionMonthFilter.value).padStart(2, '0');
         const period = `${year}-${month}`;
@@ -2619,6 +2648,30 @@
         await refreshLocalData();
         hideModal(editResidualModal);
         showNotification('Saldo residual atualizado.');
+    });
+
+    // --- RESET DATABASE ---
+    btnResetDatabase.addEventListener('click', () => {
+        const password = prompt("Para apagar todos os dados, digite a senha:");
+        if (password === '1q2w3e4r') {
+            showConfirmationModal("Apagar TODOS os dados?", "Esta ação é irreversível e limpará completamente o banco de dados. Deseja continuar?", async () => {
+                try {
+                    loadingOverlay.classList.remove('hidden');
+                    const stores = ['inventory', 'batches', 'history', 'recipes', 'productionOrders', 'monthlyConsumption', 'residualStock'];
+                    for (const storeName of stores) {
+                        await DB.clear(storeName);
+                    }
+                    await refreshLocalData();
+                    showNotification("Banco de dados apagado com sucesso.");
+                } catch(err) {
+                    showNotification("Erro ao apagar o banco de dados.", true);
+                } finally {
+                    loadingOverlay.classList.add('hidden');
+                }
+            });
+        } else if (password !== null) {
+            showNotification("Senha incorreta.", true);
+        }
     });
 
 
