@@ -161,7 +161,7 @@
                             <p id="stat-total-quantity" class="text-2xl font-bold">0</p>
                         </div>
                     </div>
-                    <div class="bg-white p-6 rounded-xl shadow flex items-center">
+                    <div id="card-low-stock" class="bg-white p-6 rounded-xl shadow flex items-center cursor-pointer hover:shadow-lg transition-shadow">
                          <div class="bg-yellow-100 text-yellow-600 p-4 rounded-full">
                             <i class="fa-solid fa-arrow-down-short-wide fa-xl"></i>
                         </div>
@@ -170,7 +170,7 @@
                             <p id="stat-low-stock" class="text-2xl font-bold">0</p>
                         </div>
                     </div>
-                    <div class="bg-white p-6 rounded-xl shadow flex items-center">
+                    <div id="card-expiring-soon" class="bg-white p-6 rounded-xl shadow flex items-center cursor-pointer hover:shadow-lg transition-shadow">
                         <div class="bg-red-100 text-red-600 p-4 rounded-full">
                             <i class="fa-solid fa-calendar-times fa-xl"></i>
                         </div>
@@ -181,18 +181,25 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Coluna Esquerda -->
-                    <div class="lg:col-span-2 space-y-6">
-                        <!-- Gráfico -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Coluna Esquerda (Gráficos) -->
+                    <div class="space-y-6">
+                        <!-- Gráfico Quantidade Crítica -->
                         <div class="bg-white p-6 rounded-xl shadow-lg">
-                            <h2 class="text-xl font-semibold text-gray-700 mb-4">Top 5 Itens em Estoque (por quantidade)</h2>
+                            <h2 class="text-xl font-semibold text-gray-700 mb-4">Top 5 Itens Críticos (Quantidade)</h2>
                             <div class="h-80 flex items-center justify-center">
-                                <canvas id="stock-chart"></canvas>
+                                <canvas id="critical-quantity-chart"></canvas>
+                            </div>
+                        </div>
+                        <!-- Gráfico Validade Crítica -->
+                        <div class="bg-white p-6 rounded-xl shadow-lg">
+                            <h2 class="text-xl font-semibold text-gray-700 mb-4">Top 5 Itens Críticos (Validade)</h2>
+                            <div class="h-80 flex items-center justify-center">
+                                <canvas id="critical-expiry-chart"></canvas>
                             </div>
                         </div>
                     </div>
-                    <!-- Coluna Direita (Alertas) -->
+                    <!-- Coluna Direita (Alertas e Entradas) -->
                     <div class="space-y-6">
                         <div class="bg-white p-6 rounded-xl shadow-lg">
                              <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i class="fa-solid fa-triangle-exclamation text-yellow-500 mr-3"></i>Alertas e Informações</h2>
@@ -529,8 +536,8 @@
                     <div><strong>Fornecedor:</strong> <span id="details-supplier"></span></div>
                     <div><strong>Estoque Total:</strong> <span id="details-total-quantity"></span></div>
                     <div><strong>Consumo Médio Diário:</strong> <span id="details-avg-consumption"></span></div>
-                    <div><strong>Estoque Mínimo (sugestão):</strong> <span id="details-min-stock"></span></div>
-                    <div><strong>Estoque Máximo (sugestão):</strong> <span id="details-max-stock"></span></div>
+                    <div><strong>Estoque Mínimo:</strong> <span id="details-min-stock"></span></div>
+                    <div><strong>Estoque Máximo:</strong> <span id="details-max-stock"></span></div>
                 </div>
             </div>
 
@@ -550,6 +557,14 @@
                         <div>
                             <label for="edit-supplier" class="block text-sm font-medium text-gray-700">Fornecedor</label>
                             <input type="text" id="edit-supplier" required class="mt-1 block w-full form-input">
+                        </div>
+                        <div>
+                            <label for="edit-min-stock" class="block text-sm font-medium text-gray-700">Estoque Mínimo (Opcional)</label>
+                            <input type="number" id="edit-min-stock" step="0.01" class="mt-1 block w-full form-input" placeholder="Deixe em branco para auto-cálculo">
+                        </div>
+                        <div>
+                            <label for="edit-max-stock" class="block text-sm font-medium text-gray-700">Estoque Máximo (Opcional)</label>
+                            <input type="number" id="edit-max-stock" step="0.01" class="mt-1 block w-full form-input" placeholder="Deixe em branco para auto-cálculo">
                         </div>
                     </div>
                     <div class="mt-8 flex justify-end space-x-3">
@@ -805,6 +820,19 @@
             </div>
         </div>
     </div>
+    
+    <!-- Modal de Informações da Dashboard -->
+    <div id="info-list-modal" class="modal p-4">
+         <div class="bg-white rounded-lg shadow-xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+             <div class="flex justify-between items-center mb-6">
+                <h2 id="info-list-title" class="text-2xl font-bold">Detalhes do Alerta</h2>
+                <button id="close-info-list-modal" class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+            </div>
+            <div id="info-list-content" class="overflow-x-auto">
+                <!-- Conteúdo da lista será inserido aqui -->
+            </div>
+         </div>
+    </div>
 
 
     <!-- Modal de Notificação -->
@@ -949,7 +977,8 @@
     let currentSort = { key: 'name', order: 'asc' };
     let tempEntryData = null;
     let backupFileContent = null; 
-    let stockChart = null;
+    let criticalQuantityChart = null;
+    let criticalExpiryChart = null;
 
     // --- DOM ELEMENTS ---
     const loadingOverlay = document.getElementById('loading-overlay');
@@ -1026,6 +1055,10 @@
     const closeEditResidualModal = document.getElementById('close-edit-residual-modal');
     const editResidualForm = document.getElementById('edit-residual-form');
     const btnResetDatabase = document.getElementById('btn-reset-database');
+    const cardLowStock = document.getElementById('card-low-stock');
+    const cardExpiringSoon = document.getElementById('card-expiring-soon');
+    const infoListModal = document.getElementById('info-list-modal');
+    const closeInfoListModalBtn = document.getElementById('close-info-list-modal');
     
     // --- FUNÇÕES AUXILIARES ---
     function showNotification(message, isError = false) {
@@ -1200,16 +1233,36 @@
     });
 
     // --- INVENTORY SCREEN LOGIC ---
-    function renderInventoryTable() {
+    function renderInventoryTable(specialFilter = null) {
         let filteredInventory = [...localInventory];
-        const searchTerm = searchInput.value.toLowerCase();
-        if (searchTerm) {
+        let searchTerm = searchInput.value.toLowerCase();
+        
+        if (specialFilter) {
+            searchInput.value = ''; // Clear search bar for special filters
+            if (specialFilter === 'low-stock') {
+                const lowStockItems = localInventory.filter(i => {
+                    const metrics = calculateConsumptionMetrics(i.id);
+                    const minStock = i.minStock !== null && i.minStock !== undefined ? i.minStock : metrics.minStock;
+                    return i.totalQuantity < minStock && minStock > 0;
+                });
+                const lowStockIds = new Set(lowStockItems.map(i => i.id));
+                filteredInventory = filteredInventory.filter(item => lowStockIds.has(item.id));
+            } else if (specialFilter === 'expiring-soon') {
+                const today = new Date();
+                const thirtyDaysFromNow = new Date();
+                thirtyDaysFromNow.setDate(today.getDate() + 30);
+                const expiringBatches = localBatches.filter(b => b.quantity > 0 && b.expiryDate && new Date(b.expiryDate) <= thirtyDaysFromNow);
+                const expiringProductIds = new Set(expiringBatches.map(b => b.productId));
+                filteredInventory = filteredInventory.filter(item => expiringProductIds.has(item.id));
+            }
+        } else if (searchTerm) {
             filteredInventory = filteredInventory.filter(item => 
                 item.name.toLowerCase().includes(searchTerm) ||
                 item.code.toLowerCase().includes(searchTerm) ||
                 item.supplier.toLowerCase().includes(searchTerm)
             );
         }
+
         filteredInventory.sort((a, b) => {
             let valA, valB;
             if (currentSort.key === 'expiry') {
@@ -1236,7 +1289,7 @@
 
         inventoryTableBody.innerHTML = '';
         if (filteredInventory.length === 0) {
-            inventoryTableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4">Nenhum item em estoque.</td></tr>`;
+            inventoryTableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4">Nenhum item encontrado.</td></tr>`;
             return;
         }
         filteredInventory.forEach(item => {
@@ -1272,7 +1325,7 @@
             renderInventoryTable();
         });
     });
-    searchInput.addEventListener('input', renderInventoryTable);
+    searchInput.addEventListener('input', () => renderInventoryTable());
     
     // --- ITEM DETAILS & EDIT MODAL ---
     function calculateConsumptionMetrics(productId) {
@@ -1302,14 +1355,27 @@
         document.getElementById('details-total-quantity').textContent = product.totalQuantity.toFixed(2);
         
         const metrics = calculateConsumptionMetrics(productId);
+        
         document.getElementById('details-avg-consumption').textContent = metrics.avgConsumption.toFixed(2);
-        document.getElementById('details-min-stock').textContent = metrics.minStock.toFixed(2);
-        document.getElementById('details-max-stock').textContent = metrics.maxStock.toFixed(2);
+
+        if (product.minStock !== null && product.minStock !== undefined) {
+            document.getElementById('details-min-stock').innerHTML = `${product.minStock.toFixed(2)} <span class="text-xs text-gray-500">(sugestão: ${metrics.minStock.toFixed(2)})</span>`;
+        } else {
+            document.getElementById('details-min-stock').innerHTML = `${metrics.minStock.toFixed(2)} <span class="text-xs text-gray-500">(sugestão)</span>`;
+        }
+        
+        if (product.maxStock !== null && product.maxStock !== undefined) {
+             document.getElementById('details-max-stock').innerHTML = `${product.maxStock.toFixed(2)} <span class="text-xs text-gray-500">(sugestão: ${metrics.maxStock.toFixed(2)})</span>`;
+        } else {
+            document.getElementById('details-max-stock').innerHTML = `${metrics.maxStock.toFixed(2)} <span class="text-xs text-gray-500">(sugestão)</span>`;
+        }
         
         document.getElementById('edit-item-id').value = product.id;
         document.getElementById('edit-product-name').value = product.name;
         document.getElementById('edit-product-code').value = product.code;
         document.getElementById('edit-supplier').value = product.supplier;
+        document.getElementById('edit-min-stock').value = product.minStock;
+        document.getElementById('edit-max-stock').value = product.maxStock;
 
         const batches = localBatches.filter(b => b.productId === productId && b.quantity > 0);
         const history = localHistory.filter(h => h.productId === productId).sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -1365,6 +1431,11 @@
             code: document.getElementById('edit-product-code').value,
             supplier: document.getElementById('edit-supplier').value,
         };
+        const minStock = parseFloat(document.getElementById('edit-min-stock').value);
+        const maxStock = parseFloat(document.getElementById('edit-max-stock').value);
+        updatedData.minStock = isNaN(minStock) ? null : minStock;
+        updatedData.maxStock = isNaN(maxStock) ? null : maxStock;
+
         try {
             const item = await DB.get('inventory', updatedData.id);
             const fullItem = { ...item, ...updatedData };
@@ -1372,8 +1443,8 @@
             showNotification("Item atualizado com sucesso!");
             itemDetailsView.classList.remove('hidden');
             itemDetailsEdit.classList.add('hidden');
-            document.getElementById('details-product-name').textContent = updatedData.name;
             await refreshLocalData();
+            showItemDetails(updatedData.id);
         } catch (error) {
             console.error("Erro ao atualizar o item:", error);
             showNotification("Erro ao atualizar o item.", true);
@@ -2299,37 +2370,26 @@
     
     // --- DASHBOARD ---
     function renderDashboard() {
-        // --- GRÁFICO ---
-        const top5Stock = [...localInventory].sort((a,b) => b.totalQuantity - a.totalQuantity).slice(0, 5);
-        const ctx = document.getElementById('stock-chart').getContext('2d');
-        if (stockChart) {
-            stockChart.destroy();
-        }
-        stockChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: top5Stock.map(item => item.name),
-                datasets: [{
-                    label: 'Quantidade em Estoque',
-                    data: top5Stock.map(item => item.totalQuantity),
-                    backgroundColor: ['#4f46e5', '#6366f1', '#818cf8', '#a5b4fc', '#c7d2fe'],
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    }
-                }
-            }
-        });
+        const today = new Date();
 
         // --- STAT CARDS ---
+        const lowStockItems = localInventory.filter(i => {
+            const metrics = calculateConsumptionMetrics(i.id);
+            const minStock = i.minStock !== null && i.minStock !== undefined ? i.minStock : metrics.minStock;
+            return i.totalQuantity < minStock && minStock > 0;
+        });
+        const thirtyDaysFromNow = new Date();
+        thirtyDaysFromNow.setDate(today.getDate() + 30);
+        const expiringBatches = localBatches.filter(b => b.quantity > 0 && b.expiryDate && new Date(b.expiryDate) <= thirtyDaysFromNow);
+        
         document.getElementById('stat-total-items').textContent = localInventory.length;
         document.getElementById('stat-total-quantity').textContent = localInventory.reduce((sum, item) => sum + item.totalQuantity, 0).toFixed(2);
+        document.getElementById('stat-low-stock').textContent = lowStockItems.length;
+        document.getElementById('stat-expiring-soon').textContent = expiringBatches.length;
+
+        // --- GRÁFICOS ---
+        renderCriticalQuantityChart(lowStockItems);
+        renderCriticalExpiryChart(expiringBatches, today);
         
         // --- ÚLTIMAS ENTRADAS ---
         const lastEntries = [...localHistory].filter(h => h.type === 'entrada').sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0,5);
@@ -2357,19 +2417,6 @@
         }
         
         // --- ALERTAS ---
-        const today = new Date();
-        const thirtyDaysFromNow = new Date();
-        thirtyDaysFromNow.setDate(today.getDate() + 30);
-        
-        const lowStockItems = localInventory.filter(i => {
-            const metrics = calculateConsumptionMetrics(i.id);
-            return i.totalQuantity < metrics.minStock && metrics.minStock > 0;
-        });
-        const expiringBatches = localBatches.filter(b => b.quantity > 0 && b.expiryDate && new Date(b.expiryDate) <= thirtyDaysFromNow);
-        
-        document.getElementById('stat-low-stock').textContent = lowStockItems.length;
-        document.getElementById('stat-expiring-soon').textContent = expiringBatches.length;
-        
         const lossRiskBatches = localBatches.filter(b => {
              const expiryDate = new Date(b.expiryDate);
              if (!b.expiryDate || expiryDate <= today || b.quantity <= 0) return false;
@@ -2409,6 +2456,82 @@
             alertsContainer.innerHTML = `<p class="text-center text-gray-500 py-4">Nenhum alerta no momento.</p>`;
         }
     }
+
+    function renderCriticalQuantityChart(lowStockItems) {
+        const ctx = document.getElementById('critical-quantity-chart').getContext('2d');
+        const top5 = lowStockItems.slice(0, 5);
+        if (criticalQuantityChart) {
+            criticalQuantityChart.destroy();
+        }
+        criticalQuantityChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: top5.map(item => item.name),
+                datasets: [{
+                    label: 'Qtd. Atual',
+                    data: top5.map(item => item.totalQuantity),
+                    backgroundColor: '#fca5a5',
+                }, {
+                    label: 'Estoque Mínimo',
+                    data: top5.map(item => {
+                        const metrics = calculateConsumptionMetrics(item.id);
+                        return item.minStock !== null && item.minStock !== undefined ? item.minStock : metrics.minStock;
+                    }),
+                     backgroundColor: '#93c5fd',
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    function renderCriticalExpiryChart(expiringBatches, today) {
+        const ctx = document.getElementById('critical-expiry-chart').getContext('2d');
+        const top5 = expiringBatches.sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate)).slice(0, 5);
+
+        if (criticalExpiryChart) {
+            criticalExpiryChart.destroy();
+        }
+        criticalExpiryChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: top5.map(batch => {
+                    const product = localInventory.find(p => p.id === batch.productId);
+                    return `${product.name.substring(0,10)}... (${batch.code})`;
+                }),
+                datasets: [{
+                    label: 'Dias para Vencer',
+                    data: top5.map(batch => {
+                        const diffTime = new Date(batch.expiryDate).getTime() - today.getTime();
+                        return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+                    }),
+                    backgroundColor: '#fdba74',
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    x: { beginAtZero: true }
+                }
+            }
+        });
+    }
+    
+    cardLowStock.addEventListener('click', () => {
+        navigateTo('inventory');
+        renderInventoryTable('low-stock');
+    });
+
+    cardExpiringSoon.addEventListener('click', () => {
+        navigateTo('inventory');
+        renderInventoryTable('expiring-soon');
+    });
+
 
     // --- AJUSTES E REQUISIÇÕES ---
     function initializeAdjustmentScreen() {
@@ -2556,8 +2679,7 @@
     }
 
     function renderConsumptionReport() {
-        if(consumptionYearFilter.options.length === 0) populateConsumptionFilters();
-        
+        populateConsumptionFilters();
         const year = consumptionYearFilter.value;
         const month = String(consumptionMonthFilter.value).padStart(2, '0');
         const period = `${year}-${month}`;
