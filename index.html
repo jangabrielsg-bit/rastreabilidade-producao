@@ -329,16 +329,28 @@
 
             <!-- Tela de Receitas -->
             <div id="screen-recipes" class="hidden">
-                 <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-3xl font-bold text-gray-800">Receitas</h1>
-                    <button id="btn-new-recipe" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
-                        <i class="fa-solid fa-plus mr-2"></i>Nova Receita
-                    </button>
-                </div>
-                <div id="recipes-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Cards de categoria de receita serão inseridos aqui -->
-                </div>
-            </div>
+                <div class="flex justify-between items-center mb-6">
+                   <h1 class="text-3xl font-bold text-gray-800">Receitas</h1>
+                   <button id="btn-new-recipe" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                       <i class="fa-solid fa-plus mr-2"></i>Nova Receita
+                   </button>
+               </div>
+               <div class="flex gap-8">
+                   <!-- Coluna de Categorias -->
+                   <div class="w-1/4">
+                       <div class="bg-white p-4 rounded-xl shadow-lg">
+                           <h2 class="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">Linhas de Produção</h2>
+                           <ul id="recipe-categories-list" class="space-y-2">
+                               <!-- Categorias serão inseridas aqui -->
+                           </ul>
+                       </div>
+                   </div>
+                   <!-- Grid de Receitas -->
+                   <div id="recipes-grid" class="w-3/4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 self-start">
+                       <!-- Cards de receita serão inseridos aqui -->
+                   </div>
+               </div>
+           </div>
             
             <!-- Tela de Ordens de Produção -->
             <div id="screen-production" class="hidden">
@@ -1041,6 +1053,7 @@
     let dailyOutputChart = null;
     let scheduledOutputChart = null;
     let abcCurveChart = null;
+    let currentRecipeCategory = 'Todos'; // Default to show all
 
     // --- DOM ELEMENTS ---
     const loadingOverlay = document.getElementById('loading-overlay');
@@ -1074,7 +1087,8 @@
     const btnCancelEdit = document.getElementById('btn-cancel-edit');
     const editItemForm = document.getElementById('edit-item-form');
     const detailsHistoryContainer = document.getElementById('details-history-container');
-    const recipesList = document.getElementById('recipes-list');
+    const recipesGrid = document.getElementById('recipes-grid');
+    const recipeCategoriesList = document.getElementById('recipe-categories-list');
     const productionOrdersList = document.getElementById('production-orders-list');
     const btnNewProductionOrder = document.getElementById('btn-new-production-order');
     const productionOrderModal = document.getElementById('production-order-modal');
@@ -1652,40 +1666,66 @@
 
     // --- RECIPES SCREEN LOGIC ---
     function renderRecipes() {
-        recipesList.innerHTML = '';
-        if (localRecipes.length === 0) {
-            recipesList.innerHTML = `<p class="text-gray-500 col-span-full">Nenhuma receita criada ainda.</p>`
+        // 1. Populate categories list
+        const categories = ['Todos', ...new Set(localRecipes.map(r => r.category))].sort((a, b) => {
+            if (a === 'Todos') return -1;
+            if (b === 'Todos') return 1;
+            return a.localeCompare(b);
+        });
+
+        recipeCategoriesList.innerHTML = categories.map(category => `
+            <li>
+                <a href="#" class="block p-2 rounded-md font-medium text-gray-600 hover:bg-indigo-50 hover:text-indigo-700 category-filter-btn ${category === currentRecipeCategory ? 'bg-indigo-100 text-indigo-800' : ''}" data-category="${category}">
+                    ${category}
+                </a>
+            </li>
+        `).join('');
+
+        // 2. Filter recipes based on current category
+        let filteredRecipes = localRecipes;
+        if (currentRecipeCategory !== 'Todos') {
+            filteredRecipes = localRecipes.filter(r => r.category === currentRecipeCategory);
+        }
+
+        // 3. Render recipe cards
+        recipesGrid.innerHTML = '';
+        if (filteredRecipes.length === 0) {
+            recipesGrid.innerHTML = `<p class="text-gray-500 col-span-full text-center mt-8">Nenhuma receita encontrada para esta linha de produção.</p>`;
             return;
         }
-        const categories = [...new Set(localRecipes.map(r => r.category))].sort();
-        categories.forEach(category => {
-            const categoryDiv = document.createElement('div');
-            categoryDiv.innerHTML = `<h2 class="text-xl font-semibold mb-3 text-gray-700">${category}</h2>`;
-            const recipeCards = document.createElement('div');
-            recipeCards.className = 'space-y-4';
-            localRecipes.filter(r => r.category === category).forEach(recipe => {
-                const card = document.createElement('div');
-                card.className = 'relative bg-white p-4 rounded-lg shadow transition hover:shadow-md';
-                let ingredientsHtml = recipe.ingredients.map(ing => {
-                    const product = localInventory.find(p => p.id === ing.productId);
-                    return `<li class="text-sm text-gray-600">${product ? product.name : 'Ingrediente desconhecido'}: ${ing.quantity.toFixed(4)}</li>`;
-                }).join('');
-                card.innerHTML = `
+
+        filteredRecipes.forEach(recipe => {
+            const card = document.createElement('div');
+            card.className = 'relative bg-white p-4 rounded-lg shadow transition hover:shadow-md flex flex-col'; // Added flex
+            let ingredientsHtml = recipe.ingredients.map(ing => {
+                const product = localInventory.find(p => p.id === ing.productId);
+                return `<li class="text-sm text-gray-600">${product ? product.name : 'Ingrediente desconhecido'}: ${ing.quantity.toFixed(4)}</li>`;
+            }).join('');
+
+            card.innerHTML = `
+                <div class="flex-grow">
                     <div class="absolute top-2 right-2 flex space-x-2">
                         <button class="edit-recipe-btn text-blue-500 hover:text-blue-700" data-recipe-id="${recipe.id}" title="Editar"><i class="fa-solid fa-pencil"></i></button>
                         <button class="delete-recipe-btn text-red-500 hover:text-red-700" data-recipe-id="${recipe.id}" title="Excluir"><i class="fa-solid fa-trash"></i></button>
                     </div>
-                    <h3 class="font-bold">${recipe.name}</h3>
+                    <h3 class="font-bold pr-12">${recipe.name}</h3>
                     <ul class="list-disc list-inside mt-2">${ingredientsHtml}</ul>
-                `;
-                recipeCards.appendChild(card);
-            });
-            categoryDiv.appendChild(recipeCards);
-            recipesList.appendChild(categoryDiv);
+                </div>
+            `;
+            recipesGrid.appendChild(card);
         });
     }
 
-    recipesList.addEventListener('click', (e) => {
+    recipeCategoriesList.addEventListener('click', (e) => {
+        e.preventDefault();
+        const filterBtn = e.target.closest('.category-filter-btn');
+        if (filterBtn) {
+            currentRecipeCategory = filterBtn.dataset.category;
+            renderRecipes(); // Re-render with the new filter
+        }
+    });
+
+    recipesGrid.addEventListener('click', (e) => {
         const editBtn = e.target.closest('.edit-recipe-btn');
         if (editBtn) {
             handleEditRecipe(parseInt(editBtn.dataset.recipeId));
