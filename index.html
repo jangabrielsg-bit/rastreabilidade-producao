@@ -16,15 +16,11 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-        .sidebar-icon {
-            transition: all 0.2s ease-in-out;
+        .sidebar {
+            transition: width 0.3s ease-in-out;
         }
-        .sidebar-icon:hover {
-            transform: scale(1.1);
-        }
-        .active-nav {
-            background-color: #4f46e5;
-            color: white;
+        .sidebar-text {
+            transition: opacity 0.3s ease-in-out;
         }
         .modal {
             display: none; /* Hidden by default */
@@ -97,39 +93,53 @@
 
     <div class="flex h-screen">
         <!-- Sidebar -->
-        <aside class="w-20 bg-gray-800 text-white flex flex-col items-center py-4 space-y-6">
-            <a href="#" id="nav-dashboard" class="sidebar-icon p-3 rounded-lg active-nav" title="Dashboard">
-                <i class="fa-solid fa-chart-pie fa-lg"></i>
+        <aside class="w-20 bg-gray-800 text-white flex flex-col items-center py-4 space-y-6 sidebar hover:w-64 group">
+            <a href="#" id="nav-dashboard" class="sidebar-icon p-3 rounded-lg active-nav flex items-center w-full" title="Dashboard">
+                <i class="fa-solid fa-chart-pie fa-lg w-8 text-center"></i>
+                <span class="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 sidebar-text">Dashboard</span>
             </a>
-            <nav class="flex flex-col items-center space-y-4">
-                <a href="#" id="nav-entry" class="sidebar-icon p-3 rounded-lg" title="Entrada de Mercadorias">
-                    <i class="fa-solid fa-dolly fa-lg"></i>
+            <nav class="flex flex-col items-center space-y-4 w-full">
+                <a href="#" id="nav-entry" class="sidebar-icon p-3 rounded-lg flex items-center w-full" title="Entrada de Mercadorias">
+                    <i class="fa-solid fa-dolly fa-lg w-8 text-center"></i>
+                    <span class="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 sidebar-text">Entrada</span>
                 </a>
-                <a href="#" id="nav-inventory" class="sidebar-icon p-3 rounded-lg" title="Gerenciamento de Estoque">
-                    <i class="fa-solid fa-warehouse fa-lg"></i>
+                <a href="#" id="nav-inventory" class="sidebar-icon p-3 rounded-lg flex items-center w-full" title="Gerenciamento de Estoque">
+                    <i class="fa-solid fa-warehouse fa-lg w-8 text-center"></i>
+                     <span class="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 sidebar-text">Estoque</span>
                 </a>
-                <a href="#" id="nav-recipes" class="sidebar-icon p-3 rounded-lg" title="Receitas">
-                    <i class="fa-solid fa-book-open fa-lg"></i>
+                <a href="#" id="nav-recipes" class="sidebar-icon p-3 rounded-lg flex items-center w-full" title="Receitas">
+                    <i class="fa-solid fa-book-open fa-lg w-8 text-center"></i>
+                     <span class="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 sidebar-text">Receitas</span>
                 </a>
-                <a href="#" id="nav-production" class="sidebar-icon p-3 rounded-lg" title="Ordens de Produção">
-                    <i class="fa-solid fa-clipboard-list fa-lg"></i>
+                <a href="#" id="nav-production" class="sidebar-icon p-3 rounded-lg flex items-center w-full" title="Ordens de Produção">
+                    <i class="fa-solid fa-clipboard-list fa-lg w-8 text-center"></i>
+                     <span class="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 sidebar-text">Produção</span>
                 </a>
-                 <a href="#" id="nav-requisitions" class="sidebar-icon p-3 rounded-lg" title="Baixa por Requisição">
-                    <i class="fa-solid fa-arrow-right-from-bracket fa-lg"></i>
+                 <a href="#" id="nav-requisitions" class="sidebar-icon p-3 rounded-lg flex items-center w-full" title="Baixa por Requisição">
+                    <i class="fa-solid fa-arrow-right-from-bracket fa-lg w-8 text-center"></i>
+                     <span class="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 sidebar-text">Requisição</span>
                 </a>
-                <a href="#" id="nav-adjustments" class="sidebar-icon p-3 rounded-lg" title="Ajuste de Estoque">
-                    <i class="fa-solid fa-sliders fa-lg"></i>
+                <a href="#" id="nav-adjustments" class="sidebar-icon p-3 rounded-lg flex items-center w-full" title="Ajuste de Estoque">
+                    <i class="fa-solid fa-sliders fa-lg w-8 text-center"></i>
+                     <span class="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 sidebar-text">Ajuste</span>
                 </a>
-                <a href="#" id="nav-consumption" class="sidebar-icon p-3 rounded-lg" title="Consumo Mensal">
-                    <i class="fa-solid fa-calculator fa-lg"></i>
+                <a href="#" id="nav-consumption" class="sidebar-icon p-3 rounded-lg flex items-center w-full" title="Consumo Mensal">
+                    <i class="fa-solid fa-calculator fa-lg w-8 text-center"></i>
+                     <span class="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 sidebar-text">Consumo</span>
                 </a>
-                <a href="#" id="nav-residual" class="sidebar-icon p-3 rounded-lg" title="Estoque Residual">
-                    <i class="fa-solid fa-recycle fa-lg"></i>
+                <a href="#" id="nav-residual" class="sidebar-icon p-3 rounded-lg flex items-center w-full" title="Estoque Residual">
+                    <i class="fa-solid fa-recycle fa-lg w-8 text-center"></i>
+                    <span class="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 sidebar-text">Residual</span>
+                </a>
+                 <a href="#" id="nav-traceability" class="sidebar-icon p-3 rounded-lg flex items-center w-full" title="Rastreabilidade Inteligente">
+                    <i class="fa-solid fa-magnifying-glass-chart fa-lg w-8 text-center"></i>
+                    <span class="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 sidebar-text">Rastreabilidade</span>
                 </a>
             </nav>
-            <div class="mt-auto">
-                 <a href="#" id="nav-settings" class="sidebar-icon p-3 rounded-lg" title="Configurações">
-                    <i class="fa-solid fa-cog fa-lg"></i>
+            <div class="mt-auto w-full">
+                 <a href="#" id="nav-settings" class="sidebar-icon p-3 rounded-lg flex items-center w-full" title="Configurações">
+                    <i class="fa-solid fa-cog fa-lg w-8 text-center"></i>
+                     <span class="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 sidebar-text">Configurações</span>
                 </a>
             </div>
         </aside>
@@ -184,37 +194,53 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Coluna Esquerda (Gráficos) -->
                     <div class="space-y-6">
-                        <!-- Gráfico Quantidade Crítica -->
+                        <!-- Gráfico Saídas do dia -->
                         <div class="bg-white p-6 rounded-xl shadow-lg">
-                            <h2 class="text-xl font-semibold text-gray-700 mb-4">Top 5 Itens Críticos (Quantidade)</h2>
+                             <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-xl font-semibold text-gray-700">Top 10 Saídas de Insumos (Hoje)</h2>
+                                <button id="btn-export-daily-output" class="text-gray-500 hover:text-green-600" title="Exportar para Excel"><i class="fa-solid fa-file-excel fa-lg"></i></button>
+                            </div>
                             <div class="h-80 flex items-center justify-center">
-                                <canvas id="critical-quantity-chart"></canvas>
+                                <canvas id="daily-output-chart"></canvas>
                             </div>
                         </div>
-                        <!-- Gráfico Validade Crítica -->
+                        <!-- Gráfico Saídas Programadas -->
                         <div class="bg-white p-6 rounded-xl shadow-lg">
-                            <h2 class="text-xl font-semibold text-gray-700 mb-4">Top 5 Itens Críticos (Validade)</h2>
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-xl font-semibold text-gray-700">Top 10 Saídas Programadas (48h)</h2>
+                                 <button id="btn-export-scheduled-output" class="text-gray-500 hover:text-green-600" title="Exportar para Excel"><i class="fa-solid fa-file-excel fa-lg"></i></button>
+                            </div>
                             <div class="h-80 flex items-center justify-center">
-                                <canvas id="critical-expiry-chart"></canvas>
+                                <canvas id="scheduled-output-chart"></canvas>
                             </div>
                         </div>
                     </div>
                     <!-- Coluna Direita (Alertas e Entradas) -->
                     <div class="space-y-6">
                         <div class="bg-white p-6 rounded-xl shadow-lg">
-                             <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i class="fa-solid fa-triangle-exclamation text-yellow-500 mr-3"></i>Alertas e Informações</h2>
-                             <div id="alerts-container" class="space-y-4">
-                                <!-- Alertas são renderizados aqui -->
-                             </div>
+                             <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-xl font-semibold text-gray-700">Itens Vencendo (45d)</h2>
+                                <button id="btn-export-expiring-45" class="text-gray-500 hover:text-green-600" title="Exportar para Excel"><i class="fa-solid fa-file-excel fa-lg"></i></button>
+                            </div>
+                             <div id="expiring-45-container" class="overflow-y-auto max-h-40"></div>
                         </div>
                          <div class="bg-white p-6 rounded-xl shadow-lg">
-                             <h2 class="text-xl font-semibold text-gray-700 mb-4">Últimas Entradas</h2>
-                             <ul id="last-entries-list" class="divide-y divide-gray-200">
-                                <!-- Preenchido por JS -->
-                             </ul>
+                              <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-xl font-semibold text-gray-700">Risco de Perda Potencial</h2>
+                                <button id="btn-export-loss-risk" class="text-gray-500 hover:text-green-600" title="Exportar para Excel"><i class="fa-solid fa-file-excel fa-lg"></i></button>
+                            </div>
+                             <div id="loss-risk-container" class="overflow-y-auto max-h-40"></div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Card da Curva ABC -->
+                <div class="mt-6 bg-white p-6 rounded-xl shadow-lg">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Curva ABC do Estoque (Baseado no Consumo Total)</h2>
+                    <div class="h-80 flex items-center justify-center">
+                        <canvas id="abc-curve-chart"></canvas>
+                    </div>
+               </div>
             </div>
 
             <!-- Tela de Registro de Entrada -->
@@ -348,6 +374,7 @@
                     <div class="flex items-center mb-4 space-x-4">
                         <select id="consumption-month-filter" class="form-input"></select>
                         <select id="consumption-year-filter" class="form-input"></select>
+                        <input type="text" id="search-consumption" placeholder="🔍 Buscar item..." class="form-input flex-grow">
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-500">
@@ -453,6 +480,28 @@
                 </div>
             </div>
 
+            <!-- Tela de Rastreabilidade -->
+             <div id="screen-traceability" class="hidden">
+                <h1 class="text-3xl font-bold text-gray-800 mb-6">Rastreabilidade Inteligente</h1>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center space-x-4 mb-4">
+                        <label class="flex items-center"><input type="radio" name="trace-type" value="lote" class="form-radio" checked> <span class="ml-2">Por Lote de Produto</span></label>
+                        <label class="flex items-center"><input type="radio" name="trace-type" value="manipulador" class="form-radio"> <span class="ml-2">Por Manipulador</span></label>
+                    </div>
+                    <div id="trace-lote-fields">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div id="trace-product-searchable" class="searchable-container"></div>
+                            <input type="text" id="trace-batch-code" class="form-input" placeholder="Digite o código do lote">
+                        </div>
+                    </div>
+                    <div id="trace-manipulador-fields" class="hidden">
+                        <input type="text" id="trace-handler-name" class="form-input" placeholder="Digite o nome do manipulador">
+                    </div>
+                    <button id="btn-trace" class="mt-4 bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg">Rastrear</button>
+                    <div id="trace-results" class="mt-6"></div>
+                </div>
+             </div>
+
             <!-- Tela de Configurações -->
             <div id="screen-settings" class="hidden">
                 <h1 class="text-3xl font-bold text-gray-800 mb-6">Configurações e Backup</h1>
@@ -527,18 +576,18 @@
     <div id="item-details-modal" class="modal p-4">
         <div class="bg-white rounded-lg shadow-xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold" id="details-product-name">Nome do Produto</h2>
+                <h2 class="text-2xl font-bold flex items-center">
+                    <span id="details-product-name">Nome do Produto</span>
+                    <button id="btn-edit-item" class="ml-4 text-gray-500 hover:text-blue-600" title="Editar Produto">
+                        <i class="fa-solid fa-pencil"></i>
+                    </button>
+                </h2>
                 <button id="close-details-modal" class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
             </div>
             
             <!-- View Mode -->
             <div id="item-details-view">
-                <div class="flex justify-end mb-4">
-                    <button id="btn-edit-item" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md">
-                        <i class="fa-solid fa-pencil mr-2"></i>Editar Item
-                    </button>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm pt-4">
                     <div><strong>Código:</strong> <span id="details-product-code"></span></div>
                     <div><strong>Fornecedor:</strong> <span id="details-supplier"></span></div>
                     <div><strong>Estoque Total:</strong> <span id="details-total-quantity"></span></div>
@@ -590,6 +639,7 @@
                             <th class="px-4 py-2">Lote</th>
                             <th class="px-4 py-2">Quantidade</th>
                             <th class="px-4 py-2">Data de Validade</th>
+                             <th class="px-4 py-2">Shelf Life (%)</th>
                             <th class="px-4 py-2 text-center">Ações</th>
                         </tr>
                     </thead>
@@ -625,6 +675,10 @@
                     <div>
                         <label for="edit-batch-expiry-date" class="block text-sm font-medium text-gray-700">Data de Validade</label>
                         <input type="date" id="edit-batch-expiry-date" class="mt-1 block w-full form-input">
+                    </div>
+                    <div>
+                        <label for="edit-batch-mfg-date" class="block text-sm font-medium text-gray-700">Data de Fabricação (Opcional)</label>
+                        <input type="date" id="edit-batch-mfg-date" class="mt-1 block w-full form-input">
                     </div>
                 </div>
                 <div class="mt-8 flex justify-end">
@@ -984,13 +1038,14 @@
     let currentSort = { key: 'name', order: 'asc' };
     let tempEntryData = null;
     let backupFileContent = null; 
-    let criticalQuantityChart = null;
-    let criticalExpiryChart = null;
+    let dailyOutputChart = null;
+    let scheduledOutputChart = null;
+    let abcCurveChart = null;
 
     // --- DOM ELEMENTS ---
     const loadingOverlay = document.getElementById('loading-overlay');
-    const screens = { dashboard: document.getElementById('screen-dashboard'), entry: document.getElementById('screen-entry'), inventory: document.getElementById('screen-inventory'), recipes: document.getElementById('screen-recipes'), production: document.getElementById('screen-production'), requisitions: document.getElementById('screen-requisitions'), adjustments: document.getElementById('screen-adjustments'), consumption: document.getElementById('screen-consumption'), residual: document.getElementById('screen-residual'), settings: document.getElementById('screen-settings') };
-    const navLinks = { dashboard: document.getElementById('nav-dashboard'), entry: document.getElementById('nav-entry'), inventory: document.getElementById('nav-inventory'), recipes: document.getElementById('nav-recipes'), production: document.getElementById('nav-production'), requisitions: document.getElementById('nav-requisitions'), adjustments: document.getElementById('nav-adjustments'), consumption: document.getElementById('nav-consumption'), residual: document.getElementById('nav-residual'), settings: document.getElementById('nav-settings') };
+    const screens = { dashboard: document.getElementById('screen-dashboard'), entry: document.getElementById('screen-entry'), inventory: document.getElementById('screen-inventory'), recipes: document.getElementById('screen-recipes'), production: document.getElementById('screen-production'), requisitions: document.getElementById('screen-requisitions'), adjustments: document.getElementById('screen-adjustments'), consumption: document.getElementById('screen-consumption'), residual: document.getElementById('screen-residual'), traceability: document.getElementById('screen-traceability'), settings: document.getElementById('screen-settings') };
+    const navLinks = { dashboard: document.getElementById('nav-dashboard'), entry: document.getElementById('nav-entry'), inventory: document.getElementById('nav-inventory'), recipes: document.getElementById('nav-recipes'), production: document.getElementById('nav-production'), requisitions: document.getElementById('nav-requisitions'), adjustments: document.getElementById('nav-adjustments'), consumption: document.getElementById('nav-consumption'), residual: document.getElementById('nav-residual'), traceability: document.getElementById('nav-traceability'), settings: document.getElementById('nav-settings') };
     const entryForm = document.getElementById('entry-form');
     const shelfLifeModal = document.getElementById('shelf-life-modal');
     const shelfLifeValue = document.getElementById('shelf-life-value');
@@ -1067,7 +1122,18 @@
     const infoListModal = document.getElementById('info-list-modal');
     const closeInfoListModalBtn = document.getElementById('close-info-list-modal');
     const supplierFilter = document.getElementById('supplier-filter');
-
+    const btnExportDailyOutput = document.getElementById('btn-export-daily-output');
+    const btnExportScheduledOutput = document.getElementById('btn-export-scheduled-output');
+    const btnExportExpiring45 = document.getElementById('btn-export-expiring-45');
+    const btnExportLossRisk = document.getElementById('btn-export-loss-risk');
+    const traceProductSearchable = document.getElementById('trace-product-searchable');
+    const traceBatchCodeInput = document.getElementById('trace-batch-code');
+    const traceHandlerNameInput = document.getElementById('trace-handler-name');
+    const btnTrace = document.getElementById('btn-trace');
+    const traceResultsContainer = document.getElementById('trace-results');
+    const traceTypeRadios = document.querySelectorAll('input[name="trace-type"]');
+    const traceLoteFields = document.getElementById('trace-lote-fields');
+    const traceManipuladorFields = document.getElementById('trace-manipulador-fields');
     
     // --- FUNÇÕES AUXILIARES ---
     function showNotification(message, isError = false) {
@@ -1170,6 +1236,9 @@
         if (screenName === 'requisitions') {
             initializeRequisitionScreen();
         }
+        if (screenName === 'traceability') {
+            initializeTraceabilityScreen();
+        }
     }
     Object.keys(navLinks).forEach(key => { navLinks[key].addEventListener('click', (e) => { e.preventDefault(); navigateTo(key); }); });
 
@@ -1181,7 +1250,7 @@
         const totalLife = expiryDate.getTime() - mfgDate.getTime();
         const remainingLife = expiryDate.getTime() - receiptDate.getTime();
         if (totalLife <= 0) return 0;
-        return ((remainingLife / totalLife) * 100).toFixed(1);
+        return (remainingLife / totalLife) * 100;
     }
     entryForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -1192,12 +1261,12 @@
             mfgDate: document.getElementById('mfg-date').value, receiptDate: document.getElementById('receipt-date').value,
             expiryDate: document.getElementById('expiry-date').value
         };
-        let shelfLife = 100;
+        let shelfLife = null;
         if (data.mfgDate && data.receiptDate && data.expiryDate) { shelfLife = calculateShelfLife(data.mfgDate, data.receiptDate, data.expiryDate); }
         data.shelfLife = shelfLife;
         tempEntryData = data;
-        if (shelfLife < 75 && data.mfgDate && data.expiryDate) {
-            shelfLifeValue.textContent = shelfLife;
+        if (shelfLife !== null && shelfLife < 75) {
+            shelfLifeValue.textContent = shelfLife.toFixed(1);
             showModal(shelfLifeModal);
         } else { saveEntry(); }
     });
@@ -1269,7 +1338,7 @@
             if (searchTerm) {
                 filteredInventory = filteredInventory.filter(item => 
                     item.name.toLowerCase().includes(searchTerm) ||
-                    item.code.toLowerCase().includes(searchTerm) ||
+                    (item.code && item.code.toLowerCase().includes(searchTerm)) ||
                     item.supplier.toLowerCase().includes(searchTerm)
                 );
             }
@@ -1283,7 +1352,11 @@
             if (currentSort.key === 'expiry') {
                 valA = getNextExpiry(a.id) || '9999-12-31';
                 valB = getNextExpiry(b.id) || '9999-12-31';
-            } else {
+            } else if (currentSort.key === 'totalQuantity') {
+                valA = a.totalQuantity;
+                valB = b.totalQuantity;
+            }
+            else {
                 valA = a[currentSort.key] || '';
                 valB = b[currentSort.key] || '';
             }
@@ -1323,7 +1396,7 @@
         });
     }
     function getNextExpiry(productId) {
-         const productBatches = localBatches.filter(b => b.productId === productId && b.quantity > 0);
+         const productBatches = localBatches.filter(b => b.productId === productId && b.quantity > 0 && b.expiryDate);
         if (productBatches.length === 0) return null;
         return productBatches.sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate))[0].expiryDate;
     }
@@ -1416,6 +1489,7 @@
                 <td class="px-4 py-2">${batch.code}</td>
                 <td class="px-4 py-2">${batch.quantity.toFixed(2)}</td>
                 <td class="px-4 py-2">${batch.expiryDate ? new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'}</td>
+                <td class="px-4 py-2">${typeof batch.shelfLife === 'number' ? batch.shelfLife.toFixed(1) : (batch.shelfLife || 'N/A')}</td>
                 <td class="px-4 py-2 text-center">
                     <button class="edit-batch-btn text-blue-500 hover:text-blue-700 p-1" data-batch-id="${batch.id}" title="Editar Lote"><i class="fa-solid fa-pencil"></i></button>
                     <button class="delete-batch-btn text-red-500 hover:text-red-700 p-1" data-batch-id="${batch.id}" title="Excluir Lote"><i class="fa-solid fa-trash"></i></button>
@@ -1501,6 +1575,7 @@
         document.getElementById('edit-batch-code').value = batch.code;
         document.getElementById('edit-batch-quantity').value = batch.quantity;
         document.getElementById('edit-batch-expiry-date').value = batch.expiryDate;
+        document.getElementById('edit-batch-mfg-date').value = batch.mfgDate;
         showModal(editBatchModal);
     }
 
@@ -1512,6 +1587,7 @@
         const newCode = document.getElementById('edit-batch-code').value;
         const newQuantity = parseFloat(document.getElementById('edit-batch-quantity').value);
         const newExpiryDate = document.getElementById('edit-batch-expiry-date').value;
+        const newMfgDate = document.getElementById('edit-batch-mfg-date').value;
 
         try {
             const batch = await DB.get('batches', batchId);
@@ -1519,11 +1595,12 @@
             batch.code = newCode;
             batch.quantity = newQuantity;
             batch.expiryDate = newExpiryDate;
+            batch.mfgDate = newMfgDate;
 
             if (batch.mfgDate && batch.receiptDate && newExpiryDate) {
                 batch.shelfLife = calculateShelfLife(batch.mfgDate, batch.receiptDate, newExpiryDate);
             } else {
-                batch.shelfLife = 100;
+                batch.shelfLife = null;
             }
 
             await DB.update('batches', batch);
@@ -1591,7 +1668,7 @@
                 card.className = 'relative bg-white p-4 rounded-lg shadow transition hover:shadow-md';
                 let ingredientsHtml = recipe.ingredients.map(ing => {
                     const product = localInventory.find(p => p.id === ing.productId);
-                    return `<li class="text-sm text-gray-600">${product ? product.name : 'Ingrediente desconhecido'}: ${ing.quantity}</li>`;
+                    return `<li class="text-sm text-gray-600">${product ? product.name : 'Ingrediente desconhecido'}: ${ing.quantity.toFixed(4)}</li>`;
                 }).join('');
                 card.innerHTML = `
                     <div class="absolute top-2 right-2 flex space-x-2">
@@ -1674,7 +1751,7 @@
         row.className = 'flex items-center space-x-2';
         row.innerHTML = `
             <div class="searchable-container flex-1"></div>
-            <input type="number" placeholder="Qtd" value="${quantity || ''}" min="0.01" step="0.01" class="block w-1/3 form-input" required>
+            <input type="number" placeholder="Qtd" value="${quantity || ''}" min="0.0001" step="0.0001" class="block w-1/3 form-input" required>
             <button type="button" class="text-red-500 hover:text-red-700 remove-ingredient-btn font-bold text-xl">&times;</button>
         `;
         ingredientsContainer.appendChild(row);
@@ -1913,8 +1990,8 @@
             <tr data-product-id="${product.id}" data-original-qty="${ing.quantity}" class="${isInsufficient ? 'insufficient-stock-row' : ''}">
                 <td class="px-2 py-2">${product.name}</td>
                 <td class="px-2 py-2 text-sm ${residual > 0 ? 'text-green-600' : 'text-red-600'}">${residual.toFixed(2)}</td>
-                <td class="px-2 py-2 font-medium">${neededQty.toFixed(2)}</td>
-                <td class="px-2 py-2"><input type="number" value="${(existingIng ? existingIng.adjustedQuantity : compensatedQty).toFixed(2)}" min="0" step="0.01" class="w-24 form-input"></td>
+                <td class="px-2 py-2 font-medium">${neededQty.toFixed(4)}</td>
+                <td class="px-2 py-2"><input type="number" value="${(existingIng ? existingIng.adjustedQuantity : compensatedQty).toFixed(4)}" min="0" step="0.0001" class="w-24 form-input"></td>
                 <td class="px-2 py-2"><select class="w-48 form-input text-xs">${batchOptions}</select></td>
                 <td class="px-2 py-2"><input type="text" value="${existingIng ? existingIng.handler : ''}" placeholder="Nome" class="w-32 form-input"></td>
             </tr>`;
@@ -1928,7 +2005,7 @@
     productionOrderForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const poId = document.getElementById('edit-po-id').value;
-        if (poIngredientsBody.querySelectorAll('.insufficient-stock-row').length > 0) { showNotification("Estoque insuficiente.", true); return; }
+        if (poIngredientsBody.querySelectorAll('.insufficient-stock-row').length > 0) { showNotification("Estoque insuficiente para um ou mais itens.", true); return; }
         
         const recipeId = parseInt(poRecipeSearchableContainer.querySelector('input').dataset.selectedId);
         if (!recipeId) {
@@ -1947,7 +2024,7 @@
                 batchCode: selectedOption ? selectedOption.dataset.code : 'N/A',
             }
         });
-        if (ingredients.some(ing => !ing.batchId)) { showNotification("Lotes não disponíveis.", true); return; }
+        if (ingredients.some(ing => !ing.batchId)) { showNotification("Todos os insumos devem ter um lote de consumo selecionado.", true); return; }
         const poData = {
             recipeId: recipe.id, recipeName: recipe.name, date: poDate.value,
             quantityProduced: parseInt(poQuantity.value, 10), status: 'pendente', ingredients
@@ -2007,8 +2084,8 @@
         confirmProductionTbody.innerHTML = Object.values(aggregatedItems).map(item => {
             return `<tr data-product-id="${item.productId}">
                 <td class="px-4 py-2">${item.name}</td>
-                <td class="px-4 py-2">${item.quantity.toFixed(2)}</td>
-                <td class="px-4 py-2"><input type="number" value="${item.quantity.toFixed(2)}" class="w-32 form-input"></td>
+                <td class="px-4 py-2">${item.quantity.toFixed(4)}</td>
+                <td class="px-4 py-2"><input type="number" value="${item.quantity.toFixed(4)}" step="0.0001" class="w-32 form-input"></td>
             </tr>`;
         }).join('');
         confirmProductionTbody.dataset.orders = JSON.stringify(orders.map(po => po.id));
@@ -2073,7 +2150,7 @@
                     if (remainingToConsume <= 0) break;
                 }
                 
-                if (remainingToConsume > 0) throw new Error(`Estoque insuficiente para ${item.name}. Faltam ${remainingToConsume.toFixed(2)}.`);
+                if (remainingToConsume > 0) throw new Error(`Estoque insuficiente para ${item.name}. Faltam ${remainingToConsume.toFixed(4)}.`);
 
                 const product = await DB.get('inventory', item.productId);
                 product.totalQuantity -= item.deliveredQty;
@@ -2087,19 +2164,6 @@
             
             const ordersToUpdate = localProductionOrders.filter(po => orderIdsToUpdate.includes(po.id));
             for(const order of ordersToUpdate) {
-                const recipe = localRecipes.find(r => r.id === order.recipeId);
-                const orderIngredients = order.ingredients;
-
-                for (const ing of orderIngredients) {
-                    const recipeIng = recipe.ingredients.find(ri => ri.productId === ing.productId);
-                    const requestedQty = recipeIng.quantity * order.quantityProduced;
-                    
-                    const residual = localResidualStock.find(r => r.productId === ing.productId);
-                    if (residual && residual.quantity > 0) {
-                        const consumedFromResidual = Math.min(residual.quantity, requestedQty);
-                        await updateResidualStock(ing.productId, -consumedFromResidual);
-                    }
-                }
                 order.status = 'concluído';
                 await DB.update('productionOrders', order);
             }
@@ -2300,80 +2364,72 @@
 
 
     // --- EXPORT FUNCTIONS ---
-    function exportInventoryToExcel() {
-        const dataToExport = localInventory.map(item => ({
-            'Código': item.code,
-            'Item': item.name,
-            'Fornecedor': item.supplier,
-            'Quantidade': item.totalQuantity.toFixed(2)
-        }));
+    function exportChartDataToExcel(data, fileName) {
+        const dataToExport = data.map(item => {
+            const product = localInventory.find(p => p.id === item.productId);
+            return {
+                'Produto': product ? product.name : 'N/A',
+                'Quantidade': item.total.toFixed(4)
+            }
+        });
         const worksheet = XLSX.utils.json_to_sheet(dataToExport);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Estoque");
-        XLSX.writeFile(workbook, "relatorio_estoque.xlsx");
-        showNotification("Relatório de estoque exportado!");
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Dados");
+        XLSX.writeFile(workbook, fileName);
+        showNotification("Dados exportados!");
     }
-    btnExportExcel.addEventListener('click', exportInventoryToExcel);
-    function exportOrdersToPDF() {
-        const { jsPDF } = window.jspdf;
-        const filterDate = searchPoByDate.value;
-        if (!filterDate) {
-            showNotification("Por favor, selecione uma data para gerar o relatório.", true);
-            return;
-        }
 
-        const filteredOrders = localProductionOrders.filter(po => po.date === filterDate);
-        if (filteredOrders.length === 0) {
-            showNotification("Nenhuma ordem de produção para a data selecionada.", true);
-            return;
-        }
-
-        const doc = new jsPDF();
-        const formattedDate = new Date(filterDate + 'T00:00:00').toLocaleDateString('pt-BR');
-
-        doc.setFontSize(18);
-        doc.text(`Relatório de Ordens de Produção`, 14, 22);
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-        doc.text(`Data: ${formattedDate}`, 14, 30);
-
-        let startY = 40;
-
-        filteredOrders.forEach(order => {
-            if (startY > 250) { // Page break
-                doc.addPage();
-                startY = 22;
+    btnExportExpiring45.addEventListener('click', () => {
+         const today = new Date();
+         const fortyFiveDaysFromNow = new Date();
+         fortyFiveDaysFromNow.setDate(today.getDate() + 45);
+         const expiring45Batches = localBatches.filter(b => b.quantity > 0 && b.expiryDate && new Date(b.expiryDate) <= fortyFiveDaysFromNow);
+         const dataToExport = expiring45Batches.map(batch => {
+            const product = localInventory.find(p => p.id === batch.productId);
+            return {
+                'Produto': product.name,
+                'Lote': batch.code,
+                'Quantidade': batch.quantity,
+                'Data de Validade': new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR')
             }
-            doc.setFontSize(14);
-            doc.setFont(undefined, 'bold');
-            doc.text(`${order.recipeName} (${order.quantityProduced}x)`, 14, startY);
-            startY += 7;
+         });
+         const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+         const workbook = XLSX.utils.book_new();
+         XLSX.utils.book_append_sheet(workbook, worksheet, "Vencendo_em_45_dias");
+         XLSX.writeFile(workbook, "relatorio_vencendo_45_dias.xlsx");
+         showNotification("Relatório exportado!");
+    });
 
-            const tableBody = order.ingredients.map(ing => {
-                const product = localInventory.find(p => p.id === ing.productId);
-                return [
-                    product ? product.name : 'N/A',
-                    ing.adjustedQuantity.toFixed(2),
-                    ing.batchCode,
-                    ing.handler
-                ];
-            });
+    btnExportLossRisk.addEventListener('click', () => {
+        const today = new Date();
+        const lossRiskBatches = localBatches.filter(b => {
+             const expiryDate = new Date(b.expiryDate);
+             if (!b.expiryDate || expiryDate <= today || b.quantity <= 0) return false;
+             
+             const metrics = calculateConsumptionMetrics(b.productId);
+             const consumptionRate = metrics.avgConsumption;
+             if (consumptionRate <= 0) return false;
 
-            doc.autoTable({
-                startY: startY,
-                head: [['Insumo', 'Qtd. Usada', 'Lote', 'Manipulador']],
-                body: tableBody,
-                theme: 'striped',
-                headStyles: { fillColor: [79, 70, 229] }
-            });
-
-            startY = doc.autoTable.previous.finalY + 15;
+             const daysToExpire = (expiryDate.getTime() - today.getTime()) / (1000 * 3600 * 24);
+             const estimatedConsumption = daysToExpire * consumptionRate;
+             
+             return b.quantity > estimatedConsumption;
         });
-
-        doc.save(`relatorio_producao_${filterDate}.pdf`);
-        showNotification("Relatório PDF exportado!");
-    }
-    btnExportPdf.addEventListener('click', exportOrdersToPDF);
+         const dataToExport = lossRiskBatches.map(batch => {
+            const product = localInventory.find(p => p.id === batch.productId);
+            return {
+                'Produto': product.name,
+                'Lote': batch.code,
+                'Quantidade': batch.quantity,
+                'Data de Validade': new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR')
+            }
+         });
+         const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+         const workbook = XLSX.utils.book_new();
+         XLSX.utils.book_append_sheet(workbook, worksheet, "Risco_de_Perda");
+         XLSX.writeFile(workbook, "relatorio_risco_de_perda.xlsx");
+         showNotification("Relatório exportado!");
+    });
 
 
     // --- INICIALIZAÇÃO E SINCRONIZAÇÃO COM DADOS LOCAIS ---
@@ -2403,6 +2459,11 @@
     // --- DASHBOARD ---
     function renderDashboard() {
         const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
+        const tomorrow = new Date();
+        tomorrow.setDate(today.getDate() + 1);
+        const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
 
         // --- STAT CARDS ---
         const lowStockItems = localInventory.filter(i => {
@@ -2420,33 +2481,39 @@
         document.getElementById('stat-expiring-soon').textContent = expiringBatches.length;
 
         // --- GRÁFICOS ---
-        renderCriticalQuantityChart(lowStockItems);
-        renderCriticalExpiryChart(expiringBatches, today);
+        const dailyOutputs = localHistory.filter(h => h.date === todayStr && (h.type === 'saída' || h.type === 'requisição'));
+        dailyOutputChart = renderDashboardChart('daily-output-chart', dailyOutputChart, 'Top 10 Saídas de Hoje', dailyOutputs, false, 'btn-export-daily-output');
         
+        const scheduledOutputs = localProductionOrders.filter(po => (po.date === todayStr || po.date === tomorrowStr) && po.status === 'pendente');
+        scheduledOutputChart = renderDashboardChart('scheduled-output-chart', scheduledOutputChart, 'Top 10 Saídas Programadas (48h)', scheduledOutputs, true, 'btn-export-scheduled-output');
+
         // --- ÚLTIMAS ENTRADAS ---
-        const lastEntries = [...localHistory].filter(h => h.type === 'entrada').sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0,5);
         const lastEntriesList = document.getElementById('last-entries-list');
-        lastEntriesList.innerHTML = '';
-        if (lastEntries.length > 0) {
-            lastEntries.forEach(entry => {
-                const product = localInventory.find(p => p.id === entry.productId);
-                const li = document.createElement('li');
-                li.className = 'py-3 flex justify-between items-center text-sm';
-                li.innerHTML = `
-                    <div>
-                        <p class="font-medium text-gray-800">${product ? product.name : 'Produto desconhecido'}</p>
-                        <p class="text-gray-500">Lote: ${entry.batchCode}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-semibold text-green-600">+${entry.quantity.toFixed(2)}</p>
-                        <p class="text-gray-400">${new Date(entry.date + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
-                    </div>
-                `;
-                lastEntriesList.appendChild(li);
-            });
-        } else {
-             lastEntriesList.innerHTML = `<p class="text-center text-gray-500 py-4">Nenhuma entrada registrada.</p>`;
+        if (lastEntriesList) {
+            const lastEntries = [...localHistory].filter(h => h.type === 'entrada').sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0,5);
+            lastEntriesList.innerHTML = '';
+            if (lastEntries.length > 0) {
+                lastEntries.forEach(entry => {
+                    const product = localInventory.find(p => p.id === entry.productId);
+                    const li = document.createElement('li');
+                    li.className = 'py-3 flex justify-between items-center text-sm';
+                    li.innerHTML = `
+                        <div>
+                            <p class="font-medium text-gray-800">${product ? product.name : 'Produto desconhecido'}</p>
+                            <p class="text-gray-500">Lote: ${entry.batchCode}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-semibold text-green-600">+${entry.quantity.toFixed(2)}</p>
+                            <p class="text-gray-400">${new Date(entry.date + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
+                        </div>
+                    `;
+                    lastEntriesList.appendChild(li);
+                });
+            } else {
+                 lastEntriesList.innerHTML = `<p class="text-center text-gray-500 py-4">Nenhuma entrada registrada.</p>`;
+            }
         }
+        
         
         // --- ALERTAS ---
         const lossRiskBatches = localBatches.filter(b => {
@@ -2457,7 +2524,7 @@
              const consumptionRate = metrics.avgConsumption;
              if (consumptionRate <= 0) return false;
 
-             const daysToExpire = (expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
+             const daysToExpire = (expiryDate.getTime() - today.getTime()) / (1000 * 3600 * 24);
              const estimatedConsumption = daysToExpire * consumptionRate;
              
              return b.quantity > estimatedConsumption;
@@ -2468,101 +2535,140 @@
         const recentOuts = [...localHistory].filter(h => h.type === 'saída' && new Date(h.date) > sixtyDaysAgo);
         const recentOutProductIds = new Set(recentOuts.map(h => h.productId));
         const stagnantItems = localInventory.filter(i => i.totalQuantity > 0 && !recentOutProductIds.has(i.id));
+        
+        const fortyFiveDaysFromNow = new Date();
+        fortyFiveDaysFromNow.setDate(today.getDate() + 45);
+        const expiring45Batches = localBatches.filter(b => b.quantity > 0 && b.expiryDate && new Date(b.expiryDate) <= fortyFiveDaysFromNow);
 
-        const alertsContainer = document.getElementById('alerts-container');
-        alertsContainer.innerHTML = '';
-        const createAlertHTML = (title, items, formatter) => {
-            if (items.length > 0) {
-                 return `<div><h3 class="font-semibold text-sm text-gray-600">${title} (${items.length})</h3>
-                    <ul class="text-xs text-gray-500 mt-1 space-y-1">${items.map(formatter).join('')}</ul></div>`;
-            }
-            return '';
+        renderAlertTable('expiring-45-container', expiring45Batches, (batch) => {
+            const product = localInventory.find(p => p.id === batch.productId);
+            return `<tr>
+                        <td class="py-1 pr-2 text-xs">${product.name} (${batch.code})</td>
+                        <td class="py-1 px-2 text-xs text-right">${batch.quantity.toFixed(2)}</td>
+                        <td class="py-1 pl-2 text-xs text-right">${new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                    </tr>`;
+        }, ['Produto (Lote)', 'Qtd', 'Validade']);
+        
+        renderAlertTable('loss-risk-container', lossRiskBatches, (batch) => {
+            const product = localInventory.find(p => p.id === batch.productId);
+            return `<tr>
+                        <td class="py-1 pr-2 text-xs">${product.name} (${batch.code})</td>
+                        <td class="py-1 pl-2 text-xs text-right">${new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                    </tr>`;
+        }, ['Produto (Lote)', 'Validade']);
+
+        calculateAndRenderAbcCurve();
+    }
+
+    function renderAlertTable(containerId, items, formatter, headers) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        if (items.length > 0) {
+            container.innerHTML = `
+                <table class="w-full text-left">
+                    <thead class="text-xs text-gray-500"><tr>${headers.map(h => `<th class="pb-2 font-semibold ${h !== 'Produto (Lote)' ? 'text-right' : ''}">${h}</th>`).join('')}</tr></thead>
+                    <tbody class="divide-y divide-gray-200">${items.map(formatter).join('')}</tbody>
+                </table>`;
+        } else {
+            container.innerHTML = `<p class="text-center text-sm text-gray-400 py-4">Nenhum item para exibir.</p>`;
+        }
+    }
+
+
+    function renderDashboardChart(canvasId, chartInstance, title, data, isScheduled = false, exportBtnId) {
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return null;
+        
+        if (Chart.getChart(ctx)) {
+            Chart.getChart(ctx).destroy();
         }
         
-        alertsContainer.innerHTML += createAlertHTML('Risco de Perda', lossRiskBatches, batch => {
-            const product = localInventory.find(p => p.id === batch.productId);
-            return `<li>- ${product.name} (L: ${batch.code})</li>`;
-        });
-        alertsContainer.innerHTML += createAlertHTML('Itens sem Saída (>60d)', stagnantItems, item => `<li>- ${item.name}</li>`);
-        if(alertsContainer.innerHTML === '') {
-            alertsContainer.innerHTML = `<p class="text-center text-gray-500 py-4">Nenhum alerta no momento.</p>`;
+        const consumption = {};
+        if (isScheduled) {
+             data.forEach(po => po.ingredients.forEach(ing => {
+                consumption[ing.productId] = (consumption[ing.productId] || 0) + ing.adjustedQuantity;
+             }));
+        } else { // History
+            data.forEach(h => {
+                consumption[h.productId] = (consumption[h.productId] || 0) + h.quantity;
+            });
         }
-    }
+        
+        const sortedData = Object.keys(consumption)
+            .map(productId => ({ productId: parseInt(productId), total: consumption[productId] }))
+            .sort((a,b) => b.total - a.total)
+            .slice(0, 10);
 
-    function renderCriticalQuantityChart(lowStockItems) {
-        const ctx = document.getElementById('critical-quantity-chart').getContext('2d');
-        const top5 = lowStockItems.slice(0, 5);
-        if (criticalQuantityChart) {
-            criticalQuantityChart.destroy();
-        }
-        criticalQuantityChart = new Chart(ctx, {
+        const newChartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: top5.map(item => item.name),
-                datasets: [{
-                    label: 'Qtd. Atual',
-                    data: top5.map(item => item.totalQuantity),
-                    backgroundColor: '#fca5a5',
-                }, {
-                    label: 'Estoque Mínimo',
-                    data: top5.map(item => {
-                        const metrics = calculateConsumptionMetrics(item.id);
-                        return item.minStock !== null && item.minStock !== undefined ? item.minStock : metrics.minStock;
-                    }),
-                     backgroundColor: '#93c5fd',
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
-    }
-
-    function renderCriticalExpiryChart(expiringBatches, today) {
-        const ctx = document.getElementById('critical-expiry-chart').getContext('2d');
-        const top5 = expiringBatches.sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate)).slice(0, 5);
-
-        if (criticalExpiryChart) {
-            criticalExpiryChart.destroy();
-        }
-        criticalExpiryChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: top5.map(batch => {
-                    const product = localInventory.find(p => p.id === batch.productId);
-                    return `${product.name.substring(0,10)}... (${batch.code})`;
+                labels: sortedData.map(item => {
+                    const product = localInventory.find(p => p.id === item.productId);
+                    return product ? product.name.substring(0, 15) : 'N/A';
                 }),
                 datasets: [{
-                    label: 'Dias para Vencer',
-                    data: top5.map(batch => {
-                        const diffTime = new Date(batch.expiryDate).getTime() - today.getTime();
-                        return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-                    }),
-                    backgroundColor: '#fdba74',
+                    label: 'Quantidade',
+                    data: sortedData.map(item => item.total),
+                    backgroundColor: '#818cf8',
                 }]
             },
-            options: {
+             options: {
                 indexAxis: 'y',
                 responsive: true, maintainAspectRatio: false,
-                scales: {
-                    x: { beginAtZero: true }
-                }
+                scales: { x: { beginAtZero: true } },
+                plugins: { legend: { display: false } }
             }
         });
+
+        const exportBtn = document.getElementById(exportBtnId);
+        if (exportBtn) {
+            exportBtn.onclick = () => exportChartDataToExcel(sortedData, `${title.replace(/\s/g, '_')}.xlsx`);
+        }
+
+        return newChartInstance;
     }
+
     
     cardLowStock.addEventListener('click', () => {
-        navigateTo('inventory');
-        renderInventoryTable('low-stock');
+        const lowStockItems = localInventory.filter(i => {
+            const metrics = calculateConsumptionMetrics(i.id);
+            const minStock = i.minStock !== null && i.minStock !== undefined ? i.minStock : metrics.minStock;
+            return i.totalQuantity < minStock && minStock > 0;
+        });
+        document.getElementById('info-list-title').textContent = 'Itens com Estoque Baixo';
+        let content = `<table class="w-full text-sm">
+                        <thead><tr class="border-b"><th class="py-2 text-left">Produto</th><th class="py-2 text-right">Qtd. Atual</th><th class="py-2 text-right">Mínimo</th></tr></thead>
+                        <tbody>`;
+        content += lowStockItems.map(item => {
+            const metrics = calculateConsumptionMetrics(item.id);
+            const minStock = item.minStock !== null && item.minStock !== undefined ? item.minStock : metrics.minStock;
+            return `<tr><td class="py-2">${item.name}</td><td class="py-2 text-right">${item.totalQuantity.toFixed(2)}</td><td class="py-2 text-right">${minStock.toFixed(2)}</td></tr>`
+        }).join('');
+        content += `</tbody></table>`;
+        document.getElementById('info-list-content').innerHTML = content;
+        showModal(infoListModal);
     });
 
     cardExpiringSoon.addEventListener('click', () => {
-        navigateTo('inventory');
-        renderInventoryTable('expiring-soon');
+        const today = new Date();
+        const thirtyDaysFromNow = new Date();
+        thirtyDaysFromNow.setDate(today.getDate() + 30);
+        const expiringBatches = localBatches.filter(b => b.quantity > 0 && b.expiryDate && new Date(b.expiryDate) <= thirtyDaysFromNow);
+
+        document.getElementById('info-list-title').textContent = 'Lotes Vencendo nos Próximos 30 Dias';
+        let content = `<table class="w-full text-sm">
+                        <thead><tr class="border-b"><th class="py-2 text-left">Produto</th><th class="py-2 text-left">Lote</th><th class="py-2 text-right">Validade</th></tr></thead>
+                        <tbody>`;
+        content += expiringBatches.map(batch => {
+            const product = localInventory.find(p => p.id === batch.productId);
+            return `<tr><td class="py-2">${product.name}</td><td class="py-2">${batch.code}</td><td class="py-2 text-right">${new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR')}</td></tr>`
+        }).join('');
+        content += `</tbody></table>`;
+        document.getElementById('info-list-content').innerHTML = content;
+        showModal(infoListModal);
     });
+
+    closeInfoListModalBtn.addEventListener('click', () => hideModal(infoListModal));
 
 
     // --- AJUSTES E REQUISIÇÕES ---
@@ -2622,7 +2728,7 @@
             </div>
             <div class="w-24">
                 <label class="block text-sm font-medium text-gray-700">Qtd.</label>
-                <input type="number" class="requisition-quantity w-full form-input" required min="0.01" step="0.01">
+                <input type="number" class="requisition-quantity w-full form-input" required min="0.0001" step="0.0001">
             </div>
             <button type="button" class="remove-requisition-item-btn text-red-500 hover:text-red-700 h-10">&times;</button>
         `;
@@ -2715,11 +2821,20 @@
         const year = consumptionYearFilter.value;
         const month = String(consumptionMonthFilter.value).padStart(2, '0');
         const period = `${year}-${month}`;
+        const searchTerm = document.getElementById('search-consumption').value.toLowerCase();
 
-        const consumptionData = localMonthlyConsumption.filter(c => c.period === period);
+        let consumptionData = localMonthlyConsumption.filter(c => c.period === period);
+
+        if (searchTerm) {
+            consumptionData = consumptionData.filter(item => {
+                const product = localInventory.find(p => p.id === item.productId);
+                return product && product.name.toLowerCase().includes(searchTerm);
+            });
+        }
+
         consumptionTableBody.innerHTML = '';
         if (consumptionData.length === 0) {
-            consumptionTableBody.innerHTML = `<tr><td colspan="2" class="text-center py-4">Nenhum consumo registrado para este período.</td></tr>`;
+            consumptionTableBody.innerHTML = `<tr><td colspan="2" class="text-center py-4">Nenhum consumo encontrado para este período/filtro.</td></tr>`;
             return;
         }
 
@@ -2739,6 +2854,7 @@
 
     consumptionMonthFilter.addEventListener('change', renderConsumptionReport);
     consumptionYearFilter.addEventListener('change', renderConsumptionReport);
+    document.getElementById('search-consumption').addEventListener('input', renderConsumptionReport);
 
     // --- RESIDUAL STOCK ---
     function renderResidualStock() {
@@ -2783,9 +2899,12 @@
             const productId = parseInt(deleteBtn.dataset.productId);
              const product = localInventory.find(p => p.id === productId);
             showConfirmationModal('Zerar Saldo Residual', `Tem certeza que deseja zerar o saldo residual para <strong>${product.name}</strong>?`, async () => {
-                await updateResidualStock(productId, -localResidualStock.find(r => r.productId === productId).quantity);
-                await refreshLocalData();
-                showNotification('Saldo residual zerado.');
+                const residual = localResidualStock.find(r => r.productId === productId);
+                if (residual) {
+                    await updateResidualStock(productId, -residual.quantity);
+                    await refreshLocalData();
+                    showNotification('Saldo residual zerado.');
+                }
             });
         }
     });
@@ -2797,35 +2916,268 @@
         const productId = parseInt(document.getElementById('edit-residual-product-id').value);
         const newQuantity = parseFloat(document.getElementById('edit-residual-quantity').value);
         const residual = await DB.get('residualStock', productId);
-        const difference = newQuantity - residual.quantity;
+        const difference = newQuantity - (residual ? residual.quantity : 0);
         await updateResidualStock(productId, difference);
         await refreshLocalData();
         hideModal(editResidualModal);
         showNotification('Saldo residual atualizado.');
     });
+    
+    // --- CÓDIGO CORRIGIDO/ADICIONADO PARA RASTREABILIDADE ---
+    function initializeTraceabilityScreen() {
+        createSearchableSelect(traceProductSearchable, localInventory, 'Buscar produto...', null);
+    }
+
+    traceTypeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (radio.value === 'lote') {
+                traceLoteFields.classList.remove('hidden');
+                traceManipuladorFields.classList.add('hidden');
+            } else {
+                traceLoteFields.classList.add('hidden');
+                traceManipuladorFields.classList.remove('hidden');
+            }
+        });
+    });
+
+    btnTrace.addEventListener('click', () => {
+        const traceType = document.querySelector('input[name="trace-type"]:checked').value;
+        traceResultsContainer.innerHTML = '<div class="text-center py-4"><div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-600 mx-auto"></div><p class="mt-2 text-gray-600">Buscando...</p></div>';
+
+        // Usamos um setTimeout para garantir que o spinner de loading apareça na tela antes de iniciar a busca pesada
+        setTimeout(() => {
+            let resultsHtml = '';
+
+            if (traceType === 'lote') {
+                const productId = parseInt(traceProductSearchable.querySelector('input').dataset.selectedId);
+                const batchCode = traceBatchCodeInput.value.trim();
+
+                if (!productId || !batchCode) {
+                    traceResultsContainer.innerHTML = '<p class="text-red-500 p-4 text-center">Por favor, selecione um produto e insira um código de lote.</p>';
+                    return;
+                }
+
+                const product = localInventory.find(p => p.id === productId);
+                resultsHtml += `<h3 class="text-xl font-semibold mb-4">Rastreamento para: ${product.name} - Lote ${batchCode}</h3>`;
+
+                // 1. Encontrar a origem do lote
+                const entryRecord = localHistory.find(h => h.productId === productId && h.batchCode === batchCode && h.type === 'entrada');
+                if (entryRecord) {
+                    resultsHtml += `
+                        <div class="mb-4 p-4 border rounded-lg bg-gray-50">
+                            <h4 class="font-bold text-lg text-green-700">Origem do Lote</h4>
+                            <p><strong>Data de Recebimento:</strong> ${new Date(entryRecord.date + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
+                            <p><strong>Fornecedor:</strong> ${product.supplier}</p>
+                            <p><strong>Quantidade Recebida:</strong> ${entryRecord.quantity.toFixed(2)}</p>
+                        </div>
+                    `;
+                } else {
+                     resultsHtml += `<div class="mb-4 p-4 border-l-4 border-yellow-400 bg-yellow-50"><p class="text-yellow-700">Nenhum registro de entrada encontrado para este lote.</p></div>`;
+                }
+
+                // 2. Encontrar o uso em produção
+                const productionUsages = localProductionOrders.filter(po =>
+                    po.ingredients.some(ing => ing.productId === productId && ing.batchCode === batchCode)
+                );
+
+                if (productionUsages.length > 0) {
+                    resultsHtml += `<h4 class="font-bold text-lg text-blue-700 mt-6 mb-2">Uso em Produção</h4>`;
+                    resultsHtml += '<ul class="space-y-3">';
+                    productionUsages.forEach(po => {
+                        const usedIngredient = po.ingredients.find(ing => ing.productId === productId && ing.batchCode === batchCode);
+                        resultsHtml += `
+                            <li class="p-3 border rounded-md shadow-sm">
+                                Produziu <strong>${po.recipeName}</strong> em <strong>${new Date(po.date + 'T00:00:00').toLocaleDateString('pt-BR')}</strong>.
+                                <div class="text-sm text-gray-600 mt-1">
+                                    <span>Quantidade Usada: ${usedIngredient.adjustedQuantity.toFixed(2)}</span> |
+                                    <span>Manipulador: ${usedIngredient.handler}</span>
+                                </div>
+                            </li>
+                        `;
+                    });
+                    resultsHtml += '</ul>';
+                }
+
+                // 3. Encontrar outras movimentações (ajustes, requisições, etc.)
+                const otherMovements = localHistory.filter(h => h.productId === productId && h.batchCode === batchCode && h.type !== 'entrada' && h.type !== 'saída');
+                if(otherMovements.length > 0) {
+                    resultsHtml += `<h4 class="font-bold text-lg text-purple-700 mt-6 mb-2">Outras Movimentações</h4>`;
+                    resultsHtml += '<ul class="space-y-3">';
+                     otherMovements.forEach(m => {
+                         resultsHtml += `
+                            <li class="p-3 border rounded-md shadow-sm">
+                                <strong>${m.type.charAt(0).toUpperCase() + m.type.slice(1)}</strong> em <strong>${new Date(m.date + 'T00:00:00').toLocaleDateString('pt-BR')}</strong>.
+                                <div class="text-sm text-gray-600 mt-1">
+                                    <span>Quantidade: ${m.quantity.toFixed(2)}</span>
+                                    ${m.reason ? `<span> | Motivo: ${m.reason}</span>` : ''}
+                                    ${m.responsible ? `<span> | Responsável: ${m.responsible}</span>` : ''}
+                                </div>
+                            </li>
+                         `;
+                     });
+                     resultsHtml += '</ul>';
+                }
+                
+                if (!entryRecord && productionUsages.length === 0 && otherMovements.length === 0) {
+                     resultsHtml += `<p class="text-center text-gray-500 mt-4">Nenhuma movimentação encontrada para este lote.</p>`;
+                }
+
+            } else if (traceType === 'manipulador') {
+                const handlerName = traceHandlerNameInput.value.trim().toLowerCase();
+                if (!handlerName) {
+                    traceResultsContainer.innerHTML = '<p class="text-red-500 p-4 text-center">Por favor, insira o nome do manipulador.</p>';
+                    return;
+                }
+
+                resultsHtml += `<h3 class="text-xl font-semibold mb-4">Rastreamento para Manipulador: ${traceHandlerNameInput.value.trim()}</h3>`;
+
+                const handledProductions = localProductionOrders.filter(po =>
+                    po.ingredients.some(ing => ing.handler && ing.handler.toLowerCase().includes(handlerName))
+                );
+
+                if (handledProductions.length > 0) {
+                    resultsHtml += '<ul class="space-y-4">';
+                    handledProductions.forEach(po => {
+                         const handledIngredients = po.ingredients.filter(ing => ing.handler && ing.handler.toLowerCase().includes(handlerName));
+                         resultsHtml += `
+                            <li class="p-4 border rounded-lg bg-gray-50 shadow-sm">
+                                <p class="font-bold">Produção de <strong>${po.recipeName}</strong> em <strong>${new Date(po.date + 'T00:00:00').toLocaleDateString('pt-BR')}</strong></p>
+                                <p class="text-sm mt-2 font-semibold">Insumos manipulados:</p>
+                                <ul class="list-disc list-inside text-sm text-gray-700 pl-4">
+                                    ${handledIngredients.map(ing => {
+                                        const product = localInventory.find(p => p.id === ing.productId);
+                                        return `<li>${product.name} (Lote: ${ing.batchCode}, Qtd: ${ing.adjustedQuantity.toFixed(2)})</li>`;
+                                    }).join('')}
+                                </ul>
+                            </li>
+                         `;
+                    });
+                    resultsHtml += '</ul>';
+                } else {
+                    resultsHtml += `<p class="text-center text-gray-500 mt-4">Nenhuma produção encontrada para este manipulador.</p>`;
+                }
+            }
+            
+            traceResultsContainer.innerHTML = resultsHtml;
+
+        }, 200);
+    });
+
+    // --- ABC CURVE ---
+    function calculateAndRenderAbcCurve() {
+        const consumptionData = localMonthlyConsumption.reduce((acc, current) => {
+            if (acc[current.productId]) {
+                acc[current.productId] += current.totalConsumed;
+            } else {
+                acc[current.productId] = current.totalConsumed;
+            }
+            return acc;
+        }, {});
+
+        const totalConsumption = Object.values(consumptionData).reduce((sum, qty) => sum + qty, 0);
+        
+        const canvas = document.getElementById('abc-curve-chart');
+        const ctx = canvas.getContext('2d');
+        if (abcCurveChart) {
+            abcCurveChart.destroy();
+        }
+
+        if (totalConsumption === 0) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#6b7280';
+            ctx.font = "16px 'Inter', sans-serif";
+            ctx.fillText('Dados de consumo insuficientes para gerar a curva ABC.', canvas.width / 2, canvas.height / 2);
+            return;
+        }
+
+        const sortedItems = Object.keys(consumptionData)
+            .map(productId => ({
+                productId: parseInt(productId),
+                consumedQty: consumptionData[productId],
+                percentage: (consumptionData[productId] / totalConsumption) * 100,
+            }))
+            .sort((a, b) => b.consumedQty - a.consumedQty);
+
+        let cumulativePercentage = 0;
+        const classifiedItems = { A: 0, B: 0, C: 0 };
+        
+        sortedItems.forEach(item => {
+            cumulativePercentage += item.percentage;
+            if (cumulativePercentage <= 80) {
+                classifiedItems.A++;
+            } else if (cumulativePercentage <= 95) { // 80 + 15
+                classifiedItems.B++;
+            } else {
+                classifiedItems.C++;
+            }
+        });
+
+        abcCurveChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    `Classe A (${classifiedItems.A} itens)`,
+                    `Classe B (${classifiedItems.B} itens)`,
+                    `Classe C (${classifiedItems.C} itens)`
+                ],
+                datasets: [{
+                    label: 'Número de Itens por Classe',
+                    data: [classifiedItems.A, classifiedItems.B, classifiedItems.C],
+                    backgroundColor: [
+                        '#4f46e5', // Indigo-600
+                        '#10b981', // Emerald-500
+                        '#f59e0b'  // Amber-500
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 2,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                const totalItems = classifiedItems.A + classifiedItems.B + classifiedItems.C;
+                                const value = context.raw;
+                                const percentage = totalItems > 0 ? (value / totalItems * 100).toFixed(1) : 0;
+                                label += `${percentage}% do total de itens`;
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
 
     // --- RESET DATABASE ---
     btnResetDatabase.addEventListener('click', () => {
-        const password = prompt("Para apagar todos os dados, digite a senha:");
-        if (password === '1q2w3e4r') {
-            showConfirmationModal("Apagar TODOS os dados?", "Esta ação é irreversível e limpará completamente o banco de dados. Deseja continuar?", async () => {
-                try {
-                    loadingOverlay.classList.remove('hidden');
-                    const stores = ['inventory', 'batches', 'history', 'recipes', 'productionOrders', 'monthlyConsumption', 'residualStock'];
-                    for (const storeName of stores) {
-                        await DB.clear(storeName);
-                    }
-                    await refreshLocalData();
-                    showNotification("Banco de dados apagado com sucesso.");
-                } catch(err) {
-                    showNotification("Erro ao apagar o banco de dados.", true);
-                } finally {
-                    loadingOverlay.classList.add('hidden');
+        showConfirmationModal("Apagar TODOS os dados?", "Esta ação é irreversível e limpará completamente o banco de dados. Deseja continuar?", async () => {
+            try {
+                loadingOverlay.classList.remove('hidden');
+                const stores = ['inventory', 'batches', 'history', 'recipes', 'productionOrders', 'monthlyConsumption', 'residualStock'];
+                for (const storeName of stores) {
+                    await DB.clear(storeName);
                 }
-            });
-        } else if (password !== null) {
-            showNotification("Senha incorreta.", true);
-        }
+                await refreshLocalData();
+                showNotification("Banco de dados apagado com sucesso.");
+            } catch(err) {
+                showNotification("Erro ao apagar o banco de dados.", true);
+            } finally {
+                loadingOverlay.classList.add('hidden');
+            }
+        });
     });
 
 
