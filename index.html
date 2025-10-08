@@ -73,6 +73,23 @@
         .searchable-item:hover {
             background-color: #f3f4f6;
         }
+        .gemini-modal-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .gemini-modal-content ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+        }
+         .gemini-modal-content ol {
+            list-style-type: decimal;
+            padding-left: 1.5rem;
+        }
+        .gemini-modal-content li {
+            margin-bottom: 0.25rem;
+        }
 
         @keyframes fade-in-out {
             0% { opacity: 0; transform: translateY(-20px); }
@@ -365,14 +382,16 @@
                         </button>
                     </div>
                 </div>
-                <div class="bg-white p-4 rounded-lg shadow-sm mb-6 flex items-center justify-between">
+                <div class="bg-white p-4 rounded-lg shadow-sm mb-6 flex items-center justify-between flex-wrap gap-4">
                     <div class="flex items-center">
                         <label for="search-po-by-date" class="text-sm font-medium text-gray-700 mr-2">Filtrar por data:</label>
                         <input type="date" id="search-po-by-date" class="form-input">
                     </div>
-                    <button id="btn-export-pdf" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg shadow-sm">
-                        <i class="fa-solid fa-file-pdf text-red-600 mr-2"></i>Exportar Relatório (PDF)
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button id="btn-export-pdf" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg shadow-sm">
+                            <i class="fa-solid fa-file-pdf text-red-600 mr-2"></i>Exportar Relatório (PDF)
+                        </button>
+                    </div>
                 </div>
                 <div id="production-orders-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Ordens de produção serão listadas aqui -->
@@ -404,7 +423,9 @@
 
             <!-- Tela de Estoque Residual -->
             <div id="screen-residual" class="hidden">
-                 <h1 class="text-3xl font-bold text-gray-800 mb-6">Estoque Residual</h1>
+                 <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-bold text-gray-800">Estoque Residual</h1>
+                 </div>
                  <div class="bg-white p-6 rounded-xl shadow-lg">
                     <p class="text-sm text-gray-600 mb-4">Esta tela mostra as sobras (positivo) ou faltas (negativo) de insumos acumuladas após a confirmação das ordens de produção.</p>
                     <div class="overflow-x-auto">
@@ -1148,7 +1169,7 @@
     const traceTypeRadios = document.querySelectorAll('input[name="trace-type"]');
     const traceLoteFields = document.getElementById('trace-lote-fields');
     const traceManipuladorFields = document.getElementById('trace-manipulador-fields');
-    
+
     // --- FUNÇÕES AUXILIARES ---
     function showNotification(message, isError = false) {
         notificationMessage.textContent = message;
@@ -1255,6 +1276,9 @@
         }
     }
     Object.keys(navLinks).forEach(key => { navLinks[key].addEventListener('click', (e) => { e.preventDefault(); navigateTo(key); }); });
+    
+    btnExportExcel.addEventListener('click', exportInventoryToExcel);
+    btnExportPdf.addEventListener('click', exportProductionOrdersToPdf);
 
     // --- ENTRY SCREEN LOGIC ---
     function calculateShelfLife(mfg, receipt, expiry) {
@@ -2404,6 +2428,107 @@
 
 
     // --- EXPORT FUNCTIONS ---
+    function exportInventoryToExcel() {
+        let filteredInventory = [...localInventory];
+        let searchTerm = searchInput.value.toLowerCase();
+        const selectedSupplier = supplierFilter.value;
+
+        if (searchTerm) {
+            filteredInventory = filteredInventory.filter(item => 
+                item.name.toLowerCase().includes(searchTerm) ||
+                (item.code && item.code.toLowerCase().includes(searchTerm)) ||
+                item.supplier.toLowerCase().includes(searchTerm)
+            );
+        }
+        if (selectedSupplier) {
+            filteredInventory = filteredInventory.filter(item => item.supplier === selectedSupplier);
+        }
+        
+        if (filteredInventory.length === 0) {
+            showNotification("Nenhum item para exportar com os filtros atuais.", true);
+            return;
+        }
+
+        const dataToExport = filteredInventory.map(item => ({
+            'Nome do Produto': item.name,
+            'Código': item.code,
+            'Fornecedor': item.supplier,
+            'Quantidade Total': item.totalQuantity.toFixed(2),
+            'Próxima Validade': getNextExpiry(item.id) ? new Date(getNextExpiry(item.id) + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Estoque");
+        
+        const date = new Date().toISOString().split('T')[0];
+        XLSX.writeFile(workbook, `relatorio_estoque_${date}.xlsx`);
+        showNotification("Relatório de estoque exportado para Excel!");
+    }
+
+    function exportProductionOrdersToPdf() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        const filterDate = searchPoByDate.value;
+        let filteredOrders = localProductionOrders;
+        if (filterDate) {
+            filteredOrders = localProductionOrders.filter(po => po.date === filterDate);
+        }
+
+        if (filteredOrders.length === 0) {
+            showNotification("Nenhuma ordem de produção para exportar com os filtros atuais.", true);
+            return;
+        }
+
+        const tableColumn = ["Data", "Receita (Qtd)", "Status", "Insumo", "Qtd. Usada", "Lote"];
+        const tableRows = [];
+
+        filteredOrders.forEach(order => {
+            const numIngredients = order.ingredients.length;
+            if (numIngredients === 0) return; // Pula ordens sem insumos
+
+            order.ingredients.forEach((ing, index) => {
+                const product = localInventory.find(p => p.id === ing.productId);
+                
+                const ingredientData = [
+                    product ? product.name : 'N/A',
+                    ing.adjustedQuantity.toFixed(4),
+                    ing.batchCode
+                ];
+
+                if (index === 0) {
+                    // Primeira linha para esta ordem, adiciona todas as colunas com rowSpan
+                    const orderData = [
+                        { content: new Date(order.date + 'T00:00:00').toLocaleDateString('pt-BR'), rowSpan: numIngredients },
+                        { content: `${order.recipeName} (${order.quantityProduced}x)`, rowSpan: numIngredients },
+                        { content: order.status, rowSpan: numIngredients },
+                    ];
+                    tableRows.push([...orderData, ...ingredientData]);
+                } else {
+                    // Linhas subsequentes, adiciona apenas os dados do insumo
+                    tableRows.push(ingredientData);
+                }
+            });
+        });
+        
+        doc.setFontSize(18);
+        doc.text(`Relatório de Ordens de Produção - ${filterDate ? new Date(filterDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'Geral'}`, 14, 22);
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+
+        doc.autoTable({
+            startY: 30,
+            head: [tableColumn],
+            body: tableRows,
+            theme: 'grid'
+        });
+
+        const dateStr = new Date().toISOString().split('T')[0];
+        doc.save(`relatorio_producao_${dateStr}.pdf`);
+        showNotification("Relatório PDF gerado com sucesso!");
+    }
+
     function exportChartDataToExcel(data, fileName) {
         const dataToExport = data.map(item => {
             const product = localInventory.find(p => p.id === item.productId);
@@ -2526,33 +2651,6 @@
         
         const scheduledOutputs = localProductionOrders.filter(po => (po.date === todayStr || po.date === tomorrowStr) && po.status === 'pendente');
         scheduledOutputChart = renderDashboardChart('scheduled-output-chart', scheduledOutputChart, 'Top 10 Saídas Programadas (48h)', scheduledOutputs, true, 'btn-export-scheduled-output');
-
-        // --- ÚLTIMAS ENTRADAS ---
-        const lastEntriesList = document.getElementById('last-entries-list');
-        if (lastEntriesList) {
-            const lastEntries = [...localHistory].filter(h => h.type === 'entrada').sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0,5);
-            lastEntriesList.innerHTML = '';
-            if (lastEntries.length > 0) {
-                lastEntries.forEach(entry => {
-                    const product = localInventory.find(p => p.id === entry.productId);
-                    const li = document.createElement('li');
-                    li.className = 'py-3 flex justify-between items-center text-sm';
-                    li.innerHTML = `
-                        <div>
-                            <p class="font-medium text-gray-800">${product ? product.name : 'Produto desconhecido'}</p>
-                            <p class="text-gray-500">Lote: ${entry.batchCode}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-semibold text-green-600">+${entry.quantity.toFixed(2)}</p>
-                            <p class="text-gray-400">${new Date(entry.date + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
-                        </div>
-                    `;
-                    lastEntriesList.appendChild(li);
-                });
-            } else {
-                 lastEntriesList.innerHTML = `<p class="text-center text-gray-500 py-4">Nenhuma entrada registrada.</p>`;
-            }
-        }
         
         
         // --- ALERTAS ---
@@ -2899,6 +2997,7 @@
     // --- RESIDUAL STOCK ---
     function renderResidualStock() {
         residualTableBody.innerHTML = '';
+
         if(localResidualStock.length === 0) {
              residualTableBody.innerHTML = `<tr><td colspan="3" class="text-center py-4">Nenhum saldo residual.</td></tr>`;
             return;
