@@ -12,6 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -73,23 +74,6 @@
         .searchable-item:hover {
             background-color: #f3f4f6;
         }
-        .gemini-modal-content h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
-        }
-        .gemini-modal-content ul {
-            list-style-type: disc;
-            padding-left: 1.5rem;
-        }
-         .gemini-modal-content ol {
-            list-style-type: decimal;
-            padding-left: 1.5rem;
-        }
-        .gemini-modal-content li {
-            margin-bottom: 0.25rem;
-        }
 
         @keyframes fade-in-out {
             0% { opacity: 0; transform: translateY(-20px); }
@@ -100,6 +84,23 @@
         .animate-fade-in-out {
             animation: fade-in-out 4s ease-in-out forwards;
         }
+        
+        @keyframes flash-red-bg {
+            0%, 100% { background-color: #f1f5f9; } /* bg-slate-100 */
+            50% { background-color: #fee2e2; } /* bg-red-100 */
+        }
+        .flash-red {
+            animation: flash-red-bg 0.8s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .shake-alert {
+            animation: shake 0.5s ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -107,6 +108,15 @@
     <div id="loading-overlay" class="fixed inset-0 z-[101] flex items-center justify-center bg-white">
         <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-600"></div>
     </div>
+    
+    <!-- Low Stock Alert Bell -->
+    <div id="low-stock-indicator" class="hidden fixed top-5 right-24 z-[100] cursor-pointer">
+        <div class="relative">
+            <i class="fa-solid fa-bell text-3xl text-red-600"></i>
+            <span id="low-stock-count" class="absolute -top-2 -right-2 bg-red-700 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+        </div>
+    </div>
+
 
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
@@ -382,12 +392,15 @@
                         </button>
                     </div>
                 </div>
-                <div class="bg-white p-4 rounded-lg shadow-sm mb-6 flex items-center justify-between flex-wrap gap-4">
+                <div class="bg-white p-4 rounded-lg shadow-sm mb-6 flex items-center justify-between flex-wrap gap-2">
                     <div class="flex items-center">
                         <label for="search-po-by-date" class="text-sm font-medium text-gray-700 mr-2">Filtrar por data:</label>
                         <input type="date" id="search-po-by-date" class="form-input">
                     </div>
                     <div class="flex items-center gap-2">
+                        <button id="btn-export-word" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg shadow-sm">
+                            <i class="fa-solid fa-file-word text-blue-600 mr-2"></i>Exportar para Word
+                        </button>
                         <button id="btn-export-pdf" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg shadow-sm">
                             <i class="fa-solid fa-file-pdf text-red-600 mr-2"></i>Exportar Relatório (PDF)
                         </button>
@@ -423,9 +436,7 @@
 
             <!-- Tela de Estoque Residual -->
             <div id="screen-residual" class="hidden">
-                 <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-3xl font-bold text-gray-800">Estoque Residual</h1>
-                 </div>
+                 <h1 class="text-3xl font-bold text-gray-800 mb-6">Estoque Residual</h1>
                  <div class="bg-white p-6 rounded-xl shadow-lg">
                     <p class="text-sm text-gray-600 mb-4">Esta tela mostra as sobras (positivo) ou faltas (negativo) de insumos acumuladas após a confirmação das ordens de produção.</p>
                     <div class="overflow-x-auto">
@@ -928,6 +939,25 @@
          </div>
     </div>
 
+    <!-- Low Stock Alert Modal -->
+    <div id="low-stock-alert-modal" class="modal p-4">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-lg w-full border-t-4 border-red-500">
+             <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-red-600 flex items-center"><i class="fa-solid fa-triangle-exclamation mr-3"></i>Alerta de Estoque Baixo</h2>
+                <button id="close-low-stock-alert-modal" class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+            </div>
+            <p class="text-gray-600 mb-4">Os seguintes itens estão abaixo do estoque mínimo definido:</p>
+            <div id="low-stock-alert-list" class="overflow-y-auto max-h-64 border rounded-lg">
+                <!-- List will be populated by JS -->
+            </div>
+            <div class="mt-6 flex justify-end">
+                 <button id="view-low-stock-items-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">
+                    Ver Itens no Estoque
+                </button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Modal de Notificação -->
     <div id="notification-modal" class="fixed top-5 right-5 z-[100] hidden text-white py-2 px-5 rounded-lg shadow-lg">
@@ -1075,6 +1105,8 @@
     let scheduledOutputChart = null;
     let abcCurveChart = null;
     let currentRecipeCategory = 'Todos'; // Default to show all
+    let previouslyNotifiedLowStockIds = new Set();
+    let hasFlashedScreen = false;
 
     // --- DOM ELEMENTS ---
     const loadingOverlay = document.getElementById('loading-overlay');
@@ -1122,6 +1154,7 @@
     const poDate = document.getElementById('po-date');
     const searchPoByDate = document.getElementById('search-po-by-date');
     const btnExportPdf = document.getElementById('btn-export-pdf');
+    const btnExportWord = document.getElementById('btn-export-word');
     const btnConfirmProduction = document.getElementById('btn-confirm-production');
     const confirmProductionModal = document.getElementById('confirm-production-modal');
     const closeConfirmProductionModalBtn = document.getElementById('close-confirm-production-modal');
@@ -1169,6 +1202,28 @@
     const traceTypeRadios = document.querySelectorAll('input[name="trace-type"]');
     const traceLoteFields = document.getElementById('trace-lote-fields');
     const traceManipuladorFields = document.getElementById('trace-manipulador-fields');
+    const lowStockIndicator = document.getElementById('low-stock-indicator');
+    const lowStockCount = document.getElementById('low-stock-count');
+    const lowStockAlertModal = document.getElementById('low-stock-alert-modal');
+    const closeLowStockAlertModal = document.getElementById('close-low-stock-alert-modal');
+    const lowStockAlertList = document.getElementById('low-stock-alert-list');
+    const viewLowStockItemsBtn = document.getElementById('view-low-stock-items-btn');
+    
+    // --- EVENT LISTENERS FOR NEW ELEMENTS ---
+    lowStockIndicator.addEventListener('click', () => {
+        showModal(lowStockAlertModal);
+        lowStockIndicator.classList.remove('shake-alert');
+    });
+
+    closeLowStockAlertModal.addEventListener('click', () => {
+        hideModal(lowStockAlertModal);
+    });
+
+    viewLowStockItemsBtn.addEventListener('click', () => {
+        hideModal(lowStockAlertModal);
+        navigateTo('inventory');
+        renderInventoryTable('low-stock');
+    });
 
     // --- FUNÇÕES AUXILIARES ---
     function showNotification(message, isError = false) {
@@ -1276,9 +1331,6 @@
         }
     }
     Object.keys(navLinks).forEach(key => { navLinks[key].addEventListener('click', (e) => { e.preventDefault(); navigateTo(key); }); });
-    
-    btnExportExcel.addEventListener('click', exportInventoryToExcel);
-    btnExportPdf.addEventListener('click', exportProductionOrdersToPdf);
 
     // --- ENTRY SCREEN LOGIC ---
     function calculateShelfLife(mfg, receipt, expiry) {
@@ -2428,107 +2480,6 @@
 
 
     // --- EXPORT FUNCTIONS ---
-    function exportInventoryToExcel() {
-        let filteredInventory = [...localInventory];
-        let searchTerm = searchInput.value.toLowerCase();
-        const selectedSupplier = supplierFilter.value;
-
-        if (searchTerm) {
-            filteredInventory = filteredInventory.filter(item => 
-                item.name.toLowerCase().includes(searchTerm) ||
-                (item.code && item.code.toLowerCase().includes(searchTerm)) ||
-                item.supplier.toLowerCase().includes(searchTerm)
-            );
-        }
-        if (selectedSupplier) {
-            filteredInventory = filteredInventory.filter(item => item.supplier === selectedSupplier);
-        }
-        
-        if (filteredInventory.length === 0) {
-            showNotification("Nenhum item para exportar com os filtros atuais.", true);
-            return;
-        }
-
-        const dataToExport = filteredInventory.map(item => ({
-            'Nome do Produto': item.name,
-            'Código': item.code,
-            'Fornecedor': item.supplier,
-            'Quantidade Total': item.totalQuantity.toFixed(2),
-            'Próxima Validade': getNextExpiry(item.id) ? new Date(getNextExpiry(item.id) + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'
-        }));
-
-        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Estoque");
-        
-        const date = new Date().toISOString().split('T')[0];
-        XLSX.writeFile(workbook, `relatorio_estoque_${date}.xlsx`);
-        showNotification("Relatório de estoque exportado para Excel!");
-    }
-
-    function exportProductionOrdersToPdf() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        const filterDate = searchPoByDate.value;
-        let filteredOrders = localProductionOrders;
-        if (filterDate) {
-            filteredOrders = localProductionOrders.filter(po => po.date === filterDate);
-        }
-
-        if (filteredOrders.length === 0) {
-            showNotification("Nenhuma ordem de produção para exportar com os filtros atuais.", true);
-            return;
-        }
-
-        const tableColumn = ["Data", "Receita (Qtd)", "Status", "Insumo", "Qtd. Usada", "Lote"];
-        const tableRows = [];
-
-        filteredOrders.forEach(order => {
-            const numIngredients = order.ingredients.length;
-            if (numIngredients === 0) return; // Pula ordens sem insumos
-
-            order.ingredients.forEach((ing, index) => {
-                const product = localInventory.find(p => p.id === ing.productId);
-                
-                const ingredientData = [
-                    product ? product.name : 'N/A',
-                    ing.adjustedQuantity.toFixed(4),
-                    ing.batchCode
-                ];
-
-                if (index === 0) {
-                    // Primeira linha para esta ordem, adiciona todas as colunas com rowSpan
-                    const orderData = [
-                        { content: new Date(order.date + 'T00:00:00').toLocaleDateString('pt-BR'), rowSpan: numIngredients },
-                        { content: `${order.recipeName} (${order.quantityProduced}x)`, rowSpan: numIngredients },
-                        { content: order.status, rowSpan: numIngredients },
-                    ];
-                    tableRows.push([...orderData, ...ingredientData]);
-                } else {
-                    // Linhas subsequentes, adiciona apenas os dados do insumo
-                    tableRows.push(ingredientData);
-                }
-            });
-        });
-        
-        doc.setFontSize(18);
-        doc.text(`Relatório de Ordens de Produção - ${filterDate ? new Date(filterDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'Geral'}`, 14, 22);
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-
-        doc.autoTable({
-            startY: 30,
-            head: [tableColumn],
-            body: tableRows,
-            theme: 'grid'
-        });
-
-        const dateStr = new Date().toISOString().split('T')[0];
-        doc.save(`relatorio_producao_${dateStr}.pdf`);
-        showNotification("Relatório PDF gerado com sucesso!");
-    }
-
     function exportChartDataToExcel(data, fileName) {
         const dataToExport = data.map(item => {
             const product = localInventory.find(p => p.id === item.productId);
@@ -2595,6 +2546,174 @@
          XLSX.writeFile(workbook, "relatorio_risco_de_perda.xlsx");
          showNotification("Relatório exportado!");
     });
+    
+    btnExportWord.addEventListener('click', exportProductionOrdersToWord);
+
+    async function exportProductionOrdersToWord() {
+        const filterDate = searchPoByDate.value;
+        if (!filterDate) {
+            showNotification("Por favor, selecione uma data para exportar.", true);
+            return;
+        }
+
+        let filteredOrders = localProductionOrders.filter(po => po.date === filterDate);
+
+        if (filteredOrders.length === 0) {
+            showNotification("Nenhuma ordem de produção para exportar na data selecionada.", true);
+            return;
+        }
+
+        // Group orders by production line (recipe category)
+        const groupedByLine = {};
+        for (const order of filteredOrders) {
+            const recipe = localRecipes.find(r => r.id === order.recipeId);
+            if (recipe) {
+                const category = recipe.category || 'Sem Categoria';
+                if (!groupedByLine[category]) {
+                    groupedByLine[category] = [];
+                }
+                groupedByLine[category].push(order);
+            }
+        }
+
+        let htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+            <meta charset='UTF-8'>
+            <style>
+                body { font-family: Arial, sans-serif; font-size: 11pt; margin: 40px; }
+                h1 { font-size: 18pt; color: #333; text-align: center; }
+                h2 { font-size: 16pt; color: #444; border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-top: 30px;}
+                h3 { font-size: 14pt; color: #555; }
+                table { border-collapse: collapse; width: 100%; margin-top: 10px; font-size: 10pt; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; font-weight: bold; }
+                .order-container { margin-bottom: 25px; page-break-inside: avoid; }
+            </style>
+            </head>
+            <body>
+        `;
+
+        const formattedDate = new Date(filterDate + 'T00:00:00').toLocaleDateString('pt-BR');
+        htmlContent += `<h1>Ordens de Produção - ${formattedDate}</h1>`;
+
+        const productionLines = Object.keys(groupedByLine).sort();
+
+        for (const line of productionLines) {
+            htmlContent += `<h2>Linha de Produção: ${line}</h2>`;
+            const ordersInLine = groupedByLine[line];
+
+            for (const order of ordersInLine) {
+                htmlContent += `<div class="order-container">`;
+                htmlContent += `<h3>Receita: ${order.recipeName} (Quantidade: ${order.quantityProduced})</h3>`;
+                
+                htmlContent += `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Insumo</th>
+                                <th>Lote de Consumo</th>
+                                <th>Quantidade a Usar</th>
+                                <th>Manipulador</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                for (const ing of order.ingredients) {
+                    const product = localInventory.find(p => p.id === ing.productId);
+                    htmlContent += `
+                        <tr>
+                            <td>${product ? product.name : 'Insumo não encontrado'}</td>
+                            <td>${ing.batchCode}</td>
+                            <td>${ing.adjustedQuantity.toFixed(4)}</td>
+                            <td>${ing.handler}</td>
+                        </tr>
+                    `;
+                }
+
+                htmlContent += `</tbody></table></div>`;
+            }
+        }
+
+        htmlContent += `</body></html>`;
+
+        try {
+            // Note: FileSaver.js must be loaded for 'saveAs' to be defined.
+            const blob = new Blob([htmlContent], { type: "application/msword;charset=utf-8" });
+            saveAs(blob, `Ordens_de_Producao_${filterDate}.doc`);
+            showNotification("Arquivo Word gerado com sucesso!");
+        } catch (error) {
+            console.error("Erro ao gerar arquivo Word:", error);
+            showNotification("Erro ao gerar arquivo Word. Verifique se a biblioteca FileSaver.js está carregada.", true);
+        }
+    }
+
+    // --- LOW STOCK ALERT LOGIC ---
+    function updateLowStockAlerts() {
+        const lowStockItems = localInventory.filter(i => {
+            const metrics = calculateConsumptionMetrics(i.id);
+            const minStock = i.minStock !== null && i.minStock !== undefined ? i.minStock : metrics.minStock;
+            // Only alert if a minimum stock is defined (greater than 0)
+            return minStock > 0 && i.totalQuantity < minStock;
+        });
+
+        if (lowStockItems.length === 0) {
+            lowStockIndicator.classList.add('hidden');
+            previouslyNotifiedLowStockIds.clear();
+            return;
+        }
+
+        // Always show the indicator if there are low stock items
+        lowStockCount.textContent = lowStockItems.length;
+        lowStockIndicator.classList.remove('hidden');
+
+        // Populate the modal list
+        lowStockAlertList.innerHTML = `
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 sticky top-0">
+                    <tr>
+                        <th class="px-4 py-2 text-left">Produto</th>
+                        <th class="px-4 py-2 text-right">Atual</th>
+                        <th class="px-4 py-2 text-right">Mínimo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${lowStockItems.map(item => {
+                        const metrics = calculateConsumptionMetrics(item.id);
+                        const minStock = item.minStock !== null && item.minStock !== undefined ? item.minStock : metrics.minStock;
+                        return `
+                        <tr class="border-b">
+                            <td class="px-4 py-2">${item.name}</td>
+                            <td class="px-4 py-2 text-right font-bold text-red-600">${item.totalQuantity.toFixed(2)}</td>
+                            <td class="px-4 py-2 text-right">${minStock.toFixed(2)}</td>
+                        </tr>
+                        `
+                    }).join('')}
+                </tbody>
+            </table>
+        `;
+
+        const currentLowStockIds = new Set(lowStockItems.map(item => item.id));
+        const hasNewItems = [...currentLowStockIds].some(id => !previouslyNotifiedLowStockIds.has(id));
+        
+        if (hasNewItems) {
+            // Flash the screen on the very first new notification of the session
+            if (!hasFlashedScreen) {
+                document.body.classList.add('flash-red');
+                hasFlashedScreen = true; // Prevents re-flashing
+                setTimeout(() => document.body.classList.remove('flash-red'), 800);
+            }
+
+            // Always shake the bell and show the modal for new items
+            lowStockIndicator.classList.add('shake-alert');
+            showModal(lowStockAlertModal);
+            
+            // Update the set of notified items
+            previouslyNotifiedLowStockIds = currentLowStockIds;
+        }
+    }
 
 
     // --- INICIALIZAÇÃO E SINCRONIZAÇÃO COM DADOS LOCAIS ---
@@ -2615,6 +2734,9 @@
             renderConsumptionReport();
             renderResidualStock();
             populateSupplierFilter();
+            
+            // Check for low stock after all data is refreshed
+            updateLowStockAlerts();
         } catch (error) {
             console.error("Erro ao carregar dados locais:", error);
             showNotification("Falha ao carregar dados do banco de dados local.", true);
@@ -2651,6 +2773,33 @@
         
         const scheduledOutputs = localProductionOrders.filter(po => (po.date === todayStr || po.date === tomorrowStr) && po.status === 'pendente');
         scheduledOutputChart = renderDashboardChart('scheduled-output-chart', scheduledOutputChart, 'Top 10 Saídas Programadas (48h)', scheduledOutputs, true, 'btn-export-scheduled-output');
+
+        // --- ÚLTIMAS ENTRADAS ---
+        const lastEntriesList = document.getElementById('last-entries-list');
+        if (lastEntriesList) {
+            const lastEntries = [...localHistory].filter(h => h.type === 'entrada').sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0,5);
+            lastEntriesList.innerHTML = '';
+            if (lastEntries.length > 0) {
+                lastEntries.forEach(entry => {
+                    const product = localInventory.find(p => p.id === entry.productId);
+                    const li = document.createElement('li');
+                    li.className = 'py-3 flex justify-between items-center text-sm';
+                    li.innerHTML = `
+                        <div>
+                            <p class="font-medium text-gray-800">${product ? product.name : 'Produto desconhecido'}</p>
+                            <p class="text-gray-500">Lote: ${entry.batchCode}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-semibold text-green-600">+${entry.quantity.toFixed(2)}</p>
+                            <p class="text-gray-400">${new Date(entry.date + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
+                        </div>
+                    `;
+                    lastEntriesList.appendChild(li);
+                });
+            } else {
+                 lastEntriesList.innerHTML = `<p class="text-center text-gray-500 py-4">Nenhuma entrada registrada.</p>`;
+            }
+        }
         
         
         // --- ALERTAS ---
@@ -2997,7 +3146,6 @@
     // --- RESIDUAL STOCK ---
     function renderResidualStock() {
         residualTableBody.innerHTML = '';
-
         if(localResidualStock.length === 0) {
              residualTableBody.innerHTML = `<tr><td colspan="3" class="text-center py-4">Nenhum saldo residual.</td></tr>`;
             return;
