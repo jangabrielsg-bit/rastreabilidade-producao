@@ -331,7 +331,7 @@
                             </select>
                         </div>
 
-                        <button id="btn-export-excel" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg shadow-sm">
+                        <button id="btn-export-excel" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg shadow-sm flex items-center justify-center">
                             <i class="fa-solid fa-file-excel text-green-600 mr-2"></i>Exportar para Excel
                         </button>
                     </div>
@@ -2480,16 +2480,41 @@
 
 
     // --- EXPORT FUNCTIONS ---
-
     function exportInventoryToExcel() {
-        try {
-            const dataToExport = [];
-            
-            // Usar a lista completa de inventário para um relatório detalhado
-            localInventory.forEach(item => {
-                const itemBatches = localBatches.filter(b => b.productId === item.id && b.quantity > 0);
-                if (itemBatches.length > 0) {
-                    itemBatches.forEach(batch => {
+        const button = document.getElementById('btn-export-excel');
+        const originalHtml = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = `
+            <span class="animate-spin h-5 w-5 mr-3" role="status" aria-hidden="true">
+                <i class="fa-solid fa-spinner"></i>
+            </span>
+            Exportando...
+        `;
+
+        // Yield to the browser to update the UI
+        setTimeout(() => {
+            try {
+                const dataToExport = [];
+                
+                localInventory.forEach(item => {
+                    const itemBatches = localBatches.filter(b => b.productId === item.id && b.quantity > 0);
+                    if (itemBatches.length > 0) {
+                        itemBatches.forEach(batch => {
+                            dataToExport.push({
+                                'Nome do Produto': item.name,
+                                'Código': item.code,
+                                'Fornecedor': item.supplier,
+                                'Estoque Mínimo': item.minStock,
+                                'Estoque Máximo': item.maxStock,
+                                'Estoque Total do Item': item.totalQuantity,
+                                'Lote': batch.code,
+                                'Quantidade do Lote': batch.quantity,
+                                'Data de Validade': batch.expiryDate ? new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A',
+                                'Data de Fabricação': batch.mfgDate ? new Date(batch.mfgDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A',
+                                'Data de Recebimento': batch.receiptDate ? new Date(batch.receiptDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'
+                            });
+                        });
+                    } else {
                         dataToExport.push({
                             'Nome do Produto': item.name,
                             'Código': item.code,
@@ -2497,62 +2522,42 @@
                             'Estoque Mínimo': item.minStock,
                             'Estoque Máximo': item.maxStock,
                             'Estoque Total do Item': item.totalQuantity,
-                            'Lote': batch.code,
-                            'Quantidade do Lote': batch.quantity,
-                            'Data de Validade': batch.expiryDate ? new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A',
-                            'Data de Fabricação': batch.mfgDate ? new Date(batch.mfgDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A',
-                            'Data de Recebimento': batch.receiptDate ? new Date(batch.receiptDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'
+                            'Lote': 'N/A',
+                            'Quantidade do Lote': 0,
+                            'Data de Validade': 'N/A',
+                            'Data de Fabricação': 'N/A',
+                            'Data de Recebimento': 'N/A'
                         });
-                    });
-                } else {
-                    // Inclui itens sem lotes ou com estoque zero
-                    dataToExport.push({
-                        'Nome do Produto': item.name,
-                        'Código': item.code,
-                        'Fornecedor': item.supplier,
-                        'Estoque Mínimo': item.minStock,
-                        'Estoque Máximo': item.maxStock,
-                        'Estoque Total do Item': item.totalQuantity,
-                        'Lote': 'N/A',
-                        'Quantidade do Lote': 0,
-                        'Data de Validade': 'N/A',
-                        'Data de Fabricação': 'N/A',
-                        'Data de Recebimento': 'N/A'
-                    });
+                    }
+                });
+
+                if (dataToExport.length === 0) {
+                    showNotification("Nenhum dado de estoque para exportar.", true);
+                    return; // The finally block will still run
                 }
-            });
 
-            if (dataToExport.length === 0) {
-                showNotification("Nenhum dado de estoque para exportar.", true);
-                return;
+                const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Estoque Detalhado");
+
+                worksheet['!cols'] = [
+                    { wch: 40 }, { wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 15 },
+                    { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }
+                ];
+
+                XLSX.writeFile(workbook, `Relatorio_Estoque_Detalhado_${new Date().toISOString().split('T')[0]}.xlsx`);
+                showNotification("Relatório de estoque exportado com sucesso!");
+
+            } catch (error) {
+                console.error("Erro ao exportar para Excel:", error);
+                showNotification("Ocorreu um erro ao exportar o relatório.", true);
+            } finally {
+                button.disabled = false;
+                button.innerHTML = originalHtml;
             }
-
-            const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Estoque Detalhado");
-
-            worksheet['!cols'] = [
-                { wch: 40 }, // Nome do Produto
-                { wch: 15 }, // Código
-                { wch: 25 }, // Fornecedor
-                { wch: 15 }, // Estoque Mínimo
-                { wch: 15 }, // Estoque Máximo
-                { wch: 20 }, // Estoque Total do Item
-                { wch: 20 }, // Lote
-                { wch: 20 }, // Quantidade do Lote
-                { wch: 20 }, // Data de Validade
-                { wch: 20 }, // Data de Fabricação
-                { wch: 20 }  // Data de Recebimento
-            ];
-
-            XLSX.writeFile(workbook, `Relatorio_Estoque_Detalhado_${new Date().toISOString().split('T')[0]}.xlsx`);
-            showNotification("Relatório de estoque exportado com sucesso!");
-
-        } catch (error) {
-            console.error("Erro ao exportar para Excel:", error);
-            showNotification("Ocorreu um erro ao exportar o relatório.", true);
-        }
+        }, 50); // A small delay is enough
     }
+
 
     function exportChartDataToExcel(data, fileName) {
         const dataToExport = data.map(item => {
