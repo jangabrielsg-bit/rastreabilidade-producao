@@ -194,7 +194,7 @@
                             <i class="fa-solid fa-box fa-xl"></i>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm text-gray-500">Quantidade Total</p>
+                            <p class="text-sm text-gray-500">Quantidade Disponível</p>
                             <p id="stat-total-quantity" class="text-2xl font-bold">0</p>
                         </div>
                     </div>
@@ -343,6 +343,8 @@
                                     <th scope="col" class="px-6 py-3 table-header-sortable" data-sort="code">Código</th>
                                     <th scope="col" class="px-6 py-3 table-header-sortable" data-sort="supplier">Fornecedor</th>
                                     <th scope="col" class="px-6 py-3 text-right table-header-sortable" data-sort="totalQuantity">Qtd. Total</th>
+                                    <th scope="col" class="px-6 py-3 text-right">Qtd. Reservada</th>
+                                    <th scope="col" class="px-6 py-3 text-right">Qtd. Disponível</th>
                                     <th scope="col" class="px-6 py-3 table-header-sortable" data-sort="expiry">Próx. Validade</th>
                                 </tr>
                             </thead>
@@ -634,12 +636,17 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm pt-4">
                     <div><strong>Código:</strong> <span id="details-product-code"></span></div>
                     <div><strong>Fornecedor:</strong> <span id="details-supplier"></span></div>
-                    <div><strong>Estoque Total:</strong> <span id="details-total-quantity"></span></div>
                     <div><strong>Consumo Médio Diário:</strong> <span id="details-avg-consumption"></span></div>
                     <div><strong>Estoque Mínimo:</strong> <span id="details-min-stock"></span></div>
                     <div><strong>Estoque Máximo:</strong> <span id="details-max-stock"></span></div>
+                    <div class="md:col-span-3 grid grid-cols-3 gap-6 mt-2 pt-2 border-t">
+                        <div><strong>Estoque Total:</strong> <span id="details-total-quantity"></span></div>
+                        <div><strong>Estoque Reservado:</strong> <span id="details-reserved-quantity" class="text-orange-600 font-semibold"></span></div>
+                        <div><strong>Estoque Disponível:</strong> <span id="details-available-quantity" class="text-green-600 font-bold"></span></div>
+                    </div>
                 </div>
             </div>
+
 
             <!-- Edit Mode -->
             <div id="item-details-edit" class="hidden">
@@ -681,7 +688,9 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-4 py-2">Lote</th>
-                            <th class="px-4 py-2">Quantidade</th>
+                            <th class="px-4 py-2">Qtd. Física</th>
+                            <th class="px-4 py-2">Qtd. Reservada</th>
+                            <th class="px-4 py-2">Qtd. Disponível</th>
                             <th class="px-4 py-2">Data de Validade</th>
                              <th class="px-4 py-2">Shelf Life (%)</th>
                             <th class="px-4 py-2 text-center">Ações</th>
@@ -832,7 +841,7 @@
                                 <th class="px-2 py-2 text-left">Residual</th>
                                 <th class="px-2 py-2 text-left">Qtd. Necessária</th>
                                 <th class="px-2 py-2 text-left">Qtd. a Usar</th>
-                                <th class="px-2 py-2 text-left">Lote de Consumo</th>
+                                <th class="px-2 py-2 text-left">Lote de Consumo (PVPS)</th>
                                 <th class="px-2 py-2 text-left">Manipulador</th>
                             </tr>
                         </thead>
@@ -848,34 +857,6 @@
         </div>
     </div>
 
-    <!-- Modal de Confirmação de Produção -->
-    <div id="confirm-production-modal" class="modal p-4">
-        <div class="bg-white rounded-lg shadow-xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold">Confirmar Produção e Baixa de Estoque</h2>
-                <button id="close-confirm-production-modal" class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
-            </div>
-            <p class="text-sm text-gray-600 mb-4">Resumo de todos os insumos para as ordens de produção selecionadas.</p>
-             <div class="overflow-x-auto border rounded-lg">
-                <table class="w-full text-sm">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-2 text-left">Insumo</th>
-                            <th class="px-4 py-2 text-left">Qtd. Requisitada</th>
-                            <th class="px-4 py-2 text-left">Qtd. Entregue (editável)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="confirm-production-tbody"></tbody>
-                </table>
-             </div>
-             <div class="mt-8 flex justify-end">
-                <button id="btn-execute-stock-consumption" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md">
-                    Confirmar e Dar Baixa no Estoque
-                </button>
-            </div>
-        </div>
-    </div>
-    
     <!-- Modal de Confirmação de Upload -->
     <div id="confirm-upload-modal" class="modal">
         <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
@@ -971,7 +952,7 @@
 
         function init() {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open('estoqueDB', 4); // Versão incrementada para novo Object Store
+                const request = indexedDB.open('estoqueDB', 4); // Versão não precisa mudar para adicionar campos, apenas stores/indexes
 
                 request.onerror = (event) => reject("Erro ao abrir o banco de dados.");
 
@@ -1156,11 +1137,6 @@
     const btnExportPdf = document.getElementById('btn-export-pdf');
     const btnExportWord = document.getElementById('btn-export-word');
     const btnConfirmProduction = document.getElementById('btn-confirm-production');
-    const confirmProductionModal = document.getElementById('confirm-production-modal');
-    const closeConfirmProductionModalBtn = document.getElementById('close-confirm-production-modal');
-    const productionDateFilter = document.getElementById('production-date-filter');
-    const confirmProductionTbody = document.getElementById('confirm-production-tbody');
-    const btnExecuteStockConsumption = document.getElementById('btn-execute-stock-consumption');
     const btnDownloadBackup = document.getElementById('btn-download-backup');
     const btnUploadBackup = document.getElementById('btn-upload-backup');
     const backupFileInput = document.getElementById('backup-file-input');
@@ -1206,7 +1182,6 @@
     const lowStockCount = document.getElementById('low-stock-count');
     const lowStockAlertModal = document.getElementById('low-stock-alert-modal');
     const closeLowStockAlertModal = document.getElementById('close-low-stock-alert-modal');
-    const lowStockAlertList = document.getElementById('low-stock-alert-list');
     const viewLowStockItemsBtn = document.getElementById('view-low-stock-items-btn');
     
     // --- EVENT LISTENERS FOR NEW ELEMENTS ---
@@ -1374,7 +1349,7 @@
                 product.totalQuantity += data.quantity;
                 await DB.update('inventory', product);
             }
-            await DB.add('batches', { productId, code: data.batchCode, quantity: data.quantity, mfgDate: data.mfgDate, receiptDate: data.receiptDate, expiryDate: data.expiryDate, shelfLife: data.shelfLife, authorizedBy });
+            await DB.add('batches', { productId, code: data.batchCode, quantity: data.quantity, reservedQuantity: 0, mfgDate: data.mfgDate, receiptDate: data.receiptDate, expiryDate: data.expiryDate, shelfLife: data.shelfLife, authorizedBy });
             await DB.add('history', { productId, batchCode: data.batchCode, type: 'entrada', quantity: data.quantity, date: data.receiptDate });
             showNotification('Entrada registrada com sucesso!');
             entryForm.reset();
@@ -1412,7 +1387,7 @@
                 const lowStockItems = localInventory.filter(i => {
                     const metrics = calculateConsumptionMetrics(i.id);
                     const minStock = i.minStock !== null && i.minStock !== undefined ? i.minStock : metrics.minStock;
-                    return i.totalQuantity < minStock && minStock > 0;
+                    return i.availableQuantity < minStock && minStock > 0;
                 });
                 const lowStockIds = new Set(lowStockItems.map(i => i.id));
                 filteredInventory = filteredInventory.filter(item => lowStockIds.has(item.id));
@@ -1467,7 +1442,7 @@
 
         inventoryTableBody.innerHTML = '';
         if (filteredInventory.length === 0) {
-            inventoryTableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4">Nenhum item encontrado.</td></tr>`;
+            inventoryTableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Nenhum item encontrado.</td></tr>`;
             return;
         }
         filteredInventory.forEach(item => {
@@ -1480,6 +1455,8 @@
                 <td class="px-6 py-4">${item.code}</td>
                 <td class="px-6 py-4">${item.supplier}</td>
                 <td class="px-6 py-4 text-right">${item.totalQuantity.toFixed(2)}</td>
+                <td class="px-6 py-4 text-right text-orange-600">${(item.totalReserved || 0).toFixed(2)}</td>
+                <td class="px-6 py-4 text-right font-bold ${item.availableQuantity <= 0 ? 'text-red-600' : 'text-green-600'}">${item.availableQuantity.toFixed(2)}</td>
                 <td class="px-6 py-4">${nextExpiry ? new Date(nextExpiry + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'}</td>
             `;
             inventoryTableBody.appendChild(row);
@@ -1546,7 +1523,6 @@
         document.getElementById('details-product-name').textContent = product.name;
         document.getElementById('details-product-code').textContent = product.code;
         document.getElementById('details-supplier').textContent = product.supplier;
-        document.getElementById('details-total-quantity').textContent = product.totalQuantity.toFixed(2);
         
         const metrics = calculateConsumptionMetrics(productId);
         
@@ -1564,6 +1540,10 @@
             document.getElementById('details-max-stock').innerHTML = `${metrics.maxStock.toFixed(2)} <span class="text-xs text-gray-500">(sugestão)</span>`;
         }
         
+        document.getElementById('details-total-quantity').textContent = product.totalQuantity.toFixed(2);
+        document.getElementById('details-reserved-quantity').textContent = (product.totalReserved || 0).toFixed(2);
+        document.getElementById('details-available-quantity').textContent = product.availableQuantity.toFixed(2);
+
         document.getElementById('edit-item-id').value = product.id;
         document.getElementById('edit-product-name').value = product.name;
         document.getElementById('edit-product-code').value = product.code;
@@ -1574,17 +1554,23 @@
         const batches = localBatches.filter(b => b.productId === productId && b.quantity > 0);
         const history = localHistory.filter(h => h.productId === productId).sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        detailsBatchesTable.innerHTML = batches.map(batch => `
+        detailsBatchesTable.innerHTML = batches.map(batch => {
+            const reserved = batch.reservedQuantity || 0;
+            const available = batch.quantity - reserved;
+            return `
             <tr class="border-b">
                 <td class="px-4 py-2">${batch.code}</td>
                 <td class="px-4 py-2">${batch.quantity.toFixed(2)}</td>
+                <td class="px-4 py-2 text-orange-600">${reserved.toFixed(2)}</td>
+                <td class="px-4 py-2 font-medium">${available.toFixed(2)}</td>
                 <td class="px-4 py-2">${batch.expiryDate ? new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'}</td>
                 <td class="px-4 py-2">${typeof batch.shelfLife === 'number' ? batch.shelfLife.toFixed(1) : (batch.shelfLife || 'N/A')}</td>
                 <td class="px-4 py-2 text-center">
                     <button class="edit-batch-btn text-blue-500 hover:text-blue-700 p-1" data-batch-id="${batch.id}" title="Editar Lote"><i class="fa-solid fa-pencil"></i></button>
                     <button class="delete-batch-btn text-red-500 hover:text-red-700 p-1" data-batch-id="${batch.id}" title="Excluir Lote"><i class="fa-solid fa-trash"></i></button>
                 </td>
-            </tr>`).join('');
+            </tr>`
+        }).join('');
         
         const groupedHistory = history.reduce((acc, entry) => {
             (acc[entry.date] = acc[entry.date] || []).push(entry);
@@ -1681,6 +1667,11 @@
 
         try {
             const batch = await DB.get('batches', batchId);
+            if(newQuantity < batch.reservedQuantity){
+                showNotification("A nova quantidade não pode ser menor que a quantidade já reservada.", true);
+                return;
+            }
+
             const oldQuantity = batch.quantity;
             batch.code = newCode;
             batch.quantity = newQuantity;
@@ -1713,6 +1704,11 @@
     function handleDeleteBatch(batchId) {
         const batch = localBatches.find(b => b.id === batchId);
         if (!batch) return;
+
+        if((batch.reservedQuantity || 0) > 0){
+            showNotification("Não é possível excluir um lote com estoque reservado.", true);
+            return;
+        }
 
         showConfirmationModal("Excluir Lote", `Tem certeza que deseja excluir o lote <strong>${batch.code}</strong>? A quantidade (${batch.quantity.toFixed(2)}) será removida do estoque total.`, async () => {
             try {
@@ -1970,7 +1966,7 @@
                             <div class="absolute top-3 right-3 text-right">
                                  <span class="block text-xs font-semibold px-3 py-1 rounded-full ${statusClass}">${po.status}</span>
                                  <div class="mt-2 flex space-x-2 justify-end">
-                                    <button class="edit-po-btn text-blue-500 hover:text-blue-700 p-1" data-po-id="${po.id}" title="Editar Ordem"><i class="fa-solid fa-pencil"></i></button>
+                                    <button class="edit-po-btn text-blue-500 hover:text-blue-700 p-1" data-po-id="${po.id}" title="Editar Ordem" ${po.status !== 'pendente' ? 'disabled' : ''}><i class="fa-solid fa-pencil"></i></button>
                                     <button class="delete-po-btn text-red-500 hover:text-red-700 p-1" data-po-id="${po.id}" title="Excluir Ordem"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                             </div>
@@ -1990,7 +1986,7 @@
 
     productionOrdersList.addEventListener('click', (e) => {
         const editBtn = e.target.closest('.edit-po-btn');
-        if (editBtn) {
+        if (editBtn && !editBtn.disabled) {
             handleEditProductionOrder(parseInt(editBtn.dataset.poId));
         }
         const deleteBtn = e.target.closest('.delete-po-btn');
@@ -1999,10 +1995,14 @@
         }
     });
 
-    function handleEditProductionOrder(poId) {
+    async function handleEditProductionOrder(poId) {
         const po = localProductionOrders.find(p => p.id === poId);
-        if (!po) return;
+        if (!po || po.status !== 'pendente') {
+            showNotification("Apenas ordens pendentes podem ser editadas.", true);
+            return;
+        }
 
+        productionOrderForm.reset();
         document.getElementById('edit-po-id').value = po.id;
         
         createSearchableSelect(poRecipeSearchableContainer, localRecipes, 'Buscar receita...', (recipe) => {
@@ -2017,7 +2017,7 @@
         poQuantity.value = po.quantityProduced;
         poDate.value = po.date;
         
-        updatePOIngredients(po.ingredients);
+        await updatePOIngredients(po.ingredients);
 
         productionOrderModalTitle.textContent = "Editar Ordem de Produção";
         productionOrderForm.querySelector('button[type="submit"]').textContent = "Salvar Alterações";
@@ -2031,20 +2031,32 @@
 
         showConfirmationModal(
             "Excluir Ordem de Produção",
-            `Tem certeza que deseja excluir a ordem para "<strong>${po.recipeName}</strong>" do dia ${new Date(po.date + 'T00:00:00').toLocaleDateString('pt-BR')}?`,
+            `Tem certeza que deseja excluir a ordem para "<strong>${po.recipeName}</strong>"? ${po.status === 'pendente' ? 'O estoque reservado será liberado.' : ''}`,
             async () => {
                 try {
+                    // Release reserved stock if pending
+                    if (po.status === 'pendente') {
+                        for (const ing of po.ingredients) {
+                            const batch = await DB.get('batches', ing.batchId);
+                            if (batch) {
+                                batch.reservedQuantity = (batch.reservedQuantity || 0) - ing.adjustedQuantity;
+                                if (batch.reservedQuantity < 0) batch.reservedQuantity = 0;
+                                await DB.update('batches', batch);
+                            }
+                        }
+                    }
                     await DB.remove('productionOrders', poId);
                     showNotification("Ordem de produção excluída com sucesso.");
                     await refreshLocalData();
                 } catch (err) {
                     showNotification("Erro ao excluir a ordem de produção.", true);
+                    console.error(err);
                 }
             }
         );
     }
 
-    btnNewProductionOrder.addEventListener('click', () => {
+    btnNewProductionOrder.addEventListener('click', async () => {
         if (localRecipes.length === 0) {
             showNotification("Crie uma receita antes de gerar uma ordem.", true);
             return;
@@ -2056,9 +2068,9 @@
         productionOrderForm.reset();
         document.getElementById('edit-po-id').value = '';
 
-        createSearchableSelect(poRecipeSearchableContainer, localRecipes, 'Buscar receita...', (recipe) => {
+        createSearchableSelect(poRecipeSearchableContainer, localRecipes, 'Buscar receita...', async (recipe) => {
             if (recipe) {
-                updatePOIngredients();
+                await updatePOIngredients();
             }
         });
         const recipeSearchInput = poRecipeSearchableContainer.querySelector('input');
@@ -2067,52 +2079,113 @@
 
         poQuantity.value = 1;
         poDate.value = new Date().toISOString().split('T')[0];
-        updatePOIngredients();
+        await updatePOIngredients();
         productionOrderModalTitle.textContent = "Nova Ordem de Produção";
         productionOrderForm.querySelector('button[type="submit"]').textContent = "Criar Ordem de Produção";
         showModal(productionOrderModal);
     });
 
-    function updatePOIngredients(existingIngredients = null) {
+    poIngredientsBody.addEventListener('input', e => {
+        if (e.target.classList.contains('po-adjusted-quantity')) {
+            const row = e.target.closest('tr');
+            updatePvpsCell(row);
+        }
+    });
+
+    function updatePvpsCell(row) {
+        const productId = parseInt(row.dataset.productId);
+        const adjustedQtyInput = row.querySelector('.po-adjusted-quantity');
+        const neededQty = parseFloat(adjustedQtyInput.value);
+        const cell = row.querySelector('.po-batch-consumption-cell');
+
+        const poId = document.getElementById('edit-po-id').value;
+        const existingIngredients = poId ? localProductionOrders.find(p => p.id === parseInt(poId))?.ingredients : null;
+
+        let tempAvailableBatches = JSON.parse(JSON.stringify(localBatches));
+        if (existingIngredients) {
+            existingIngredients.forEach(ing => {
+                if (ing.productId === productId) {
+                    const batchIndex = tempAvailableBatches.findIndex(b => b.id === ing.batchId);
+                    if (batchIndex > -1) {
+                        tempAvailableBatches[batchIndex].reservedQuantity -= ing.adjustedQuantity;
+                    }
+                }
+            });
+        }
+
+        const availableBatches = tempAvailableBatches
+            .filter(b => b.productId === productId && (b.quantity - (b.reservedQuantity || 0)) > 0)
+            .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+
+        let remainingToFulfill = neededQty;
+        const consumptionPlan = [];
+        let totalAvailable = 0;
+
+        for (const batch of availableBatches) {
+            const availableInBatch = batch.quantity - (batch.reservedQuantity || 0);
+            totalAvailable += availableInBatch;
+            const qtyToTake = Math.min(remainingToFulfill, availableInBatch);
+            if (qtyToTake > 0) {
+                consumptionPlan.push(`Lote ${batch.code} (${qtyToTake.toFixed(2)})`);
+                remainingToFulfill -= qtyToTake;
+            }
+            if (remainingToFulfill <= 0) break;
+        }
+
+        if (neededQty > totalAvailable) {
+            row.classList.add('insufficient-stock-row');
+        } else {
+            row.classList.remove('insufficient-stock-row');
+        }
+
+        if (consumptionPlan.length > 0) {
+            cell.innerHTML = consumptionPlan.join('<br>');
+        } else if (neededQty > 0) {
+            cell.innerHTML = '<span class="text-red-500">Sem estoque</span>';
+        } else {
+            cell.innerHTML = 'N/A';
+        }
+    }
+
+
+    async function updatePOIngredients(existingIngredients = null) {
         const recipeId = parseInt(poRecipeSearchableContainer.querySelector('input').dataset.selectedId);
         const recipe = localRecipes.find(r => r.id === recipeId);
         const recipeQuantity = parseInt(poQuantity.value, 10) || 1;
         
         if (!recipe) { poIngredientsBody.innerHTML = ''; return; }
 
-        poIngredientsBody.innerHTML = recipe.ingredients.map((ing, index) => {
+        let html = '';
+        for(const ing of recipe.ingredients) {
             const product = localInventory.find(p => p.id === ing.productId);
-            if(!product) return '';
+            if(!product) continue;
             
             const residual = localResidualStock.find(r => r.productId === product.id)?.quantity || 0;
             const neededQty = ing.quantity * recipeQuantity;
-            const compensatedQty = neededQty - residual;
-            const availableQty = product.totalQuantity;
-            const isInsufficient = neededQty > availableQty;
+            let compensatedQty = neededQty - residual;
+            if(compensatedQty < 0) compensatedQty = 0;
 
-            const existingIng = existingIngredients ? existingIngredients.find(ei => ei.productId === ing.productId) : null;
+            const existingIngData = existingIngredients ? existingIngredients.filter(ei => ei.productId === ing.productId) : null;
+            const totalAdjustedQty = existingIngData ? existingIngData.reduce((sum, item) => sum + item.adjustedQuantity, 0) : compensatedQty;
+            const handler = existingIngData ? existingIngData[0].handler : '';
 
-            const availableBatches = localBatches
-                .filter(b => b.productId === ing.productId && b.quantity > 0)
-                .sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate));
-            
-            const batchOptions = availableBatches.map(b => 
-                `<option value="${b.id}" data-code="${b.code}" ${existingIng && existingIng.batchId === b.id ? 'selected' : ''}>
-                    ${b.code} (Qtd: ${b.quantity.toFixed(2)}, Val: ${b.expiryDate ? new Date(b.expiryDate+'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'})
-                </option>`
-            ).join('');
-            
-            return `
-            <tr data-product-id="${product.id}" data-original-qty="${ing.quantity}" class="${isInsufficient ? 'insufficient-stock-row' : ''}">
+            html += `
+            <tr data-product-id="${product.id}" data-original-qty="${ing.quantity}">
                 <td class="px-2 py-2">${product.name}</td>
                 <td class="px-2 py-2 text-sm ${residual > 0 ? 'text-green-600' : 'text-red-600'}">${residual.toFixed(2)}</td>
                 <td class="px-2 py-2 font-medium">${neededQty.toFixed(4)}</td>
-                <td class="px-2 py-2"><input type="number" value="${(existingIng ? existingIng.adjustedQuantity : compensatedQty).toFixed(4)}" min="0" step="0.0001" class="w-24 form-input"></td>
-                <td class="px-2 py-2"><select class="w-48 form-input text-xs">${batchOptions}</select></td>
-                <td class="px-2 py-2"><input type="text" value="${existingIng ? existingIng.handler : ''}" placeholder="Nome" class="w-32 form-input"></td>
+                <td class="px-2 py-2"><input type="number" value="${totalAdjustedQty.toFixed(4)}" min="0" step="0.0001" class="w-24 form-input po-adjusted-quantity"></td>
+                <td class="px-2 py-2 po-batch-consumption-cell text-xs">...</td>
+                <td class="px-2 py-2"><input type="text" value="${handler}" placeholder="Nome" class="w-32 form-input"></td>
             </tr>`;
-        }).join('');
+        }
+        poIngredientsBody.innerHTML = html;
+
+        poIngredientsBody.querySelectorAll('tr').forEach(row => {
+            updatePvpsCell(row);
+        });
     }
+
     
     poQuantity.addEventListener('input', () => updatePOIngredients());
     
@@ -2120,36 +2193,82 @@
 
     productionOrderForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        loadingOverlay.classList.remove('hidden');
         const poId = document.getElementById('edit-po-id').value;
-        if (poIngredientsBody.querySelectorAll('.insufficient-stock-row').length > 0) { showNotification("Estoque insuficiente para um ou mais itens.", true); return; }
-        
-        const recipeId = parseInt(poRecipeSearchableContainer.querySelector('input').dataset.selectedId);
-        if (!recipeId) {
-            showNotification("Por favor, selecione uma receita válida.", true);
-            return;
-        }
-        const recipe = localRecipes.find(r => r.id === recipeId);
-        
-        const ingredients = Array.from(poIngredientsBody.querySelectorAll('tr')).map(row => {
-            const batchSelect = row.querySelector('select');
-            const selectedOption = batchSelect.options[batchSelect.selectedIndex];
-            return {
-                productId: parseInt(row.dataset.productId), adjustedQuantity: parseFloat(row.querySelector('input[type="number"]').value),
-                handler: row.querySelector('input[type="text"]').value || 'N/A',
-                batchId: selectedOption ? parseInt(selectedOption.value) : null,
-                batchCode: selectedOption ? selectedOption.dataset.code : 'N/A',
-            }
-        });
-        if (ingredients.some(ing => !ing.batchId)) { showNotification("Todos os insumos devem ter um lote de consumo selecionado.", true); return; }
-        const poData = {
-            recipeId: recipe.id, recipeName: recipe.name, date: poDate.value,
-            quantityProduced: parseInt(poQuantity.value, 10), status: 'pendente', ingredients
-        };
+        const finalIngredients = []; 
+
         try {
+            const recipeId = parseInt(poRecipeSearchableContainer.querySelector('input').dataset.selectedId);
+            if (!recipeId) throw new Error("Por favor, selecione uma receita válida.");
+            
+            const recipe = localRecipes.find(r => r.id === recipeId);
+
+            if (poId) {
+                const originalPo = await DB.get('productionOrders', parseInt(poId));
+                if (originalPo && originalPo.status === 'pendente') {
+                    for (const ing of originalPo.ingredients) {
+                        const batch = await DB.get('batches', ing.batchId);
+                        if (batch) {
+                            batch.reservedQuantity = (batch.reservedQuantity || 0) - ing.adjustedQuantity;
+                            if (batch.reservedQuantity < 0) batch.reservedQuantity = 0;
+                            await DB.update('batches', batch);
+                        }
+                    }
+                }
+            }
+            
+            const currentBatches = await DB.getAll('batches');
+
+            for (const row of poIngredientsBody.querySelectorAll('tr')) {
+                const productId = parseInt(row.dataset.productId);
+                const adjustedQuantity = parseFloat(row.querySelector('.po-adjusted-quantity').value);
+                const handler = row.querySelector('input[type="text"]').value || 'N/A';
+
+                if(adjustedQuantity > 0) {
+                    const availableBatches = currentBatches
+                        .filter(b => b.productId === productId && (b.quantity - (b.reservedQuantity || 0)) > 0)
+                        .sort((a,b) => (a.expiryDate ? new Date(a.expiryDate) : new Date('9999-12-31')) - (b.expiryDate ? new Date(b.expiryDate) : new Date('9999-12-31')));
+
+                    let remainingToFulfill = adjustedQuantity;
+
+                    for (const batch of availableBatches) {
+                        const availableInBatch = batch.quantity - (batch.reservedQuantity || 0);
+                        const qtyToTake = Math.min(remainingToFulfill, availableInBatch);
+
+                        if (qtyToTake > 0) {
+                            finalIngredients.push({
+                                productId: productId,
+                                adjustedQuantity: qtyToTake,
+                                handler: handler,
+                                batchId: batch.id,
+                                batchCode: batch.code
+                            });
+                            remainingToFulfill -= qtyToTake;
+                        }
+                        if (remainingToFulfill <= 0.00001) break;
+                    }
+
+                    if (remainingToFulfill > 0.00001) { 
+                        const product = localInventory.find(p=>p.id === productId);
+                        throw new Error(`Estoque insuficiente para ${product.name}. Faltam ${remainingToFulfill.toFixed(4)}.`);
+                    }
+                }
+            }
+
+            for (const ing of finalIngredients) {
+                const batch = await DB.get('batches', ing.batchId); 
+                batch.reservedQuantity = (batch.reservedQuantity || 0) + ing.adjustedQuantity;
+                await DB.update('batches', batch);
+            }
+
+            const poData = {
+                recipeId: recipe.id, recipeName: recipe.name, date: poDate.value,
+                quantityProduced: parseInt(poQuantity.value, 10), status: 'pendente',
+                ingredients: finalIngredients
+            };
+            
             if (poId) {
                 poData.id = parseInt(poId);
-                const originalPo = localProductionOrders.find(p => p.id === poData.id);
-                poData.status = originalPo.status; // Keep original status when editing
                 await DB.update('productionOrders', poData);
                 showNotification("Ordem de Produção atualizada!");
             } else {
@@ -2158,8 +2277,17 @@
             }
             hideModal(productionOrderModal);
             await refreshLocalData();
-        } catch(error) { console.error("Erro ao salvar Ordem de Produção:", error); showNotification("Erro ao salvar Ordem.", true); }
+
+        } catch(error) { 
+            console.error("Erro ao salvar Ordem de Produção:", error); 
+            showNotification(error.message || "Erro ao salvar Ordem.", true); 
+            await refreshLocalData();
+        } finally {
+            loadingOverlay.classList.add('hidden');
+        }
     });
+
+
     searchPoByDate.addEventListener('input', renderProductionOrders);
     
     btnConfirmProduction.addEventListener('click', () => {
@@ -2168,50 +2296,76 @@
             showNotification("Selecione pelo menos uma ordem de produção para confirmar.", true);
             return;
         }
-        
         const selectedOrderIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.dataset.poId));
-        const selectedOrders = localProductionOrders.filter(po => selectedOrderIds.includes(po.id));
-
-        populateConfirmationModal(selectedOrders);
-        showModal(confirmProductionModal);
+        
+        showConfirmationModal(
+            "Confirmar Produção",
+            `Você confirma a produção de <strong>${selectedOrderIds.length}</strong> ordem(ns)? O estoque será baixado permanentemente.`,
+            () => executeProductionBatch(selectedOrderIds)
+        );
     });
 
-    function populateConfirmationModal(orders) {
-        const aggregatedItems = {};
-        orders.forEach(po => {
-            const recipe = localRecipes.find(r => r.id === po.recipeId);
-            po.ingredients.forEach(ing => {
-                const recipeIng = recipe.ingredients.find(ri => ri.productId === ing.productId);
-                const requestedQty = recipeIng.quantity * po.quantityProduced;
+    // --- CONFIRM PRODUCTION & STOCK CONSUMPTION ---
+    async function executeProductionBatch(orderIds) {
+        try {
+            loadingOverlay.classList.remove('hidden');
 
-                if (aggregatedItems[ing.productId]) {
-                    aggregatedItems[ing.productId].quantity += requestedQty;
-                } else {
-                    const product = localInventory.find(p => p.id === ing.productId);
-                    aggregatedItems[ing.productId] = { 
-                        productId: ing.productId,
-                        name: product.name,
-                        quantity: requestedQty 
-                    };
+            for (const orderId of orderIds) {
+                const order = await DB.get('productionOrders', orderId);
+                if (!order || order.status !== 'pendente') continue;
+
+                for (const ing of order.ingredients) {
+                    const batch = await DB.get('batches', ing.batchId);
+                    const product = await DB.get('inventory', ing.productId);
+
+                    if (batch.quantity < ing.adjustedQuantity) {
+                        throw new Error(`Estoque físico insuficiente no lote ${batch.code} para a ordem ${order.recipeName}.`);
+                    }
+
+                    // Consume physical stock and release reservation
+                    batch.quantity -= ing.adjustedQuantity;
+                    batch.reservedQuantity -= ing.adjustedQuantity;
+                    if (batch.reservedQuantity < 0) batch.reservedQuantity = 0;
+                    await DB.update('batches', batch);
+
+                    // Update total product quantity
+                    product.totalQuantity -= ing.adjustedQuantity;
+                    await DB.update('inventory', product);
+
+                    // Add to history
+                    await DB.add('history', { 
+                        productId: ing.productId, 
+                        batchCode: batch.code, 
+                        type: 'saída', 
+                        quantity: ing.adjustedQuantity, 
+                        date: order.date,
+                        reason: `OP: ${order.recipeName}`
+                    });
+                    
+                    // Update consumption/residual
+                    await updateMonthlyConsumption(ing.productId, ing.adjustedQuantity, order.date);
+                    const recipe = await DB.get('recipes', order.recipeId);
+                    const recipeIng = recipe.ingredients.find(ri => ri.productId === ing.productId);
+                    const requestedQty = recipeIng.quantity * order.quantityProduced;
+                    const difference = requestedQty - ing.adjustedQuantity; // leftover
+                    await updateResidualStock(ing.productId, difference);
                 }
-            });
-        });
-        
-        confirmProductionTbody.innerHTML = Object.values(aggregatedItems).map(item => {
-            return `<tr data-product-id="${item.productId}">
-                <td class="px-4 py-2">${item.name}</td>
-                <td class="px-4 py-2">${item.quantity.toFixed(4)}</td>
-                <td class="px-4 py-2"><input type="number" value="${item.quantity.toFixed(4)}" step="0.0001" class="w-32 form-input"></td>
-            </tr>`;
-        }).join('');
-        confirmProductionTbody.dataset.orders = JSON.stringify(orders.map(po => po.id));
+
+                // Mark order as complete
+                order.status = 'concluído';
+                await DB.update('productionOrders', order);
+            }
+
+            showNotification("Baixa de estoque realizada com sucesso!");
+        } catch (error) {
+            console.error("Erro ao dar baixa no estoque: ", error);
+            showNotification(error.message || "Erro ao dar baixa no estoque.", true);
+        } finally {
+            await refreshLocalData();
+            loadingOverlay.classList.add('hidden');
+        }
     }
 
-
-    closeConfirmProductionModalBtn.addEventListener('click', () => { hideModal(confirmProductionModal) });
-
-
-    // --- CONFIRM PRODUCTION & STOCK CONSUMPTION ---
     async function updateMonthlyConsumption(productId, consumedQuantity, date) {
         const period = date.substring(0, 7); // YYYY-MM
         let consumptionRecord = (await DB.getAll('monthlyConsumption')).find(c => c.period === period && c.productId === productId);
@@ -2237,63 +2391,6 @@
             await DB.add('residualStock', { productId, quantity: difference });
         }
     }
-
-    btnExecuteStockConsumption.addEventListener('click', async () => {
-        const orderIdsToUpdate = JSON.parse(confirmProductionTbody.dataset.orders || '[]');
-        if (orderIdsToUpdate.length === 0) { showNotification("Nenhuma ordem para confirmar.", true); return; }
-        try {
-            loadingOverlay.classList.remove('hidden');
-            const deliveredItems = Array.from(confirmProductionTbody.querySelectorAll('tr')).map(row => ({
-                productId: parseInt(row.dataset.productId),
-                requestedQty: parseFloat(row.cells[1].textContent),
-                deliveredQty: parseFloat(row.querySelector('input').value)
-            }));
-            
-            for (const item of deliveredItems) {
-                let remainingToConsume = item.deliveredQty;
-                if (remainingToConsume <= 0) continue;
-
-                const productBatches = localBatches
-                    .filter(b => b.productId === item.productId && b.quantity > 0)
-                    .sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate));
-
-                for (const batchDoc of productBatches) {
-                    const consumeFromThisBatch = Math.min(remainingToConsume, batchDoc.quantity);
-                    batchDoc.quantity -= consumeFromThisBatch;
-                    await DB.update('batches', batchDoc);
-                    await DB.add('history', { productId: item.productId, batchCode: batchDoc.code, type: 'saída', quantity: consumeFromThisBatch, date: new Date().toISOString().split('T')[0] });
-                    remainingToConsume -= consumeFromThisBatch;
-                    if (remainingToConsume <= 0) break;
-                }
-                
-                if (remainingToConsume > 0) throw new Error(`Estoque insuficiente para ${item.name}. Faltam ${remainingToConsume.toFixed(4)}.`);
-
-                const product = await DB.get('inventory', item.productId);
-                product.totalQuantity -= item.deliveredQty;
-                await DB.update('inventory', product);
-                await updateMonthlyConsumption(item.productId, item.deliveredQty, new Date().toISOString().split('T')[0]);
-                
-                // Update residual stock
-                const difference = item.deliveredQty - item.requestedQty;
-                await updateResidualStock(item.productId, difference);
-            }
-            
-            const ordersToUpdate = localProductionOrders.filter(po => orderIdsToUpdate.includes(po.id));
-            for(const order of ordersToUpdate) {
-                order.status = 'concluído';
-                await DB.update('productionOrders', order);
-            }
-
-            showNotification("Baixa de estoque realizada com sucesso!");
-            hideModal(confirmProductionModal);
-            await refreshLocalData();
-        } catch (error) {
-            console.error("Erro ao dar baixa no estoque: ", error);
-            showNotification(error.message || "Erro ao dar baixa no estoque.", true);
-        } finally {
-            loadingOverlay.classList.add('hidden');
-        }
-    });
 
     // --- BACKUP / RESTORE FUNCTIONS ---
     async function downloadBackup() {
@@ -2414,6 +2511,7 @@
                 for (const batch of data.batches) {
                     delete batch.id;
                     batch.productId = idMaps.inventory[batch.productId];
+                    if(batch.reservedQuantity === undefined) batch.reservedQuantity = 0; // Ensure compatibility
                     if (batch.productId) {
                         await DB.add('batches', batch);
                     }
@@ -2507,8 +2605,12 @@
                                 'Estoque Mínimo': item.minStock,
                                 'Estoque Máximo': item.maxStock,
                                 'Estoque Total do Item': item.totalQuantity,
+                                'Estoque Reservado do Item': item.totalReserved,
+                                'Estoque Disponível do Item': item.availableQuantity,
                                 'Lote': batch.code,
-                                'Quantidade do Lote': batch.quantity,
+                                'Qtd. Física do Lote': batch.quantity,
+                                'Qtd. Reservada do Lote': batch.reservedQuantity,
+                                'Qtd. Disponível do Lote': batch.quantity - batch.reservedQuantity,
                                 'Data de Validade': batch.expiryDate ? new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A',
                                 'Data de Fabricação': batch.mfgDate ? new Date(batch.mfgDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A',
                                 'Data de Recebimento': batch.receiptDate ? new Date(batch.receiptDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'
@@ -2522,8 +2624,12 @@
                             'Estoque Mínimo': item.minStock,
                             'Estoque Máximo': item.maxStock,
                             'Estoque Total do Item': item.totalQuantity,
+                            'Estoque Reservado do Item': item.totalReserved,
+                            'Estoque Disponível do Item': item.availableQuantity,
                             'Lote': 'N/A',
-                            'Quantidade do Lote': 0,
+                            'Qtd. Física do Lote': 0,
+                            'Qtd. Reservada do Lote': 0,
+                            'Qtd. Disponível do Lote': 0,
                             'Data de Validade': 'N/A',
                             'Data de Fabricação': 'N/A',
                             'Data de Recebimento': 'N/A'
@@ -2533,17 +2639,14 @@
 
                 if (dataToExport.length === 0) {
                     showNotification("Nenhum dado de estoque para exportar.", true);
-                    return; // The finally block will still run
+                    return;
                 }
 
                 const worksheet = XLSX.utils.json_to_sheet(dataToExport);
                 const workbook = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(workbook, worksheet, "Estoque Detalhado");
 
-                worksheet['!cols'] = [
-                    { wch: 40 }, { wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 15 },
-                    { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }
-                ];
+                worksheet['!cols'] = [ { wch: 40 }, { wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 15 }, { wch: 20 }, { wch: 25 }, { wch: 28 }, { wch: 15 }, { wch: 20 }, { wch: 25 }, { wch: 28 }, { wch: 20 }, { wch: 20 }, { wch: 20 } ];
 
                 XLSX.writeFile(workbook, `Relatorio_Estoque_Detalhado_${new Date().toISOString().split('T')[0]}.xlsx`);
                 showNotification("Relatório de estoque exportado com sucesso!");
@@ -2555,7 +2658,7 @@
                 button.disabled = false;
                 button.innerHTML = originalHtml;
             }
-        }, 50); // A small delay is enough
+        }, 50); 
     }
 
 
@@ -2734,8 +2837,7 @@
         const lowStockItems = localInventory.filter(i => {
             const metrics = calculateConsumptionMetrics(i.id);
             const minStock = i.minStock !== null && i.minStock !== undefined ? i.minStock : metrics.minStock;
-            // Only alert if a minimum stock is defined (greater than 0)
-            return minStock > 0 && i.totalQuantity < minStock;
+            return minStock > 0 && i.availableQuantity < minStock;
         });
 
         if (lowStockItems.length === 0) {
@@ -2744,17 +2846,15 @@
             return;
         }
 
-        // Always show the indicator if there are low stock items
         lowStockCount.textContent = lowStockItems.length;
         lowStockIndicator.classList.remove('hidden');
 
-        // Populate the modal list
         lowStockAlertList.innerHTML = `
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 sticky top-0">
                     <tr>
                         <th class="px-4 py-2 text-left">Produto</th>
-                        <th class="px-4 py-2 text-right">Atual</th>
+                        <th class="px-4 py-2 text-right">Disponível</th>
                         <th class="px-4 py-2 text-right">Mínimo</th>
                     </tr>
                 </thead>
@@ -2765,7 +2865,7 @@
                         return `
                         <tr class="border-b">
                             <td class="px-4 py-2">${item.name}</td>
-                            <td class="px-4 py-2 text-right font-bold text-red-600">${item.totalQuantity.toFixed(2)}</td>
+                            <td class="px-4 py-2 text-right font-bold text-red-600">${item.availableQuantity.toFixed(2)}</td>
                             <td class="px-4 py-2 text-right">${minStock.toFixed(2)}</td>
                         </tr>
                         `
@@ -2778,18 +2878,15 @@
         const hasNewItems = [...currentLowStockIds].some(id => !previouslyNotifiedLowStockIds.has(id));
         
         if (hasNewItems) {
-            // Flash the screen on the very first new notification of the session
             if (!hasFlashedScreen) {
                 document.body.classList.add('flash-red');
-                hasFlashedScreen = true; // Prevents re-flashing
+                hasFlashedScreen = true; 
                 setTimeout(() => document.body.classList.remove('flash-red'), 800);
             }
 
-            // Always shake the bell and show the modal for new items
             lowStockIndicator.classList.add('shake-alert');
             showModal(lowStockAlertModal);
             
-            // Update the set of notified items
             previouslyNotifiedLowStockIds = currentLowStockIds;
         }
     }
@@ -2806,6 +2903,20 @@
             localMonthlyConsumption = await DB.getAll('monthlyConsumption');
             localResidualStock = await DB.getAll('residualStock');
             
+            // NEW: Calculate reserved and available quantities
+            localBatches.forEach(b => {
+                if (b.reservedQuantity === undefined) {
+                    b.reservedQuantity = 0;
+                }
+            });
+
+            localInventory.forEach(product => {
+                const productBatches = localBatches.filter(b => b.productId === product.id);
+                product.totalReserved = productBatches.reduce((sum, batch) => sum + (batch.reservedQuantity || 0), 0);
+                product.availableQuantity = product.totalQuantity - product.totalReserved;
+            });
+
+
             renderInventoryTable();
             renderRecipes();
             renderProductionOrders();
@@ -2814,7 +2925,6 @@
             renderResidualStock();
             populateSupplierFilter();
             
-            // Check for low stock after all data is refreshed
             updateLowStockAlerts();
         } catch (error) {
             console.error("Erro ao carregar dados locais:", error);
@@ -2830,19 +2940,18 @@
         tomorrow.setDate(today.getDate() + 1);
         const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
-
         // --- STAT CARDS ---
         const lowStockItems = localInventory.filter(i => {
             const metrics = calculateConsumptionMetrics(i.id);
             const minStock = i.minStock !== null && i.minStock !== undefined ? i.minStock : metrics.minStock;
-            return i.totalQuantity < minStock && minStock > 0;
+            return i.availableQuantity < minStock && minStock > 0;
         });
         const thirtyDaysFromNow = new Date();
         thirtyDaysFromNow.setDate(today.getDate() + 30);
         const expiringBatches = localBatches.filter(b => b.quantity > 0 && b.expiryDate && new Date(b.expiryDate) <= thirtyDaysFromNow);
         
         document.getElementById('stat-total-items').textContent = localInventory.length;
-        document.getElementById('stat-total-quantity').textContent = localInventory.reduce((sum, item) => sum + item.totalQuantity, 0).toFixed(2);
+        document.getElementById('stat-total-quantity').textContent = localInventory.reduce((sum, item) => sum + item.availableQuantity, 0).toFixed(2);
         document.getElementById('stat-low-stock').textContent = lowStockItems.length;
         document.getElementById('stat-expiring-soon').textContent = expiringBatches.length;
 
@@ -2852,34 +2961,6 @@
         
         const scheduledOutputs = localProductionOrders.filter(po => (po.date === todayStr || po.date === tomorrowStr) && po.status === 'pendente');
         scheduledOutputChart = renderDashboardChart('scheduled-output-chart', scheduledOutputChart, 'Top 10 Saídas Programadas (48h)', scheduledOutputs, true, 'btn-export-scheduled-output');
-
-        // --- ÚLTIMAS ENTRADAS ---
-        const lastEntriesList = document.getElementById('last-entries-list');
-        if (lastEntriesList) {
-            const lastEntries = [...localHistory].filter(h => h.type === 'entrada').sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0,5);
-            lastEntriesList.innerHTML = '';
-            if (lastEntries.length > 0) {
-                lastEntries.forEach(entry => {
-                    const product = localInventory.find(p => p.id === entry.productId);
-                    const li = document.createElement('li');
-                    li.className = 'py-3 flex justify-between items-center text-sm';
-                    li.innerHTML = `
-                        <div>
-                            <p class="font-medium text-gray-800">${product ? product.name : 'Produto desconhecido'}</p>
-                            <p class="text-gray-500">Lote: ${entry.batchCode}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-semibold text-green-600">+${entry.quantity.toFixed(2)}</p>
-                            <p class="text-gray-400">${new Date(entry.date + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
-                        </div>
-                    `;
-                    lastEntriesList.appendChild(li);
-                });
-            } else {
-                 lastEntriesList.innerHTML = `<p class="text-center text-gray-500 py-4">Nenhuma entrada registrada.</p>`;
-            }
-        }
-        
         
         // --- ALERTAS ---
         const lossRiskBatches = localBatches.filter(b => {
@@ -2999,16 +3080,16 @@
         const lowStockItems = localInventory.filter(i => {
             const metrics = calculateConsumptionMetrics(i.id);
             const minStock = i.minStock !== null && i.minStock !== undefined ? i.minStock : metrics.minStock;
-            return i.totalQuantity < minStock && minStock > 0;
+            return i.availableQuantity < minStock && minStock > 0;
         });
         document.getElementById('info-list-title').textContent = 'Itens com Estoque Baixo';
         let content = `<table class="w-full text-sm">
-                        <thead><tr class="border-b"><th class="py-2 text-left">Produto</th><th class="py-2 text-right">Qtd. Atual</th><th class="py-2 text-right">Mínimo</th></tr></thead>
+                        <thead><tr class="border-b"><th class="py-2 text-left">Produto</th><th class="py-2 text-right">Qtd. Disponível</th><th class="py-2 text-right">Mínimo</th></tr></thead>
                         <tbody>`;
         content += lowStockItems.map(item => {
             const metrics = calculateConsumptionMetrics(item.id);
             const minStock = item.minStock !== null && item.minStock !== undefined ? item.minStock : metrics.minStock;
-            return `<tr><td class="py-2">${item.name}</td><td class="py-2 text-right">${item.totalQuantity.toFixed(2)}</td><td class="py-2 text-right">${minStock.toFixed(2)}</td></tr>`
+            return `<tr><td class="py-2">${item.name}</td><td class="py-2 text-right">${item.availableQuantity.toFixed(2)}</td><td class="py-2 text-right">${minStock.toFixed(2)}</td></tr>`
         }).join('');
         content += `</tbody></table>`;
         document.getElementById('info-list-content').innerHTML = content;
@@ -3055,6 +3136,10 @@
 
         try {
             const batch = await DB.get('batches', batchId);
+            if(newQuantity < batch.reservedQuantity){
+                showNotification("Ajuste inválido. A nova quantidade não pode ser menor que o estoque já reservado.", true);
+                return;
+            }
             const oldQuantity = batch.quantity;
             const difference = newQuantity - oldQuantity;
 
@@ -3105,8 +3190,8 @@
         
         createSearchableSelect(searchableContainer, localInventory, 'Buscar produto...', (product) => {
             const productId = product.id;
-            const batches = localBatches.filter(b => b.productId === productId && b.quantity > 0);
-            batchSelect.innerHTML = batches.map(b => `<option value="${b.id}">${b.code} (Qtd: ${b.quantity.toFixed(2)})</option>`).join('');
+            const batches = localBatches.filter(b => b.productId === productId && (b.quantity - (b.reservedQuantity || 0)) > 0);
+            batchSelect.innerHTML = batches.map(b => `<option value="${b.id}">${b.code} (Disp: ${(b.quantity - (b.reservedQuantity || 0)).toFixed(2)})</option>`).join('');
         });
     }
 
@@ -3139,8 +3224,9 @@
         try {
              for(const item of items) {
                 const batch = await DB.get('batches', item.batchId);
-                if (item.quantity > batch.quantity) {
-                    throw new Error(`Quantidade requisitada para o lote ${batch.code} é maior que o estoque.`);
+                const availableInBatch = batch.quantity - (batch.reservedQuantity || 0);
+                if (item.quantity > availableInBatch) {
+                    throw new Error(`Quantidade requisitada para o lote ${batch.code} é maior que o estoque disponível.`);
                 }
                 const product = await DB.get('inventory', batch.productId);
                 
@@ -3310,7 +3396,6 @@
         const traceType = document.querySelector('input[name="trace-type"]:checked').value;
         traceResultsContainer.innerHTML = '<div class="text-center py-4"><div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-600 mx-auto"></div><p class="mt-2 text-gray-600">Buscando...</p></div>';
 
-        // Usamos um setTimeout para garantir que o spinner de loading apareça na tela antes de iniciar a busca pesada
         setTimeout(() => {
             let resultsHtml = '';
 
