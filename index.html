@@ -341,8 +341,9 @@
                                 <tr>
                                     <th scope="col" class="px-6 py-3 table-header-sortable" data-sort="name">Nome do Produto</th>
                                     <th scope="col" class="px-6 py-3 table-header-sortable" data-sort="code">Código</th>
-                                    <th scope="col" class="px-6 py-3 table-header-sortable" data-sort="supplier">Fornecedor</th>
-                                    <th scope="col" class="px-6 py-3 text-right table-header-sortable" data-sort="totalQuantity">Qtd. Total</th>
+                                    <th scope="col" class="px-6 py-3 text-right table-header-sortable" data-sort="totalQuantity">Qtd. Física</th>
+                                    <th scope="col" class="px-6 py-3 text-right table-header-sortable" data-sort="reserved">Qtd. Reservada</th>
+                                    <th scope="col" class="px-6 py-3 text-right table-header-sortable" data-sort="available">Qtd. Disponível</th>
                                     <th scope="col" class="px-6 py-3 table-header-sortable" data-sort="expiry">Próx. Validade</th>
                                 </tr>
                             </thead>
@@ -832,7 +833,7 @@
                                 <th class="px-2 py-2 text-left">Residual</th>
                                 <th class="px-2 py-2 text-left">Qtd. Necessária</th>
                                 <th class="px-2 py-2 text-left">Qtd. a Usar</th>
-                                <th class="px-2 py-2 text-left">Lote de Consumo</th>
+                                <th class="px-2 py-2 text-left">Plano de Consumo (Lotes)</th>
                                 <th class="px-2 py-2 text-left">Manipulador</th>
                             </tr>
                         </thead>
@@ -855,14 +856,14 @@
                 <h2 class="text-2xl font-bold">Confirmar Produção e Baixa de Estoque</h2>
                 <button id="close-confirm-production-modal" class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
             </div>
-            <p class="text-sm text-gray-600 mb-4">Resumo de todos os insumos para as ordens de produção selecionadas.</p>
+            <p class="text-sm text-gray-600 mb-4">Resumo do plano de consumo para as ordens de produção selecionadas.</p>
              <div class="overflow-x-auto border rounded-lg">
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-4 py-2 text-left">Insumo</th>
-                            <th class="px-4 py-2 text-left">Qtd. Requisitada</th>
-                            <th class="px-4 py-2 text-left">Qtd. Entregue (editável)</th>
+                            <th class="px-4 py-2 text-right">Qtd. Total a Baixar</th>
+                            <th class="px-4 py-2 text-left">Lotes de Consumo</th>
                         </tr>
                     </thead>
                     <tbody id="confirm-production-tbody"></tbody>
@@ -1401,8 +1402,28 @@
     });
 
     // --- INVENTORY SCREEN LOGIC ---
+    function calculateAllReservations() {
+        const reservations = {}; // { productId: reservedQty }
+        const pendingPOs = localProductionOrders.filter(p => p.status === 'pendente');
+        
+        pendingPOs.forEach(po => {
+            if (!po.ingredients) return;
+            po.ingredients.forEach(ing => {
+                if (ing.consumptionPlan) {
+                    ing.consumptionPlan.forEach(planItem => {
+                        // This was the bug: it should be ing.productId, not planItem.productId
+                        reservations[ing.productId] = (reservations[ing.productId] || 0) + planItem.quantity;
+                    });
+                }
+            });
+        });
+        return reservations;
+    }
+
     function renderInventoryTable(specialFilter = null) {
+        const reservations = calculateAllReservations();
         let filteredInventory = [...localInventory];
+
         let searchTerm = searchInput.value.toLowerCase();
         const selectedSupplier = supplierFilter.value;
         
@@ -1445,6 +1466,12 @@
             } else if (currentSort.key === 'totalQuantity') {
                 valA = a.totalQuantity;
                 valB = b.totalQuantity;
+            } else if (currentSort.key === 'reserved') {
+                valA = reservations[a.id] || 0;
+                valB = reservations[b.id] || 0;
+            } else if (currentSort.key === 'available') {
+                valA = a.totalQuantity - (reservations[a.id] || 0);
+                valB = b.totalQuantity - (reservations[b.id] || 0);
             }
             else {
                 valA = a[currentSort.key] || '';
@@ -1467,19 +1494,22 @@
 
         inventoryTableBody.innerHTML = '';
         if (filteredInventory.length === 0) {
-            inventoryTableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4">Nenhum item encontrado.</td></tr>`;
+            inventoryTableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4">Nenhum item encontrado.</td></tr>`;
             return;
         }
         filteredInventory.forEach(item => {
             const nextExpiry = getNextExpiry(item.id);
+            const reservedQty = reservations[item.id] || 0;
+            const availableQty = item.totalQuantity - reservedQty;
             const row = document.createElement('tr');
             row.className = 'bg-white border-b hover:bg-gray-50 cursor-pointer';
             row.addEventListener('click', () => showItemDetails(item.id));
             row.innerHTML = `
                 <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${item.name}</td>
                 <td class="px-6 py-4">${item.code}</td>
-                <td class="px-6 py-4">${item.supplier}</td>
                 <td class="px-6 py-4 text-right">${item.totalQuantity.toFixed(2)}</td>
+                <td class="px-6 py-4 text-right text-blue-600">${reservedQty.toFixed(2)}</td>
+                <td class="px-6 py-4 text-right font-bold ${availableQty <= 0 ? 'text-red-600' : 'text-green-600'}">${availableQty.toFixed(2)}</td>
                 <td class="px-6 py-4">${nextExpiry ? new Date(nextExpiry + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'}</td>
             `;
             inventoryTableBody.appendChild(row);
@@ -1947,11 +1977,15 @@
 
                 const ingredientsHtml = po.ingredients.map(ing => {
                     const product = localInventory.find(p => p.id === ing.productId);
+                    // Updated to show consumption plan
+                    const consumptionPlanHtml = ing.consumptionPlan.map(p => `${p.batchCode} (${p.quantity.toFixed(2)})`).join(', ');
                     return `
                     <li class="flex justify-between items-center text-sm py-1">
-                        <span class="text-gray-600"><i class="fa-solid fa-box-open mr-2 text-gray-400"></i>${product ? product.name : '...'}</span>
-                        <span class="font-medium text-gray-800">${ing.adjustedQuantity.toFixed(2)}</span>
-                    </li>`;
+                        <span class="text-gray-600 flex-1"><i class="fa-solid fa-box-open mr-2 text-gray-400"></i>${product ? product.name : '...'}</span>
+                        <span class="font-medium text-gray-800 ml-2 text-right">${ing.adjustedQuantity.toFixed(2)}</span>
+                    </li>
+                    <li class="text-xs text-gray-500 pl-6 pb-1">↳ Lotes: ${consumptionPlanHtml}</li>
+                    `;
                 }).join('');
 
                 card.innerHTML = `
@@ -2072,43 +2106,86 @@
         productionOrderForm.querySelector('button[type="submit"]').textContent = "Criar Ordem de Produção";
         showModal(productionOrderModal);
     });
+    
+    function calculateConsumptionPlan(productId, quantityNeeded, poToExcludeId = null) {
+        // 1. Calculate reserved stock from OTHER pending orders for THIS specific product
+        const otherPendingPOs = localProductionOrders.filter(p => p.status === 'pendente' && p.id !== poToExcludeId);
+        const reservedByBatch = {}; // { batchId: reservedQty }
+        otherPendingPOs.forEach(po => {
+            if (!po.ingredients) return;
+            // Find the specific ingredient in the other order that matches the current productId
+            const relevantIngredient = po.ingredients.find(ing => ing.productId === productId);
+            if (relevantIngredient && relevantIngredient.consumptionPlan) {
+                relevantIngredient.consumptionPlan.forEach(planItem => {
+                    reservedByBatch[planItem.batchId] = (reservedByBatch[planItem.batchId] || 0) + planItem.quantity;
+                });
+            }
+        });
+
+        // 2. Determine the plan for the current ingredient
+        const plan = [];
+        let remainingNeeded = quantityNeeded;
+        const availableBatches = localBatches
+            .filter(b => b.productId === productId && b.quantity > 0)
+            .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+
+        for (const batch of availableBatches) {
+            if (remainingNeeded <= 0) break;
+            const alreadyReserved = reservedByBatch[batch.id] || 0;
+            const effectiveQty = batch.quantity - alreadyReserved;
+
+            if (effectiveQty <= 0) continue;
+
+            const takeFromThisBatch = Math.min(remainingNeeded, effectiveQty);
+            plan.push({
+                batchId: batch.id,
+                batchCode: batch.code,
+                quantity: takeFromThisBatch
+            });
+            remainingNeeded -= takeFromThisBatch;
+        }
+
+        return {
+            plan,
+            isSufficient: remainingNeeded <= 0.0001 // Allow for tiny floating point inaccuracies
+        };
+    }
 
     function updatePOIngredients(existingIngredients = null) {
         const recipeId = parseInt(poRecipeSearchableContainer.querySelector('input').dataset.selectedId);
         const recipe = localRecipes.find(r => r.id === recipeId);
         const recipeQuantity = parseInt(poQuantity.value, 10) || 1;
-        
-        if (!recipe) { poIngredientsBody.innerHTML = ''; return; }
+        const currentPoId = parseInt(document.getElementById('edit-po-id').value) || null;
+
+        if (!recipe) {
+            poIngredientsBody.innerHTML = '';
+            return;
+        }
 
         poIngredientsBody.innerHTML = recipe.ingredients.map((ing, index) => {
             const product = localInventory.find(p => p.id === ing.productId);
-            if(!product) return '';
-            
+            if (!product) return '';
+
             const residual = localResidualStock.find(r => r.productId === product.id)?.quantity || 0;
             const neededQty = ing.quantity * recipeQuantity;
-            const compensatedQty = neededQty - residual;
-            const availableQty = product.totalQuantity;
-            const isInsufficient = neededQty > availableQty;
-
-            const existingIng = existingIngredients ? existingIngredients.find(ei => ei.productId === ing.productId) : null;
-
-            const availableBatches = localBatches
-                .filter(b => b.productId === ing.productId && b.quantity > 0)
-                .sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+            const compensatedQty = Math.max(0, neededQty - residual);
             
-            const batchOptions = availableBatches.map(b => 
-                `<option value="${b.id}" data-code="${b.code}" ${existingIng && existingIng.batchId === b.id ? 'selected' : ''}>
-                    ${b.code} (Qtd: ${b.quantity.toFixed(2)}, Val: ${b.expiryDate ? new Date(b.expiryDate+'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'})
-                </option>`
-            ).join('');
+            // Calculate consumption plan considering reservations
+            const { plan, isSufficient } = calculateConsumptionPlan(product.id, compensatedQty, currentPoId);
+            const planText = plan.length > 0 ? plan.map(p => `${p.batchCode} (${p.quantity.toFixed(2)})`).join(', ') : 'Sem estoque disponível';
+            
+            const existingIng = existingIngredients ? existingIngredients.find(ei => ei.productId === ing.productId) : null;
             
             return `
-            <tr data-product-id="${product.id}" data-original-qty="${ing.quantity}" class="${isInsufficient ? 'insufficient-stock-row' : ''}">
+            <tr data-product-id="${product.id}" 
+                data-original-qty="${ing.quantity}" 
+                data-consumption-plan='${JSON.stringify(plan)}'
+                class="${!isSufficient ? 'insufficient-stock-row' : ''}">
                 <td class="px-2 py-2">${product.name}</td>
-                <td class="px-2 py-2 text-sm ${residual > 0 ? 'text-green-600' : 'text-red-600'}">${residual.toFixed(2)}</td>
+                <td class="px-2 py-2 text-sm ${residual >= 0 ? 'text-green-600' : 'text-red-600'}">${residual.toFixed(2)}</td>
                 <td class="px-2 py-2 font-medium">${neededQty.toFixed(4)}</td>
-                <td class="px-2 py-2"><input type="number" value="${(existingIng ? existingIng.adjustedQuantity : compensatedQty).toFixed(4)}" min="0" step="0.0001" class="w-24 form-input"></td>
-                <td class="px-2 py-2"><select class="w-48 form-input text-xs">${batchOptions}</select></td>
+                <td class="px-2 py-2"><input type="number" value="${(existingIng ? existingIng.adjustedQuantity : neededQty).toFixed(4)}" min="0" step="0.0001" class="w-24 form-input"></td>
+                <td class="px-2 py-2 text-xs">${planText}</td>
                 <td class="px-2 py-2"><input type="text" value="${existingIng ? existingIng.handler : ''}" placeholder="Nome" class="w-32 form-input"></td>
             </tr>`;
         }).join('');
@@ -2117,11 +2194,14 @@
     poQuantity.addEventListener('input', () => updatePOIngredients());
     
     closeProductionOrderModalBtn.addEventListener('click', () => { hideModal(productionOrderModal) });
-
+    
     productionOrderForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const poId = document.getElementById('edit-po-id').value;
-        if (poIngredientsBody.querySelectorAll('.insufficient-stock-row').length > 0) { showNotification("Estoque insuficiente para um ou mais itens.", true); return; }
+        if (poIngredientsBody.querySelectorAll('.insufficient-stock-row').length > 0) {
+            showNotification("Estoque insuficiente (considerando reservas) para um ou mais itens.", true);
+            return;
+        }
         
         const recipeId = parseInt(poRecipeSearchableContainer.querySelector('input').dataset.selectedId);
         if (!recipeId) {
@@ -2131,16 +2211,24 @@
         const recipe = localRecipes.find(r => r.id === recipeId);
         
         const ingredients = Array.from(poIngredientsBody.querySelectorAll('tr')).map(row => {
-            const batchSelect = row.querySelector('select');
-            const selectedOption = batchSelect.options[batchSelect.selectedIndex];
             return {
-                productId: parseInt(row.dataset.productId), adjustedQuantity: parseFloat(row.querySelector('input[type="number"]').value),
+                productId: parseInt(row.dataset.productId),
+                adjustedQuantity: parseFloat(row.querySelector('input[type="number"]').value),
                 handler: row.querySelector('input[type="text"]').value || 'N/A',
-                batchId: selectedOption ? parseInt(selectedOption.value) : null,
-                batchCode: selectedOption ? selectedOption.dataset.code : 'N/A',
+                consumptionPlan: JSON.parse(row.dataset.consumptionPlan) // Save the calculated plan
             }
         });
-        if (ingredients.some(ing => !ing.batchId)) { showNotification("Todos os insumos devem ter um lote de consumo selecionado.", true); return; }
+
+        if (ingredients.some(ing => !ing.consumptionPlan || ing.consumptionPlan.length === 0)) {
+            const hasStock = ingredients.every(ing => {
+                const product = localInventory.find(p => p.id === ing.productId);
+                return product.totalQuantity > 0;
+            });
+            if (hasStock) {
+                 showNotification("Um ou mais itens não têm um plano de consumo. Verifique o estoque.", true);
+                 return;
+            }
+        }
         const poData = {
             recipeId: recipe.id, recipeName: recipe.name, date: poDate.value,
             quantityProduced: parseInt(poQuantity.value, 10), status: 'pendente', ingredients
@@ -2160,6 +2248,7 @@
             await refreshLocalData();
         } catch(error) { console.error("Erro ao salvar Ordem de Produção:", error); showNotification("Erro ao salvar Ordem.", true); }
     });
+
     searchPoByDate.addEventListener('input', renderProductionOrders);
     
     btnConfirmProduction.addEventListener('click', () => {
@@ -2178,108 +2267,110 @@
 
     function populateConfirmationModal(orders) {
         const aggregatedItems = {};
+        
         orders.forEach(po => {
-            const recipe = localRecipes.find(r => r.id === po.recipeId);
+            if (!po.ingredients) return;
             po.ingredients.forEach(ing => {
-                const recipeIng = recipe.ingredients.find(ri => ri.productId === ing.productId);
-                const requestedQty = recipeIng.quantity * po.quantityProduced;
+                const product = localInventory.find(p => p.id === ing.productId);
+                if (!product) return;
 
-                if (aggregatedItems[ing.productId]) {
-                    aggregatedItems[ing.productId].quantity += requestedQty;
-                } else {
-                    const product = localInventory.find(p => p.id === ing.productId);
-                    aggregatedItems[ing.productId] = { 
+                if (!aggregatedItems[ing.productId]) {
+                    aggregatedItems[ing.productId] = {
                         productId: ing.productId,
                         name: product.name,
-                        quantity: requestedQty 
+                        totalAdjusted: 0,
+                        plan: {} // { batchCode: totalQty }
                     };
+                }
+                
+                aggregatedItems[ing.productId].totalAdjusted += ing.adjustedQuantity;
+                
+                if (ing.consumptionPlan) {
+                    ing.consumptionPlan.forEach(p => {
+                        aggregatedItems[ing.productId].plan[p.batchCode] = (aggregatedItems[ing.productId].plan[p.batchCode] || 0) + p.quantity;
+                    });
                 }
             });
         });
         
         confirmProductionTbody.innerHTML = Object.values(aggregatedItems).map(item => {
-            return `<tr data-product-id="${item.productId}">
-                <td class="px-4 py-2">${item.name}</td>
-                <td class="px-4 py-2">${item.quantity.toFixed(4)}</td>
-                <td class="px-4 py-2"><input type="number" value="${item.quantity.toFixed(4)}" step="0.0001" class="w-32 form-input"></td>
+            const planDetails = Object.keys(item.plan).map(batchCode => `${batchCode} (${item.plan[batchCode].toFixed(2)})`).join(', ');
+            return `<tr>
+                <td class="px-4 py-2 font-medium">${item.name}</td>
+                <td class="px-4 py-2 text-right">${item.totalAdjusted.toFixed(4)}</td>
+                <td class="px-4 py-2 text-xs">${planDetails}</td>
             </tr>`;
         }).join('');
+
         confirmProductionTbody.dataset.orders = JSON.stringify(orders.map(po => po.id));
     }
 
-
     closeConfirmProductionModalBtn.addEventListener('click', () => { hideModal(confirmProductionModal) });
 
-
-    // --- CONFIRM PRODUCTION & STOCK CONSUMPTION ---
-    async function updateMonthlyConsumption(productId, consumedQuantity, date) {
-        const period = date.substring(0, 7); // YYYY-MM
-        let consumptionRecord = (await DB.getAll('monthlyConsumption')).find(c => c.period === period && c.productId === productId);
-
-        if (consumptionRecord) {
-            consumptionRecord.totalConsumed += consumedQuantity;
-            await DB.update('monthlyConsumption', consumptionRecord);
-        } else {
-            await DB.add('monthlyConsumption', {
-                period,
-                productId,
-                totalConsumed: consumedQuantity
-            });
-        }
-    }
-    
-    async function updateResidualStock(productId, difference) {
-        let residualRecord = await DB.get('residualStock', productId);
-        if (residualRecord) {
-            residualRecord.quantity += difference;
-            await DB.update('residualStock', residualRecord);
-        } else {
-            await DB.add('residualStock', { productId, quantity: difference });
-        }
-    }
-
     btnExecuteStockConsumption.addEventListener('click', async () => {
-        const orderIdsToUpdate = JSON.parse(confirmProductionTbody.dataset.orders || '[]');
-        if (orderIdsToUpdate.length === 0) { showNotification("Nenhuma ordem para confirmar.", true); return; }
+        const orderIdsToConfirm = JSON.parse(confirmProductionTbody.dataset.orders || '[]');
+        if (orderIdsToConfirm.length === 0) { 
+            showNotification("Nenhuma ordem para confirmar.", true); 
+            return; 
+        }
+        
         try {
             loadingOverlay.classList.remove('hidden');
-            const deliveredItems = Array.from(confirmProductionTbody.querySelectorAll('tr')).map(row => ({
-                productId: parseInt(row.dataset.productId),
-                requestedQty: parseFloat(row.cells[1].textContent),
-                deliveredQty: parseFloat(row.querySelector('input').value)
-            }));
             
-            for (const item of deliveredItems) {
-                let remainingToConsume = item.deliveredQty;
-                if (remainingToConsume <= 0) continue;
+            const ordersToConfirm = localProductionOrders.filter(po => orderIdsToConfirm.includes(po.id));
 
-                const productBatches = localBatches
-                    .filter(b => b.productId === item.productId && b.quantity > 0)
-                    .sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+            for (const order of ordersToConfirm) {
+                if (!order.ingredients) continue;
+                
+                let totalRecipeRequirement = {}; // To calculate residual
+                
+                for (const ingredient of order.ingredients) {
+                    if (!ingredient.consumptionPlan || ingredient.consumptionPlan.length === 0) {
+                        const product = localInventory.find(p => p.id === ingredient.productId) || {};
+                        throw new Error(`Ordem para '${order.recipeName}' tem um plano de consumo inválido para o item '${product.name}'. Por favor, edite e salve a ordem novamente.`);
+                    }
+                    
+                    // Calculate original requirement for residual calculation later
+                    const recipe = localRecipes.find(r => r.id === order.recipeId);
+                    const recipeIng = recipe.ingredients.find(ri => ri.productId === ingredient.productId);
+                    const originalNeeded = recipeIng.quantity * order.quantityProduced;
+                    totalRecipeRequirement[ingredient.productId] = (totalRecipeRequirement[ingredient.productId] || 0) + originalNeeded;
 
-                for (const batchDoc of productBatches) {
-                    const consumeFromThisBatch = Math.min(remainingToConsume, batchDoc.quantity);
-                    batchDoc.quantity -= consumeFromThisBatch;
-                    await DB.update('batches', batchDoc);
-                    await DB.add('history', { productId: item.productId, batchCode: batchDoc.code, type: 'saída', quantity: consumeFromThisBatch, date: new Date().toISOString().split('T')[0] });
-                    remainingToConsume -= consumeFromThisBatch;
-                    if (remainingToConsume <= 0) break;
+                    // Execute consumption based on the saved plan
+                    for (const planItem of ingredient.consumptionPlan) {
+                        const batch = await DB.get('batches', planItem.batchId);
+                        if (!batch || batch.quantity < planItem.quantity) {
+                            throw new Error(`Estoque insuficiente no lote ${batch.code} para confirmar a produção. Necessário: ${planItem.quantity.toFixed(2)}, disponível: ${batch ? batch.quantity.toFixed(2) : 0}.`);
+                        }
+                        
+                        batch.quantity -= planItem.quantity;
+                        await DB.update('batches', batch);
+
+                        const product = await DB.get('inventory', ingredient.productId);
+                        product.totalQuantity -= planItem.quantity;
+                        await DB.update('inventory', product);
+                        
+                        await DB.add('history', { 
+                            productId: ingredient.productId, 
+                            batchCode: batch.code, 
+                            type: 'saída', 
+                            quantity: planItem.quantity, 
+                            date: new Date().toISOString().split('T')[0],
+                            reason: `Produção: ${order.recipeName}`
+                        });
+                    }
+                    await updateMonthlyConsumption(ingredient.productId, ingredient.adjustedQuantity, order.date);
                 }
                 
-                if (remainingToConsume > 0) throw new Error(`Estoque insuficiente para ${item.name}. Faltam ${remainingToConsume.toFixed(4)}.`);
+                // Update residual stock for this order
+                for(const ingredient of order.ingredients) {
+                    const originalNeeded = totalRecipeRequirement[ingredient.productId] || 0;
+                    const actualUsed = ingredient.adjustedQuantity;
+                    const difference = originalNeeded - actualUsed; // Positive if sobra, negative if falta
+                    await updateResidualStock(ingredient.productId, difference);
+                }
 
-                const product = await DB.get('inventory', item.productId);
-                product.totalQuantity -= item.deliveredQty;
-                await DB.update('inventory', product);
-                await updateMonthlyConsumption(item.productId, item.deliveredQty, new Date().toISOString().split('T')[0]);
-                
-                // Update residual stock
-                const difference = item.deliveredQty - item.requestedQty;
-                await updateResidualStock(item.productId, difference);
-            }
-            
-            const ordersToUpdate = localProductionOrders.filter(po => orderIdsToUpdate.includes(po.id));
-            for(const order of ordersToUpdate) {
+                // Mark order as completed
                 order.status = 'concluído';
                 await DB.update('productionOrders', order);
             }
@@ -2287,9 +2378,11 @@
             showNotification("Baixa de estoque realizada com sucesso!");
             hideModal(confirmProductionModal);
             await refreshLocalData();
+
         } catch (error) {
             console.error("Erro ao dar baixa no estoque: ", error);
             showNotification(error.message || "Erro ao dar baixa no estoque.", true);
+            await refreshLocalData(); 
         } finally {
             loadingOverlay.classList.add('hidden');
         }
@@ -2484,31 +2577,27 @@
         const button = document.getElementById('btn-export-excel');
         const originalHtml = button.innerHTML;
         button.disabled = true;
-        button.innerHTML = `
-            <span class="animate-spin h-5 w-5 mr-3" role="status" aria-hidden="true">
-                <i class="fa-solid fa-spinner"></i>
-            </span>
-            Exportando...
-        `;
+        button.innerHTML = `<span class="animate-spin h-5 w-5 mr-3" role="status" aria-hidden="true"><i class="fa-solid fa-spinner"></i></span> Exportando...`;
 
-        // Yield to the browser to update the UI
         setTimeout(() => {
             try {
+                const reservations = calculateAllReservations();
                 const dataToExport = [];
                 
                 localInventory.forEach(item => {
+                    const reservedQty = reservations[item.id] || 0;
+                    const availableQty = item.totalQuantity - reservedQty;
                     const itemBatches = localBatches.filter(b => b.productId === item.id && b.quantity > 0);
+                    
                     if (itemBatches.length > 0) {
                         itemBatches.forEach(batch => {
                             dataToExport.push({
-                                'Nome do Produto': item.name,
-                                'Código': item.code,
-                                'Fornecedor': item.supplier,
-                                'Estoque Mínimo': item.minStock,
-                                'Estoque Máximo': item.maxStock,
-                                'Estoque Total do Item': item.totalQuantity,
-                                'Lote': batch.code,
-                                'Quantidade do Lote': batch.quantity,
+                                'Nome do Produto': item.name, 'Código': item.code, 'Fornecedor': item.supplier,
+                                'Estoque Mínimo': item.minStock, 'Estoque Máximo': item.maxStock,
+                                'Quantidade Física': item.totalQuantity,
+                                'Quantidade Reservada': reservedQty,
+                                'Quantidade Disponível': availableQty,
+                                'Lote': batch.code, 'Quantidade do Lote': batch.quantity,
                                 'Data de Validade': batch.expiryDate ? new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A',
                                 'Data de Fabricação': batch.mfgDate ? new Date(batch.mfgDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A',
                                 'Data de Recebimento': batch.receiptDate ? new Date(batch.receiptDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'
@@ -2516,34 +2605,27 @@
                         });
                     } else {
                         dataToExport.push({
-                            'Nome do Produto': item.name,
-                            'Código': item.code,
-                            'Fornecedor': item.supplier,
-                            'Estoque Mínimo': item.minStock,
-                            'Estoque Máximo': item.maxStock,
-                            'Estoque Total do Item': item.totalQuantity,
-                            'Lote': 'N/A',
-                            'Quantidade do Lote': 0,
-                            'Data de Validade': 'N/A',
-                            'Data de Fabricação': 'N/A',
-                            'Data de Recebimento': 'N/A'
+                            'Nome do Produto': item.name, 'Código': item.code, 'Fornecedor': item.supplier,
+                            'Estoque Mínimo': item.minStock, 'Estoque Máximo': item.maxStock,
+                            'Quantidade Física': item.totalQuantity,
+                            'Quantidade Reservada': reservedQty,
+                            'Quantidade Disponível': availableQty,
+                            'Lote': 'N/A', 'Quantidade do Lote': 0,
+                            'Data de Validade': 'N/A', 'Data de Fabricação': 'N/A', 'Data de Recebimento': 'N/A'
                         });
                     }
                 });
 
                 if (dataToExport.length === 0) {
                     showNotification("Nenhum dado de estoque para exportar.", true);
-                    return; // The finally block will still run
+                    return;
                 }
 
                 const worksheet = XLSX.utils.json_to_sheet(dataToExport);
                 const workbook = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(workbook, worksheet, "Estoque Detalhado");
 
-                worksheet['!cols'] = [
-                    { wch: 40 }, { wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 15 },
-                    { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }
-                ];
+                worksheet['!cols'] = [ { wch: 40 }, { wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 } ];
 
                 XLSX.writeFile(workbook, `Relatorio_Estoque_Detalhado_${new Date().toISOString().split('T')[0]}.xlsx`);
                 showNotification("Relatório de estoque exportado com sucesso!");
@@ -2555,7 +2637,7 @@
                 button.disabled = false;
                 button.innerHTML = originalHtml;
             }
-        }, 50); // A small delay is enough
+        }, 50);
     }
 
 
@@ -2702,10 +2784,11 @@
 
                 for (const ing of order.ingredients) {
                     const product = localInventory.find(p => p.id === ing.productId);
+                    const consumptionPlanHtml = ing.consumptionPlan.map(p => `${p.batchCode} (${p.quantity.toFixed(2)})`).join(', ');
                     htmlContent += `
                         <tr>
                             <td>${product ? product.name : 'Insumo não encontrado'}</td>
-                            <td>${ing.batchCode}</td>
+                            <td>${consumptionPlanHtml}</td>
                             <td>${ing.adjustedQuantity.toFixed(4)}</td>
                             <td>${ing.handler}</td>
                         </tr>
@@ -2951,9 +3034,12 @@
         
         const consumption = {};
         if (isScheduled) {
-             data.forEach(po => po.ingredients.forEach(ing => {
-                consumption[ing.productId] = (consumption[ing.productId] || 0) + ing.adjustedQuantity;
-             }));
+             data.forEach(po => {
+                if(!po.ingredients) return;
+                po.ingredients.forEach(ing => {
+                    consumption[ing.productId] = (consumption[ing.productId] || 0) + ing.adjustedQuantity;
+                })
+             });
         } else { // History
             data.forEach(h => {
                 consumption[h.productId] = (consumption[h.productId] || 0) + h.quantity;
@@ -3343,23 +3429,30 @@
 
                 // 2. Encontrar o uso em produção
                 const productionUsages = localProductionOrders.filter(po =>
-                    po.ingredients.some(ing => ing.productId === productId && ing.batchCode === batchCode)
+                    po.ingredients.some(ing => {
+                        // Check inside the consumption plan
+                        return ing.productId === productId && ing.consumptionPlan && ing.consumptionPlan.some(p => p.batchCode === batchCode)
+                    })
                 );
 
                 if (productionUsages.length > 0) {
                     resultsHtml += `<h4 class="font-bold text-lg text-blue-700 mt-6 mb-2">Uso em Produção</h4>`;
                     resultsHtml += '<ul class="space-y-3">';
                     productionUsages.forEach(po => {
-                        const usedIngredient = po.ingredients.find(ing => ing.productId === productId && ing.batchCode === batchCode);
-                        resultsHtml += `
-                            <li class="p-3 border rounded-md shadow-sm">
-                                Produziu <strong>${po.recipeName}</strong> em <strong>${new Date(po.date + 'T00:00:00').toLocaleDateString('pt-BR')}</strong>.
-                                <div class="text-sm text-gray-600 mt-1">
-                                    <span>Quantidade Usada: ${usedIngredient.adjustedQuantity.toFixed(2)}</span> |
-                                    <span>Manipulador: ${usedIngredient.handler}</span>
-                                </div>
-                            </li>
-                        `;
+                        const usedIngredient = po.ingredients.find(ing => ing.productId === productId);
+                        // Find the specific quantity used from this batch code
+                        const usageFromBatch = usedIngredient.consumptionPlan.find(p => p.batchCode === batchCode);
+                        if (usageFromBatch) {
+                             resultsHtml += `
+                                <li class="p-3 border rounded-md shadow-sm">
+                                    Produziu <strong>${po.recipeName}</strong> em <strong>${new Date(po.date + 'T00:00:00').toLocaleDateString('pt-BR')}</strong>.
+                                    <div class="text-sm text-gray-600 mt-1">
+                                        <span>Quantidade Usada deste Lote: ${usageFromBatch.quantity.toFixed(2)}</span> |
+                                        <span>Manipulador: ${usedIngredient.handler}</span>
+                                    </div>
+                                </li>
+                            `;
+                        }
                     });
                     resultsHtml += '</ul>';
                 }
@@ -3412,7 +3505,8 @@
                                 <ul class="list-disc list-inside text-sm text-gray-700 pl-4">
                                     ${handledIngredients.map(ing => {
                                         const product = localInventory.find(p => p.id === ing.productId);
-                                        return `<li>${product.name} (Lote: ${ing.batchCode}, Qtd: ${ing.adjustedQuantity.toFixed(2)})</li>`;
+                                        const consumptionPlanHtml = ing.consumptionPlan.map(p => `${p.batchCode} (${p.quantity.toFixed(2)})`).join(', ');
+                                        return `<li>${product.name} (Lotes: ${consumptionPlanHtml}, Qtd Total: ${ing.adjustedQuantity.toFixed(2)})</li>`;
                                     }).join('')}
                                 </ul>
                             </li>
@@ -3570,5 +3664,4 @@
 
 </body>
 </html>
-
 
