@@ -626,6 +626,9 @@
                     <button id="btn-edit-item" class="ml-4 text-gray-500 hover:text-blue-600" title="Editar Produto">
                         <i class="fa-solid fa-pencil"></i>
                     </button>
+                    <button id="btn-delete-item" class="ml-2 text-red-500 hover:text-red-700" title="Excluir Produto">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
                 </h2>
                 <button id="close-details-modal" class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
             </div>
@@ -1411,7 +1414,6 @@
             po.ingredients.forEach(ing => {
                 if (ing.consumptionPlan) {
                     ing.consumptionPlan.forEach(planItem => {
-                        // This was the bug: it should be ing.productId, not planItem.productId
                         reservations[ing.productId] = (reservations[ing.productId] || 0) + planItem.quantity;
                     });
                 }
@@ -1595,6 +1597,7 @@
         }
         
         document.getElementById('edit-item-id').value = product.id;
+        document.getElementById('btn-delete-item').dataset.productId = product.id;
         document.getElementById('edit-product-name').value = product.name;
         document.getElementById('edit-product-code').value = product.code;
         document.getElementById('edit-supplier').value = product.supplier;
@@ -1611,6 +1614,7 @@
                 <td class="px-4 py-2">${batch.expiryDate ? new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'}</td>
                 <td class="px-4 py-2">${typeof batch.shelfLife === 'number' ? batch.shelfLife.toFixed(1) : (batch.shelfLife || 'N/A')}</td>
                 <td class="px-4 py-2 text-center">
+                    <button class="print-label-btn text-gray-500 hover:text-gray-700 p-1" data-batch-id="${batch.id}" title="Imprimir Etiqueta"><i class="fa-solid fa-print"></i></button>
                     <button class="edit-batch-btn text-blue-500 hover:text-blue-700 p-1" data-batch-id="${batch.id}" title="Editar Lote"><i class="fa-solid fa-pencil"></i></button>
                     <button class="delete-batch-btn text-red-500 hover:text-red-700 p-1" data-batch-id="${batch.id}" title="Excluir Lote"><i class="fa-solid fa-trash"></i></button>
                 </td>
@@ -1647,6 +1651,11 @@
     closeDetailsModalBtn.addEventListener('click', () => { hideModal(detailsModal) });
     btnEditItem.addEventListener('click', () => { itemDetailsView.classList.add('hidden'); itemDetailsEdit.classList.remove('hidden'); });
     btnCancelEdit.addEventListener('click', () => { itemDetailsView.classList.remove('hidden'); itemDetailsEdit.classList.add('hidden'); });
+    
+    document.getElementById('btn-delete-item').addEventListener('click', (e) => {
+        const productId = parseInt(e.currentTarget.dataset.productId);
+        handleDeleteItem(productId);
+    });
 
     editItemForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -1676,7 +1685,7 @@
         }
     });
     
-    // --- BATCH EDIT/DELETE ---
+    // --- BATCH EDIT/DELETE/PRINT ---
     detailsBatchesTable.addEventListener('click', e => {
         const editBtn = e.target.closest('.edit-batch-btn');
         if (editBtn) {
@@ -1686,7 +1695,57 @@
         if(deleteBtn) {
             handleDeleteBatch(parseInt(deleteBtn.dataset.batchId));
         }
+        const printBtn = e.target.closest('.print-label-btn');
+        if(printBtn) {
+            handlePrintLabel(parseInt(printBtn.dataset.batchId));
+        }
     });
+
+    async function handlePrintLabel(batchId) {
+        try {
+            const batch = localBatches.find(b => b.id === batchId);
+            if (!batch) {
+                showNotification("Lote não encontrado.", true);
+                return;
+            }
+            const product = localInventory.find(p => p.id === batch.productId);
+            if (!product) {
+                showNotification("Produto não encontrado.", true);
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            // A6 size in mm: 148 x 105 (Landscape)
+            const doc = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: 'a6'
+            });
+
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 10;
+
+            doc.setFontSize(22);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`${product.name} (${product.code})`, pageWidth / 2, margin + 15, { align: 'center' });
+
+            doc.setFontSize(28);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Lote: ${batch.code}`, pageWidth / 2, margin + 35, { align: 'center' });
+            
+            doc.text(`Quantidade: ${batch.quantity.toFixed(2)}`, pageWidth / 2, margin + 55, { align: 'center' });
+            
+            const expiryDate = batch.expiryDate ? new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A';
+            doc.text(`Validade: ${expiryDate}`, pageWidth / 2, margin + 75, { align: 'center' });
+
+            doc.output('dataurlnewwindow');
+
+        } catch (error) {
+            console.error("Erro ao gerar etiqueta PDF:", error);
+            showNotification("Erro ao gerar etiqueta.", true);
+        }
+    }
+
 
     async function handleEditBatch(batchId) {
         const batch = localBatches.find(b => b.id === batchId);
@@ -1767,6 +1826,58 @@
                 console.error(error);
             }
         });
+    }
+
+    async function handleDeleteItem(productId) {
+        const product = localInventory.find(p => p.id === productId);
+        if (!product) return;
+
+        const isUsedInRecipe = localRecipes.some(recipe => 
+            recipe.ingredients.some(ing => ing.productId === productId)
+        );
+
+        if (isUsedInRecipe) {
+            showNotification("Este item não pode ser excluído pois está sendo usado em uma ou mais receitas. Remova-o das receitas primeiro.", true);
+            return;
+        }
+
+        showConfirmationModal(
+            "Excluir Item do Estoque",
+            `Tem certeza que deseja excluir o item "<strong>${product.name}</strong>"? Todos os seus lotes e histórico de movimentação serão apagados permanentemente. Esta ação não pode ser desfeita.`,
+            async () => {
+                try {
+                    loadingOverlay.classList.remove('hidden');
+
+                    const batchesToDelete = localBatches.filter(b => b.productId === productId);
+                    for (const batch of batchesToDelete) {
+                        await DB.remove('batches', batch.id);
+                    }
+
+                    const historyToDelete = localHistory.filter(h => h.productId === productId);
+                    for (const record of historyToDelete) {
+                        await DB.remove('history', record.id);
+                    }
+                    
+                    await DB.remove('residualStock', productId).catch(() => {});
+
+                    const consumptionToDelete = localMonthlyConsumption.filter(c => c.productId === productId);
+                    for (const record of consumptionToDelete) {
+                        await DB.remove('monthlyConsumption', record.id);
+                    }
+
+                    await DB.remove('inventory', productId);
+
+                    showNotification("Item e todos os seus dados foram excluídos com sucesso.");
+                    hideModal(detailsModal);
+                    await refreshLocalData();
+                } catch (err) {
+                    console.error("Erro ao excluir item:", err);
+                    showNotification("Ocorreu um erro ao excluir o item.", true);
+                } finally {
+                    loadingOverlay.classList.add('hidden');
+                }
+            }
+        );
     }
 
 
