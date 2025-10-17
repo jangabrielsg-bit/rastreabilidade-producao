@@ -2418,6 +2418,37 @@
 
     closeConfirmProductionModalBtn.addEventListener('click', () => { hideModal(confirmProductionModal) });
 
+    // --- MONTHLY CONSUMPTION & RESIDUAL STOCK ---
+    async function updateMonthlyConsumption(productId, consumedQuantity, date) {
+        const period = date.substring(0, 7); // YYYY-MM
+        let consumptionRecord = (await DB.getAll('monthlyConsumption')).find(c => c.period === period && c.productId === productId);
+
+        if (consumptionRecord) {
+            consumptionRecord.totalConsumed += consumedQuantity;
+            await DB.update('monthlyConsumption', consumptionRecord);
+        } else {
+            await DB.add('monthlyConsumption', {
+                period,
+                productId,
+                totalConsumed: consumedQuantity
+            });
+        }
+    }
+    
+    async function updateResidualStock(productId, difference) {
+        let residualRecord = await DB.get('residualStock', productId);
+        if (residualRecord) {
+            residualRecord.quantity += difference;
+            if (Math.abs(residualRecord.quantity) < 0.0001) { 
+                await DB.remove('residualStock', productId);
+            } else {
+                await DB.update('residualStock', residualRecord);
+            }
+        } else if (Math.abs(difference) > 0.0001) {
+            await DB.add('residualStock', { productId, quantity: difference });
+        }
+    }
+    
     btnExecuteStockConsumption.addEventListener('click', async () => {
         const orderIdsToConfirm = JSON.parse(confirmProductionTbody.dataset.orders || '[]');
         if (orderIdsToConfirm.length === 0) { 
