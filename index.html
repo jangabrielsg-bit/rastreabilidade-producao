@@ -325,9 +325,19 @@
                     <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
                         <input type="text" id="search-inventory" placeholder="🔍 Buscar item..." class="w-full md:w-1/3 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none form-input">
                         
-                        <div class="w-full md:w-auto">
+                        <div class="flex items-center gap-2">
                             <select id="supplier-filter" class="form-input w-full">
                                 <option value="">Todos os Fornecedores</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                             <label class="text-sm font-medium text-gray-700">Vencimento:</label>
+                            <select id="expiry-month-filter" class="form-input">
+                                <option value="">Mês</option>
+                            </select>
+                            <select id="expiry-year-filter" class="form-input">
+                                <option value="">Ano</option>
                             </select>
                         </div>
 
@@ -399,6 +409,10 @@
                         <input type="date" id="search-po-by-date" class="form-input">
                     </div>
                     <div class="flex items-center gap-2">
+                        <!-- Botão de exportar para Excel adicionado aqui -->
+                        <button id="btn-export-po-excel" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg shadow-sm">
+                            <i class="fa-solid fa-file-excel text-green-600 mr-2"></i>Exportar para Excel
+                        </button>
                         <button id="btn-export-word" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg shadow-sm">
                             <i class="fa-solid fa-file-word text-blue-600 mr-2"></i>Exportar para Word
                         </button>
@@ -962,6 +976,27 @@
         </div>
     </div>
 
+    <!-- Modal de Seleção de Lotes (Correção do Bug) -->
+    <div id="batch-selector-modal" class="modal p-4">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="batch-selector-title" class="text-2xl font-bold">Selecionar Lotes para Consumo</h2>
+                <button id="close-batch-selector-modal" class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+            </div>
+            <div class="flex justify-between text-sm mb-4 p-2 bg-gray-100 rounded-md">
+                <div><strong>Necessário:</strong> <span id="batch-selector-needed">0.00</span></div>
+                <div><strong>Selecionado:</strong> <span id="batch-selector-selected" class="font-bold text-lg">0.00</span></div>
+            </div>
+            <div id="batch-selector-list" class="overflow-y-auto flex-grow pr-2">
+                <!-- Lista de lotes será inserida aqui -->
+            </div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button type="button" id="cancel-batch-selection" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">Cancelar</button>
+                <button type="button" id="confirm-batch-selection" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg">Confirmar Seleção</button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Modal de Notificação -->
     <div id="notification-modal" class="fixed top-5 right-5 z-[100] hidden text-white py-2 px-5 rounded-lg shadow-lg">
@@ -1111,6 +1146,7 @@
     let currentRecipeCategory = 'Todos'; // Default to show all
     let previouslyNotifiedLowStockIds = new Set();
     let hasFlashedScreen = false;
+    let currentBatchSelectorRow = null;
 
     // --- DOM ELEMENTS ---
     const loadingOverlay = document.getElementById('loading-overlay');
@@ -1159,10 +1195,10 @@
     const searchPoByDate = document.getElementById('search-po-by-date');
     const btnExportPdf = document.getElementById('btn-export-pdf');
     const btnExportWord = document.getElementById('btn-export-word');
+    const btnExportPoExcel = document.getElementById('btn-export-po-excel');
     const btnConfirmProduction = document.getElementById('btn-confirm-production');
     const confirmProductionModal = document.getElementById('confirm-production-modal');
     const closeConfirmProductionModalBtn = document.getElementById('close-confirm-production-modal');
-    const productionDateFilter = document.getElementById('production-date-filter');
     const confirmProductionTbody = document.getElementById('confirm-production-tbody');
     const btnExecuteStockConsumption = document.getElementById('btn-execute-stock-consumption');
     const btnDownloadBackup = document.getElementById('btn-download-backup');
@@ -1194,6 +1230,8 @@
     const infoListModal = document.getElementById('info-list-modal');
     const closeInfoListModalBtn = document.getElementById('close-info-list-modal');
     const supplierFilter = document.getElementById('supplier-filter');
+    const expiryMonthFilter = document.getElementById('expiry-month-filter');
+    const expiryYearFilter = document.getElementById('expiry-year-filter');
     const btnExportDailyOutput = document.getElementById('btn-export-daily-output');
     const btnExportScheduledOutput = document.getElementById('btn-export-scheduled-output');
     const btnExportExpiring45 = document.getElementById('btn-export-expiring-45');
@@ -1212,22 +1250,14 @@
     const closeLowStockAlertModal = document.getElementById('close-low-stock-alert-modal');
     const lowStockAlertList = document.getElementById('low-stock-alert-list');
     const viewLowStockItemsBtn = document.getElementById('view-low-stock-items-btn');
-    
-    // --- EVENT LISTENERS FOR NEW ELEMENTS ---
-    lowStockIndicator.addEventListener('click', () => {
-        showModal(lowStockAlertModal);
-        lowStockIndicator.classList.remove('shake-alert');
-    });
-
-    closeLowStockAlertModal.addEventListener('click', () => {
-        hideModal(lowStockAlertModal);
-    });
-
-    viewLowStockItemsBtn.addEventListener('click', () => {
-        hideModal(lowStockAlertModal);
-        navigateTo('inventory');
-        renderInventoryTable('low-stock');
-    });
+    const batchSelectorModal = document.getElementById('batch-selector-modal');
+    const closeBatchSelectorModalBtn = document.getElementById('close-batch-selector-modal'); 
+    const cancelBatchSelectionBtn = document.getElementById('cancel-batch-selection'); 
+    const confirmBatchSelectionBtn = document.getElementById('confirm-batch-selection'); 
+    const batchSelectorList = document.getElementById('batch-selector-list'); 
+    const batchSelectorTitle = document.getElementById('batch-selector-title'); 
+    const batchSelectorNeeded = document.getElementById('batch-selector-needed'); 
+    const batchSelectorSelected = document.getElementById('batch-selector-selected');
 
     // --- FUNÇÕES AUXILIARES ---
     function showNotification(message, isError = false) {
@@ -1428,6 +1458,8 @@
 
         let searchTerm = searchInput.value.toLowerCase();
         const selectedSupplier = supplierFilter.value;
+        const selectedExpiryMonth = expiryMonthFilter.value;
+        const selectedExpiryYear = expiryYearFilter.value;
         
         if (specialFilter) {
             searchInput.value = ''; // Clear search bar for special filters
@@ -1457,6 +1489,20 @@
             }
             if (selectedSupplier) {
                 filteredInventory = filteredInventory.filter(item => item.supplier === selectedSupplier);
+            }
+            if (selectedExpiryYear || selectedExpiryMonth) {
+                const expiringProductIds = new Set();
+                localBatches.forEach(batch => {
+                    if (batch.expiryDate) {
+                        const expiry = new Date(batch.expiryDate + 'T00:00:00');
+                        const yearMatch = !selectedExpiryYear || expiry.getFullYear() == selectedExpiryYear;
+                        const monthMatch = !selectedExpiryMonth || (expiry.getMonth() + 1) == selectedExpiryMonth;
+                        if (yearMatch && monthMatch) {
+                            expiringProductIds.add(batch.productId);
+                        }
+                    }
+                });
+                filteredInventory = filteredInventory.filter(item => expiringProductIds.has(item.id));
             }
         }
 
@@ -1537,6 +1583,8 @@
     });
     searchInput.addEventListener('input', () => renderInventoryTable());
     supplierFilter.addEventListener('change', () => renderInventoryTable());
+    expiryMonthFilter.addEventListener('change', () => renderInventoryTable());
+    expiryYearFilter.addEventListener('change', () => renderInventoryTable());
 
     function populateSupplierFilter() {
         const suppliers = [...new Set(localInventory.map(item => item.supplier))].sort();
@@ -1551,6 +1599,14 @@
             }
             supplierFilter.appendChild(option);
         });
+    }
+
+    function populateExpiryFilters() {
+        const years = [...new Set(localBatches.filter(b => b.expiryDate).map(b => b.expiryDate.substring(0, 4)))].sort((a, b) => b - a);
+        const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+        
+        expiryYearFilter.innerHTML = `<option value="">Ano</option>` + years.map(y => `<option value="${y}">${y}</option>`).join('');
+        expiryMonthFilter.innerHTML = `<option value="">Mês</option>` + months.map((m, i) => `<option value="${i + 1}">${m}</option>`).join('');
     }
     
     // --- ITEM DETAILS & EDIT MODAL ---
@@ -2064,6 +2120,13 @@
     });
 
     // --- PRODUCTION ORDERS LOGIC ---
+    poIngredientsBody.addEventListener('click', (e) => {
+        const button = e.target.closest('.select-batches-btn');
+        if (button) {
+            openBatchSelector(button);
+        }
+    });
+
     function renderProductionOrders() {
         productionOrdersList.innerHTML = '';
         const filterDate = searchPoByDate.value;
@@ -2088,14 +2151,13 @@
 
                 const ingredientsHtml = po.ingredients.map(ing => {
                     const product = localInventory.find(p => p.id === ing.productId);
-                    // Updated to show consumption plan
                     const consumptionPlanHtml = ing.consumptionPlan.map(p => `${p.batchCode} (${p.quantity.toFixed(2)})`).join(', ');
                     return `
                     <li class="flex justify-between items-center text-sm py-1">
                         <span class="text-gray-600 flex-1"><i class="fa-solid fa-box-open mr-2 text-gray-400"></i>${product ? product.name : '...'}</span>
                         <span class="font-medium text-gray-800 ml-2 text-right">${ing.adjustedQuantity.toFixed(2)}</span>
                     </li>
-                    <li class="text-xs text-gray-500 pl-6 pb-1">↳ Lotes: ${consumptionPlanHtml}</li>
+                    <li class="text-xs text-gray-500 pl-6 pb-1">↳ Lotes: ${consumptionPlanHtml || 'N/A'}</li>
                     `;
                 }).join('');
 
@@ -2219,12 +2281,10 @@
     });
     
     function calculateConsumptionPlan(productId, quantityNeeded, poToExcludeId = null) {
-        // 1. Calculate reserved stock from OTHER pending orders for THIS specific product
         const otherPendingPOs = localProductionOrders.filter(p => p.status === 'pendente' && p.id !== poToExcludeId);
         const reservedByBatch = {}; // { batchId: reservedQty }
         otherPendingPOs.forEach(po => {
             if (!po.ingredients) return;
-            // Find the specific ingredient in the other order that matches the current productId
             const relevantIngredient = po.ingredients.find(ing => ing.productId === productId);
             if (relevantIngredient && relevantIngredient.consumptionPlan) {
                 relevantIngredient.consumptionPlan.forEach(planItem => {
@@ -2233,7 +2293,6 @@
             }
         });
 
-        // 2. Determine the plan for the current ingredient
         const plan = [];
         let remainingNeeded = quantityNeeded;
         const availableBatches = localBatches
@@ -2258,7 +2317,7 @@
 
         return {
             plan,
-            isSufficient: remainingNeeded <= 0.0001 // Allow for tiny floating point inaccuracies
+            isSufficient: remainingNeeded <= 0.0001
         };
     }
 
@@ -2281,11 +2340,13 @@
             const neededQty = ing.quantity * recipeQuantity;
             const compensatedQty = Math.max(0, neededQty - residual);
             
-            // Calculate consumption plan considering reservations
-            const { plan, isSufficient } = calculateConsumptionPlan(product.id, compensatedQty, currentPoId);
-            const planText = plan.length > 0 ? plan.map(p => `${p.batchCode} (${p.quantity.toFixed(2)})`).join(', ') : 'Sem estoque disponível';
-            
             const existingIng = existingIngredients ? existingIngredients.find(ei => ei.productId === ing.productId) : null;
+            const plan = existingIng ? existingIng.consumptionPlan : calculateConsumptionPlan(product.id, compensatedQty, currentPoId).plan;
+            
+            const totalInPlan = plan.reduce((sum, p) => sum + p.quantity, 0);
+            const isSufficient = totalInPlan >= compensatedQty - 0.0001;
+
+            const planText = plan.length > 0 ? plan.map(p => `${p.batchCode} (${p.quantity.toFixed(2)})`).join(', ') : 'Sem estoque disponível';
             
             return `
             <tr data-product-id="${product.id}" 
@@ -2295,8 +2356,11 @@
                 <td class="px-2 py-2">${product.name}</td>
                 <td class="px-2 py-2 text-sm ${residual >= 0 ? 'text-green-600' : 'text-red-600'}">${residual.toFixed(2)}</td>
                 <td class="px-2 py-2 font-medium">${neededQty.toFixed(4)}</td>
-                <td class="px-2 py-2"><input type="number" value="${(existingIng ? existingIng.adjustedQuantity : neededQty).toFixed(4)}" min="0" step="0.0001" class="w-24 form-input"></td>
-                <td class="px-2 py-2 text-xs">${planText}</td>
+                <td class="px-2 py-2"><input type="number" value="${(existingIng ? existingIng.adjustedQuantity : neededQty).toFixed(4)}" min="0" step="0.0001" class="w-24 form-input po-adjusted-qty"></td>
+                <td class="px-2 py-2 text-xs">
+                    <span class="plan-text">${planText}</span>
+                    <button type="button" class="select-batches-btn text-blue-500 hover:text-blue-700 ml-2 text-xs">[Alterar]</button>
+                </td>
                 <td class="px-2 py-2"><input type="text" value="${existingIng ? existingIng.handler : ''}" placeholder="Nome" class="w-32 form-input"></td>
             </tr>`;
         }).join('');
@@ -2326,19 +2390,13 @@
                 productId: parseInt(row.dataset.productId),
                 adjustedQuantity: parseFloat(row.querySelector('input[type="number"]').value),
                 handler: row.querySelector('input[type="text"]').value || 'N/A',
-                consumptionPlan: JSON.parse(row.dataset.consumptionPlan) // Save the calculated plan
+                consumptionPlan: JSON.parse(row.dataset.consumptionPlan)
             }
         });
 
-        if (ingredients.some(ing => !ing.consumptionPlan || ing.consumptionPlan.length === 0)) {
-            const hasStock = ingredients.every(ing => {
-                const product = localInventory.find(p => p.id === ing.productId);
-                return product.totalQuantity > 0;
-            });
-            if (hasStock) {
-                 showNotification("Um ou mais itens não têm um plano de consumo. Verifique o estoque.", true);
-                 return;
-            }
+        if (ingredients.some(ing => !ing.consumptionPlan)) {
+            showNotification("Um ou mais itens não têm um plano de consumo. Verifique o estoque.", true);
+            return;
         }
         const poData = {
             recipeId: recipe.id, recipeName: recipe.name, date: poDate.value,
@@ -2464,21 +2522,25 @@
             for (const order of ordersToConfirm) {
                 if (!order.ingredients) continue;
                 
-                let totalRecipeRequirement = {}; // To calculate residual
-                
                 for (const ingredient of order.ingredients) {
                     if (!ingredient.consumptionPlan || ingredient.consumptionPlan.length === 0) {
                         const product = localInventory.find(p => p.id === ingredient.productId) || {};
                         throw new Error(`Ordem para '${order.recipeName}' tem um plano de consumo inválido para o item '${product.name}'. Por favor, edite e salve a ordem novamente.`);
                     }
                     
-                    // Calculate original requirement for residual calculation later
                     const recipe = localRecipes.find(r => r.id === order.recipeId);
                     const recipeIng = recipe.ingredients.find(ri => ri.productId === ingredient.productId);
                     const originalNeeded = recipeIng.quantity * order.quantityProduced;
-                    totalRecipeRequirement[ingredient.productId] = (totalRecipeRequirement[ingredient.productId] || 0) + originalNeeded;
+                    const actualUsed = ingredient.adjustedQuantity;
+                    const totalFromBatches = ingredient.consumptionPlan.reduce((sum, p) => sum + p.quantity, 0);
 
-                    // Execute consumption based on the saved plan
+                    const differenceFromRecipe = originalNeeded - actualUsed;
+                    const surplusFromSelection = totalFromBatches - actualUsed;
+                    const totalResidualChange = differenceFromRecipe + surplusFromSelection;
+                    
+                    // A quantidade total a ser baixada do estoque é a soma do plano de consumo
+                    const totalToConsume = ingredient.consumptionPlan.reduce((sum, p) => sum + p.quantity, 0);
+
                     for (const planItem of ingredient.consumptionPlan) {
                         const batch = await DB.get('batches', planItem.batchId);
                         if (!batch || batch.quantity < planItem.quantity) {
@@ -2501,18 +2563,10 @@
                             reason: `Produção: ${order.recipeName}`
                         });
                     }
-                    await updateMonthlyConsumption(ingredient.productId, ingredient.adjustedQuantity, order.date);
-                }
-                
-                // Update residual stock for this order
-                for(const ingredient of order.ingredients) {
-                    const originalNeeded = totalRecipeRequirement[ingredient.productId] || 0;
-                    const actualUsed = ingredient.adjustedQuantity;
-                    const difference = originalNeeded - actualUsed; // Positive if sobra, negative if falta
-                    await updateResidualStock(ingredient.productId, difference);
+                    await updateMonthlyConsumption(ingredient.productId, actualUsed, order.date);
+                    await updateResidualStock(ingredient.productId, totalResidualChange);
                 }
 
-                // Mark order as completed
                 order.status = 'concluído';
                 await DB.update('productionOrders', order);
             }
@@ -2782,7 +2836,6 @@
         }, 50);
     }
 
-
     function exportChartDataToExcel(data, fileName) {
         const dataToExport = data.map(item => {
             const product = localInventory.find(p => p.id === item.productId);
@@ -2851,6 +2904,56 @@
     });
     
     btnExportWord.addEventListener('click', exportProductionOrdersToWord);
+    btnExportPoExcel.addEventListener('click', exportProductionOrdersToExcel);
+
+    function exportProductionOrdersToExcel() {
+        const filterDate = searchPoByDate.value;
+        if (!filterDate) {
+            showNotification("Por favor, selecione uma data para exportar.", true);
+            return;
+        }
+
+        const filteredOrders = localProductionOrders.filter(po => po.date === filterDate);
+
+        if (filteredOrders.length === 0) {
+            showNotification("Nenhuma ordem de produção para exportar na data selecionada.", true);
+            return;
+        }
+
+        const dataToExport = [];
+        filteredOrders.forEach(order => {
+            order.ingredients.forEach(ing => {
+                const product = localInventory.find(p => p.id === ing.productId);
+                const recipe = localRecipes.find(r => r.id === order.recipeId);
+                const consumptionPlanText = ing.consumptionPlan.map(p => `${p.batchCode} (${p.quantity.toFixed(2)})`).join(', ');
+
+                dataToExport.push({
+                    'Data Produção': new Date(order.date + 'T00:00:00').toLocaleDateString('pt-BR'),
+                    'Linha de Produção': recipe ? recipe.category : 'N/A',
+                    'Receita': order.recipeName,
+                    'Qtd Produzida': order.quantityProduced,
+                    'Status': order.status,
+                    'Insumo': product ? product.name : 'N/A',
+                    'Qtd a Usar': ing.adjustedQuantity,
+                    'Plano de Consumo (Lotes)': consumptionPlanText,
+                    'Manipulador': ing.handler
+                });
+            });
+        });
+        
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Ordens de Produção");
+
+        worksheet['!cols'] = [ 
+            { wch: 15 }, { wch: 20 }, { wch: 30 }, { wch: 15 }, { wch: 10 }, 
+            { wch: 30 }, { wch: 15 }, { wch: 40 }, { wch: 20 } 
+        ];
+
+        XLSX.writeFile(workbook, `Ordens_de_Producao_${filterDate}.xlsx`);
+        showNotification("Relatório de Ordens de Produção exportado com sucesso!");
+    }
+
 
     async function exportProductionOrdersToWord() {
         const filterDate = searchPoByDate.value;
@@ -2866,7 +2969,6 @@
             return;
         }
 
-        // Group orders by production line (recipe category)
         const groupedByLine = {};
         for (const order of filteredOrders) {
             const recipe = localRecipes.find(r => r.id === order.recipeId);
@@ -2944,13 +3046,12 @@
         htmlContent += `</body></html>`;
 
         try {
-            // Note: FileSaver.js must be loaded for 'saveAs' to be defined.
             const blob = new Blob([htmlContent], { type: "application/msword;charset=utf-8" });
             saveAs(blob, `Ordens_de_Producao_${filterDate}.doc`);
             showNotification("Arquivo Word gerado com sucesso!");
         } catch (error) {
             console.error("Erro ao gerar arquivo Word:", error);
-            showNotification("Erro ao gerar arquivo Word. Verifique se a biblioteca FileSaver.js está carregada.", true);
+            showNotification("Erro ao gerar arquivo Word.", true);
         }
     }
 
@@ -2959,7 +3060,6 @@
         const lowStockItems = localInventory.filter(i => {
             const metrics = calculateConsumptionMetrics(i.id);
             const minStock = i.minStock !== null && i.minStock !== undefined ? i.minStock : metrics.minStock;
-            // Only alert if a minimum stock is defined (greater than 0)
             return minStock > 0 && i.totalQuantity < minStock;
         });
 
@@ -2969,11 +3069,9 @@
             return;
         }
 
-        // Always show the indicator if there are low stock items
         lowStockCount.textContent = lowStockItems.length;
         lowStockIndicator.classList.remove('hidden');
 
-        // Populate the modal list
         lowStockAlertList.innerHTML = `
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 sticky top-0">
@@ -3003,22 +3101,137 @@
         const hasNewItems = [...currentLowStockIds].some(id => !previouslyNotifiedLowStockIds.has(id));
         
         if (hasNewItems) {
-            // Flash the screen on the very first new notification of the session
             if (!hasFlashedScreen) {
                 document.body.classList.add('flash-red');
-                hasFlashedScreen = true; // Prevents re-flashing
+                hasFlashedScreen = true;
                 setTimeout(() => document.body.classList.remove('flash-red'), 800);
             }
 
-            // Always shake the bell and show the modal for new items
             lowStockIndicator.classList.add('shake-alert');
             showModal(lowStockAlertModal);
             
-            // Update the set of notified items
             previouslyNotifiedLowStockIds = currentLowStockIds;
         }
     }
 
+    // --- LÓGICA DE SELEÇÃO DE LOTE (CORREÇÃO DO BUG) ---
+
+    function openBatchSelector(button) {
+        currentBatchSelectorRow = button.closest('tr');
+        if (!currentBatchSelectorRow) return;
+
+        const productId = parseInt(currentBatchSelectorRow.dataset.productId);
+        const neededQty = parseFloat(currentBatchSelectorRow.querySelector('.po-adjusted-qty').value);
+        const product = localInventory.find(p => p.id === productId);
+        const existingPlan = JSON.parse(currentBatchSelectorRow.dataset.consumptionPlan || '[]');
+        const poToExcludeId = parseInt(document.getElementById('edit-po-id').value) || null;
+        
+        const otherPendingPOs = localProductionOrders.filter(p => p.status === 'pendente' && p.id !== poToExcludeId);
+        const reservedByBatch = {};
+        otherPendingPOs.forEach(po => {
+            if (!po.ingredients) return;
+            const relevantIngredient = po.ingredients.find(ing => ing.productId === productId);
+            if (relevantIngredient && relevantIngredient.consumptionPlan) {
+                relevantIngredient.consumptionPlan.forEach(planItem => {
+                    reservedByBatch[planItem.batchId] = (reservedByBatch[planItem.batchId] || 0) + planItem.quantity;
+                });
+            }
+        });
+
+        const availableBatches = localBatches
+            .filter(b => b.productId === productId && b.quantity > 0)
+            .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+
+        batchSelectorTitle.textContent = `Selecionar lotes para ${product.name}`;
+        batchSelectorNeeded.textContent = neededQty.toFixed(4);
+        batchSelectorList.innerHTML = '';
+        
+        let totalSelected = 0;
+
+        availableBatches.forEach(batch => {
+            const alreadyReserved = reservedByBatch[batch.id] || 0;
+            const effectiveQty = batch.quantity - alreadyReserved;
+            const alreadyInPlan = existingPlan.find(p => p.batchId === batch.id);
+            const valueInPlan = alreadyInPlan ? alreadyInPlan.quantity : 0;
+            totalSelected += valueInPlan;
+
+            const row = document.createElement('div');
+            row.className = 'grid grid-cols-4 gap-4 items-center border-b py-2';
+            row.innerHTML = `
+                <div class="text-sm"><strong>${batch.code}</strong></div>
+                <div class="text-xs text-gray-600">Val: ${new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR')}</div>
+                <div class="text-xs text-gray-600">Disp: ${(effectiveQty).toFixed(2)}</div>
+                <input type="number" data-batch-id="${batch.id}" data-batch-code="${batch.code}" 
+                       value="${valueInPlan > 0 ? valueInPlan.toFixed(4) : ''}" 
+                       min="0" max="${effectiveQty + valueInPlan}" step="0.001" 
+                       class="form-input batch-selector-input w-full text-right" 
+                       placeholder="0.00">
+            `;
+            batchSelectorList.appendChild(row);
+        });
+
+        batchSelectorSelected.textContent = totalSelected.toFixed(4);
+        updateBatchSelectorColor();
+        showModal(batchSelectorModal);
+    }
+
+    function updateBatchSelectorColor() {
+        const needed = parseFloat(batchSelectorNeeded.textContent);
+        const selected = parseFloat(batchSelectorSelected.textContent);
+        
+        batchSelectorSelected.classList.remove('text-green-600', 'text-red-600', 'text-orange-500');
+        if (selected < needed - 0.0001) {
+            batchSelectorSelected.classList.add('text-red-600');
+        } else if (Math.abs(needed - selected) < 0.0001) {
+            batchSelectorSelected.classList.add('text-green-600');
+        } else { // selected > needed
+            batchSelectorSelected.classList.add('text-orange-500');
+        }
+    }
+
+    batchSelectorList.addEventListener('input', e => {
+        if (e.target.classList.contains('batch-selector-input')) {
+            let totalSelected = 0;
+            document.querySelectorAll('.batch-selector-input').forEach(input => {
+                totalSelected += parseFloat(input.value) || 0;
+            });
+            batchSelectorSelected.textContent = totalSelected.toFixed(4);
+            updateBatchSelectorColor();
+        }
+    });
+
+    confirmBatchSelectionBtn.addEventListener('click', () => {
+        const needed = parseFloat(batchSelectorNeeded.textContent);
+        const selected = parseFloat(batchSelectorSelected.textContent);
+
+        if (selected < needed - 0.0001) {
+            showNotification('A quantidade selecionada não pode ser menor que a necessária.', true);
+            return;
+        }
+
+        const newPlan = [];
+        document.querySelectorAll('.batch-selector-input').forEach(input => {
+            const quantity = parseFloat(input.value);
+            if (quantity > 0) {
+                newPlan.push({
+                    batchId: parseInt(input.dataset.batchId),
+                    batchCode: input.dataset.batchCode,
+                    quantity: quantity
+                });
+            }
+        });
+
+        currentBatchSelectorRow.dataset.consumptionPlan = JSON.stringify(newPlan);
+        const planText = newPlan.map(p => `${p.batchCode} (${p.quantity.toFixed(2)})`).join(', ');
+        currentBatchSelectorRow.querySelector('.plan-text').textContent = planText || 'N/A';
+
+        hideModal(batchSelectorModal);
+        currentBatchSelectorRow = null;
+    });
+
+    closeBatchSelectorModalBtn.addEventListener('click', () => hideModal(batchSelectorModal));
+    cancelBatchSelectionBtn.addEventListener('click', () => hideModal(batchSelectorModal));
+    
 
     // --- INICIALIZAÇÃO E SINCRONIZAÇÃO COM DADOS LOCAIS ---
     async function refreshLocalData() {
@@ -3038,8 +3251,8 @@
             renderConsumptionReport();
             renderResidualStock();
             populateSupplierFilter();
+            populateExpiryFilters();
             
-            // Check for low stock after all data is refreshed
             updateLowStockAlerts();
         } catch (error) {
             console.error("Erro ao carregar dados locais:", error);
@@ -3056,7 +3269,6 @@
         const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
 
-        // --- STAT CARDS ---
         const lowStockItems = localInventory.filter(i => {
             const metrics = calculateConsumptionMetrics(i.id);
             const minStock = i.minStock !== null && i.minStock !== undefined ? i.minStock : metrics.minStock;
@@ -3071,42 +3283,12 @@
         document.getElementById('stat-low-stock').textContent = lowStockItems.length;
         document.getElementById('stat-expiring-soon').textContent = expiringBatches.length;
 
-        // --- GRÁFICOS ---
         const dailyOutputs = localHistory.filter(h => h.date === todayStr && (h.type === 'saída' || h.type === 'requisição'));
         dailyOutputChart = renderDashboardChart('daily-output-chart', dailyOutputChart, 'Top 10 Saídas de Hoje', dailyOutputs, false, 'btn-export-daily-output');
         
         const scheduledOutputs = localProductionOrders.filter(po => (po.date === todayStr || po.date === tomorrowStr) && po.status === 'pendente');
         scheduledOutputChart = renderDashboardChart('scheduled-output-chart', scheduledOutputChart, 'Top 10 Saídas Programadas (48h)', scheduledOutputs, true, 'btn-export-scheduled-output');
-
-        // --- ÚLTIMAS ENTRADAS ---
-        const lastEntriesList = document.getElementById('last-entries-list');
-        if (lastEntriesList) {
-            const lastEntries = [...localHistory].filter(h => h.type === 'entrada').sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0,5);
-            lastEntriesList.innerHTML = '';
-            if (lastEntries.length > 0) {
-                lastEntries.forEach(entry => {
-                    const product = localInventory.find(p => p.id === entry.productId);
-                    const li = document.createElement('li');
-                    li.className = 'py-3 flex justify-between items-center text-sm';
-                    li.innerHTML = `
-                        <div>
-                            <p class="font-medium text-gray-800">${product ? product.name : 'Produto desconhecido'}</p>
-                            <p class="text-gray-500">Lote: ${entry.batchCode}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-semibold text-green-600">+${entry.quantity.toFixed(2)}</p>
-                            <p class="text-gray-400">${new Date(entry.date + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
-                        </div>
-                    `;
-                    lastEntriesList.appendChild(li);
-                });
-            } else {
-                 lastEntriesList.innerHTML = `<p class="text-center text-gray-500 py-4">Nenhuma entrada registrada.</p>`;
-            }
-        }
         
-        
-        // --- ALERTAS ---
         const lossRiskBatches = localBatches.filter(b => {
              const expiryDate = new Date(b.expiryDate);
              if (!b.expiryDate || expiryDate <= today || b.quantity <= 0) return false;
@@ -3121,12 +3303,6 @@
              return b.quantity > estimatedConsumption;
         });
 
-        const sixtyDaysAgo = new Date();
-        sixtyDaysAgo.setDate(today.getDate() - 60);
-        const recentOuts = [...localHistory].filter(h => h.type === 'saída' && new Date(h.date) > sixtyDaysAgo);
-        const recentOutProductIds = new Set(recentOuts.map(h => h.productId));
-        const stagnantItems = localInventory.filter(i => i.totalQuantity > 0 && !recentOutProductIds.has(i.id));
-        
         const fortyFiveDaysFromNow = new Date();
         fortyFiveDaysFromNow.setDate(today.getDate() + 45);
         const expiring45Batches = localBatches.filter(b => b.quantity > 0 && b.expiryDate && new Date(b.expiryDate) <= fortyFiveDaysFromNow);
@@ -3164,7 +3340,6 @@
             container.innerHTML = `<p class="text-center text-sm text-gray-400 py-4">Nenhum item para exibir.</p>`;
         }
     }
-
 
     function renderDashboardChart(canvasId, chartInstance, title, data, isScheduled = false, exportBtnId) {
         const ctx = document.getElementById(canvasId);
@@ -3538,7 +3713,6 @@
         const traceType = document.querySelector('input[name="trace-type"]:checked').value;
         traceResultsContainer.innerHTML = '<div class="text-center py-4"><div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-600 mx-auto"></div><p class="mt-2 text-gray-600">Buscando...</p></div>';
 
-        // Usamos um setTimeout para garantir que o spinner de loading apareça na tela antes de iniciar a busca pesada
         setTimeout(() => {
             let resultsHtml = '';
 
@@ -3554,7 +3728,6 @@
                 const product = localInventory.find(p => p.id === productId);
                 resultsHtml += `<h3 class="text-xl font-semibold mb-4">Rastreamento para: ${product.name} - Lote ${batchCode}</h3>`;
 
-                // 1. Encontrar a origem do lote
                 const entryRecord = localHistory.find(h => h.productId === productId && h.batchCode === batchCode && h.type === 'entrada');
                 if (entryRecord) {
                     resultsHtml += `
@@ -3569,10 +3742,8 @@
                      resultsHtml += `<div class="mb-4 p-4 border-l-4 border-yellow-400 bg-yellow-50"><p class="text-yellow-700">Nenhum registro de entrada encontrado para este lote.</p></div>`;
                 }
 
-                // 2. Encontrar o uso em produção
                 const productionUsages = localProductionOrders.filter(po =>
                     po.ingredients.some(ing => {
-                        // Check inside the consumption plan
                         return ing.productId === productId && ing.consumptionPlan && ing.consumptionPlan.some(p => p.batchCode === batchCode)
                     })
                 );
@@ -3582,7 +3753,6 @@
                     resultsHtml += '<ul class="space-y-3">';
                     productionUsages.forEach(po => {
                         const usedIngredient = po.ingredients.find(ing => ing.productId === productId);
-                        // Find the specific quantity used from this batch code
                         const usageFromBatch = usedIngredient.consumptionPlan.find(p => p.batchCode === batchCode);
                         if (usageFromBatch) {
                              resultsHtml += `
@@ -3599,7 +3769,6 @@
                     resultsHtml += '</ul>';
                 }
 
-                // 3. Encontrar outras movimentações (ajustes, requisições, etc.)
                 const otherMovements = localHistory.filter(h => h.productId === productId && h.batchCode === batchCode && h.type !== 'entrada' && h.type !== 'saída');
                 if(otherMovements.length > 0) {
                     resultsHtml += `<h4 class="font-bold text-lg text-purple-700 mt-6 mb-2">Outras Movimentações</h4>`;
@@ -3782,7 +3951,6 @@
         });
     });
 
-
     async function initialize() {
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('receipt-date').value = today;
@@ -3790,6 +3958,18 @@
         navigateTo('dashboard');
 
         btnExportExcel.addEventListener('click', exportInventoryToExcel);
+        lowStockIndicator.addEventListener('click', () => {
+            showModal(lowStockAlertModal);
+            lowStockIndicator.classList.remove('shake-alert');
+        });
+        closeLowStockAlertModal.addEventListener('click', () => {
+            hideModal(lowStockAlertModal);
+        });
+        viewLowStockItemsBtn.addEventListener('click', () => {
+            hideModal(lowStockAlertModal);
+            navigateTo('inventory');
+            renderInventoryTable('low-stock');
+        });
 
         try {
             await DB.getDB(); // Inicializa e abre o banco
