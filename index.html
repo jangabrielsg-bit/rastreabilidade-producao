@@ -696,14 +696,8 @@
             <h3 class="text-xl font-semibold mt-6 mb-2">Lotes Disponíveis</h3>
             <div class="overflow-x-auto border rounded-lg">
                 <table class="w-full text-sm text-left">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-2">Lote</th>
-                            <th class="px-4 py-2">Quantidade</th>
-                            <th class="px-4 py-2">Data de Validade</th>
-                             <th class="px-4 py-2">Shelf Life (%)</th>
-                            <th class="px-4 py-2 text-center">Ações</th>
-                        </tr>
+                    <thead id="details-batches-thead" class="bg-gray-50">
+                        <!-- Header dinâmico aqui -->
                     </thead>
                     <tbody id="details-batches-table"></tbody>
                 </table>
@@ -976,7 +970,7 @@
         </div>
     </div>
 
-    <!-- Modal de Seleção de Lotes (Correção do Bug) -->
+    <!-- Modal de Seleção de Lotes -->
     <div id="batch-selector-modal" class="modal p-4">
         <div class="bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center mb-4">
@@ -993,6 +987,35 @@
             <div class="mt-6 flex justify-end space-x-3">
                 <button type="button" id="cancel-batch-selection" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">Cancelar</button>
                 <button type="button" id="confirm-batch-selection" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg">Confirmar Seleção</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Receita de Teste -->
+    <div id="test-recipe-modal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
+                    <i class="fa-solid fa-flask-vial text-yellow-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Confirmação de Uso</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500">
+                        Este lote de farinha <strong id="test-recipe-batch-code"></strong> não está liberado. Deseja usá-lo para uma receita de teste?
+                    </p>
+                </div>
+                <div class="mt-4">
+                    <label for="test-responsible-name" class="sr-only">Nome do Responsável</label>
+                    <input type="text" id="test-responsible-name" placeholder="Nome do Responsável" class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none form-input" required>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-center space-x-4">
+                <button id="cancel-test-recipe-btn" type="button" class="py-2 px-4 bg-gray-200 text-gray-800 font-semibold rounded-lg shadow-md hover:bg-gray-300">
+                    Cancelar
+                </button>
+                <button id="confirm-test-recipe-btn" type="button" class="py-2 px-4 bg-yellow-500 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-600">
+                    Confirmar Uso
+                </button>
             </div>
         </div>
     </div>
@@ -1147,6 +1170,7 @@
     let previouslyNotifiedLowStockIds = new Set();
     let hasFlashedScreen = false;
     let currentBatchSelectorRow = null;
+    let currentTestBatchInput = null;
 
     // --- DOM ELEMENTS ---
     const loadingOverlay = document.getElementById('loading-overlay');
@@ -1163,6 +1187,7 @@
     const btnExportExcel = document.getElementById('btn-export-excel');
     const detailsModal = document.getElementById('item-details-modal');
     const detailsBatchesTable = document.getElementById('details-batches-table');
+    const detailsBatchesThead = document.getElementById('details-batches-thead');
     const closeDetailsModalBtn = document.getElementById('close-details-modal');
     const btnNewRecipe = document.getElementById('btn-new-recipe');
     const recipeModal = document.getElementById('recipe-modal');
@@ -1258,6 +1283,11 @@
     const batchSelectorTitle = document.getElementById('batch-selector-title'); 
     const batchSelectorNeeded = document.getElementById('batch-selector-needed'); 
     const batchSelectorSelected = document.getElementById('batch-selector-selected');
+    const testRecipeModal = document.getElementById('test-recipe-modal');
+    const testRecipeBatchCode = document.getElementById('test-recipe-batch-code');
+    const testResponsibleName = document.getElementById('test-responsible-name');
+    const cancelTestRecipeBtn = document.getElementById('cancel-test-recipe-btn');
+    const confirmTestRecipeBtn = document.getElementById('confirm-test-recipe-btn');
 
     // --- FUNÇÕES AUXILIARES ---
     function showNotification(message, isError = false) {
@@ -1398,6 +1428,12 @@
     async function saveEntry(authorizedBy = null) {
         const data = tempEntryData;
         if (!data) return;
+
+        // Adiciona status para farinha de trigo
+        if (data.code === '8110') {
+            data.status = 'não liberado';
+        }
+
         try {
             let product = await DB.getByIndex('inventory', 'code', data.code);
             let productId;
@@ -1408,7 +1444,17 @@
                 product.totalQuantity += data.quantity;
                 await DB.update('inventory', product);
             }
-            await DB.add('batches', { productId, code: data.batchCode, quantity: data.quantity, mfgDate: data.mfgDate, receiptDate: data.receiptDate, expiryDate: data.expiryDate, shelfLife: data.shelfLife, authorizedBy });
+            await DB.add('batches', { 
+                productId, 
+                code: data.batchCode, 
+                quantity: data.quantity, 
+                mfgDate: data.mfgDate, 
+                receiptDate: data.receiptDate, 
+                expiryDate: data.expiryDate, 
+                shelfLife: data.shelfLife, 
+                authorizedBy,
+                status: data.status // Salva o status no DB
+            });
             await DB.add('history', { productId, batchCode: data.batchCode, type: 'entrada', quantity: data.quantity, date: data.receiptDate });
             showNotification('Entrada registrada com sucesso!');
             entryForm.reset();
@@ -1660,21 +1706,46 @@
         document.getElementById('edit-min-stock').value = product.minStock;
         document.getElementById('edit-max-stock').value = product.maxStock;
 
+        const isFlour = product.code === '8110';
+        
+        let headerHtml = `
+            <tr>
+                <th class="px-4 py-2">Lote</th>
+                <th class="px-4 py-2">Quantidade</th>
+                <th class="px-4 py-2">Data de Validade</th>
+                <th class="px-4 py-2">Shelf Life (%)</th>
+                ${isFlour ? '<th class="px-4 py-2">Status</th>' : ''}
+                <th class="px-4 py-2 text-center">Ações</th>
+            </tr>`;
+        detailsBatchesThead.innerHTML = headerHtml;
+
         const batches = localBatches.filter(b => b.productId === productId && b.quantity > 0);
         const history = localHistory.filter(h => h.productId === productId).sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        detailsBatchesTable.innerHTML = batches.map(batch => `
-            <tr class="border-b">
-                <td class="px-4 py-2">${batch.code}</td>
-                <td class="px-4 py-2">${batch.quantity.toFixed(2)}</td>
-                <td class="px-4 py-2">${batch.expiryDate ? new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'}</td>
-                <td class="px-4 py-2">${typeof batch.shelfLife === 'number' ? batch.shelfLife.toFixed(1) : (batch.shelfLife || 'N/A')}</td>
-                <td class="px-4 py-2 text-center">
-                    <button class="print-label-btn text-gray-500 hover:text-gray-700 p-1" data-batch-id="${batch.id}" title="Imprimir Etiqueta"><i class="fa-solid fa-print"></i></button>
-                    <button class="edit-batch-btn text-blue-500 hover:text-blue-700 p-1" data-batch-id="${batch.id}" title="Editar Lote"><i class="fa-solid fa-pencil"></i></button>
-                    <button class="delete-batch-btn text-red-500 hover:text-red-700 p-1" data-batch-id="${batch.id}" title="Excluir Lote"><i class="fa-solid fa-trash"></i></button>
+        detailsBatchesTable.innerHTML = batches.map(batch => {
+            const statusCell = isFlour ? `
+                <td class="px-4 py-2">
+                    <label class="inline-flex items-center cursor-pointer">
+                      <input type="checkbox" value="" class="sr-only peer batch-status-toggle" data-batch-id="${batch.id}" ${batch.status === 'liberado' ? 'checked' : ''}>
+                      <div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                      <span class="ms-3 text-sm font-medium text-gray-900">${batch.status || 'N/A'}</span>
+                    </label>
                 </td>
-            </tr>`).join('');
+            ` : '';
+            return `
+                <tr class="border-b">
+                    <td class="px-4 py-2">${batch.code}</td>
+                    <td class="px-4 py-2">${batch.quantity.toFixed(2)}</td>
+                    <td class="px-4 py-2">${batch.expiryDate ? new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'}</td>
+                    <td class="px-4 py-2">${typeof batch.shelfLife === 'number' ? batch.shelfLife.toFixed(1) : (batch.shelfLife || 'N/A')}</td>
+                    ${statusCell}
+                    <td class="px-4 py-2 text-center">
+                        <button class="print-label-btn text-gray-500 hover:text-gray-700 p-1" data-batch-id="${batch.id}" title="Imprimir Etiqueta"><i class="fa-solid fa-print"></i></button>
+                        <button class="edit-batch-btn text-blue-500 hover:text-blue-700 p-1" data-batch-id="${batch.id}" title="Editar Lote"><i class="fa-solid fa-pencil"></i></button>
+                        <button class="delete-batch-btn text-red-500 hover:text-red-700 p-1" data-batch-id="${batch.id}" title="Excluir Lote"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>`;
+        }).join('');
         
         const groupedHistory = history.reduce((acc, entry) => {
             (acc[entry.date] = acc[entry.date] || []).push(entry);
@@ -1742,7 +1813,25 @@
     });
     
     // --- BATCH EDIT/DELETE/PRINT ---
-    detailsBatchesTable.addEventListener('click', e => {
+    detailsBatchesTable.addEventListener('click', async (e) => {
+        const toggle = e.target.closest('.batch-status-toggle');
+        if (toggle) {
+            const batchId = parseInt(toggle.dataset.batchId);
+            const isLiberado = toggle.checked;
+            const newStatus = isLiberado ? 'liberado' : 'não liberado';
+            
+            try {
+                const batch = await DB.get('batches', batchId);
+                batch.status = newStatus;
+                await DB.update('batches', batch);
+                await refreshLocalData();
+                showItemDetails(batch.productId); // Refresh the modal
+                showNotification(`Lote ${batch.code} atualizado para ${newStatus}.`);
+            } catch (error) {
+                showNotification("Erro ao atualizar status do lote.", true);
+            }
+        }
+        
         const editBtn = e.target.closest('.edit-batch-btn');
         if (editBtn) {
             handleEditBatch(parseInt(editBtn.dataset.batchId));
@@ -2151,7 +2240,11 @@
 
                 const ingredientsHtml = po.ingredients.map(ing => {
                     const product = localInventory.find(p => p.id === ing.productId);
-                    const consumptionPlanHtml = ing.consumptionPlan.map(p => `${p.batchCode} (${p.quantity.toFixed(2)})`).join(', ');
+                    const consumptionPlanHtml = ing.consumptionPlan.map(p => {
+                        const testInfo = p.responsible ? ` (Teste: ${p.responsible})` : '';
+                        return `${p.batchCode} (${p.quantity.toFixed(2)})${testInfo}`;
+                    }).join(', ');
+
                     return `
                     <li class="flex justify-between items-center text-sm py-1">
                         <span class="text-gray-600 flex-1"><i class="fa-solid fa-box-open mr-2 text-gray-400"></i>${product ? product.name : '...'}</span>
@@ -2281,6 +2374,9 @@
     });
     
     function calculateConsumptionPlan(productId, quantityNeeded, poToExcludeId = null) {
+        const product = localInventory.find(p => p.id === productId);
+        const isFlour = product && product.code === '8110';
+
         const otherPendingPOs = localProductionOrders.filter(p => p.status === 'pendente' && p.id !== poToExcludeId);
         const reservedByBatch = {}; // { batchId: reservedQty }
         otherPendingPOs.forEach(po => {
@@ -2295,9 +2391,13 @@
 
         const plan = [];
         let remainingNeeded = quantityNeeded;
-        const availableBatches = localBatches
+        let availableBatches = localBatches
             .filter(b => b.productId === productId && b.quantity > 0)
             .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+        
+        if (isFlour) {
+            availableBatches = availableBatches.filter(b => b.status === 'liberado');
+        }
 
         for (const batch of availableBatches) {
             if (remainingNeeded <= 0) break;
@@ -2537,9 +2637,6 @@
                     const differenceFromRecipe = originalNeeded - actualUsed;
                     const surplusFromSelection = totalFromBatches - actualUsed;
                     const totalResidualChange = differenceFromRecipe + surplusFromSelection;
-                    
-                    // A quantidade total a ser baixada do estoque é a soma do plano de consumo
-                    const totalToConsume = ingredient.consumptionPlan.reduce((sum, p) => sum + p.quantity, 0);
 
                     for (const planItem of ingredient.consumptionPlan) {
                         const batch = await DB.get('batches', planItem.batchId);
@@ -2560,7 +2657,7 @@
                             type: 'saída', 
                             quantity: planItem.quantity, 
                             date: new Date().toISOString().split('T')[0],
-                            reason: `Produção: ${order.recipeName}`
+                            reason: `Produção: ${order.recipeName}${planItem.responsible ? ` (Teste: ${planItem.responsible})` : ''}`
                         });
                     }
                     await updateMonthlyConsumption(ingredient.productId, actualUsed, order.date);
@@ -3114,7 +3211,7 @@
         }
     }
 
-    // --- LÓGICA DE SELEÇÃO DE LOTE (CORREÇÃO DO BUG) ---
+    // --- LÓGICA DE SELEÇÃO DE LOTE ---
 
     function openBatchSelector(button) {
         currentBatchSelectorRow = button.closest('tr');
@@ -3123,6 +3220,7 @@
         const productId = parseInt(currentBatchSelectorRow.dataset.productId);
         const neededQty = parseFloat(currentBatchSelectorRow.querySelector('.po-adjusted-qty').value);
         const product = localInventory.find(p => p.id === productId);
+        const isFlour = product.code === '8110';
         const existingPlan = JSON.parse(currentBatchSelectorRow.dataset.consumptionPlan || '[]');
         const poToExcludeId = parseInt(document.getElementById('edit-po-id').value) || null;
         
@@ -3155,13 +3253,19 @@
             const valueInPlan = alreadyInPlan ? alreadyInPlan.quantity : 0;
             totalSelected += valueInPlan;
 
+            const isNotReleasedFlour = isFlour && batch.status !== 'liberado';
+
             const row = document.createElement('div');
-            row.className = 'grid grid-cols-4 gap-4 items-center border-b py-2';
+            row.className = `grid grid-cols-4 gap-4 items-center border-b py-2 ${isNotReleasedFlour ? 'bg-yellow-50' : ''}`;
             row.innerHTML = `
-                <div class="text-sm"><strong>${batch.code}</strong></div>
+                <div class="text-sm">
+                    <strong>${batch.code}</strong>
+                    ${isNotReleasedFlour ? '<i class="fa-solid fa-triangle-exclamation text-yellow-500 ml-2" title="Lote não liberado"></i>' : ''}
+                </div>
                 <div class="text-xs text-gray-600">Val: ${new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR')}</div>
                 <div class="text-xs text-gray-600">Disp: ${(effectiveQty).toFixed(2)}</div>
                 <input type="number" data-batch-id="${batch.id}" data-batch-code="${batch.code}" 
+                       data-is-flour="${isFlour}" data-status="${batch.status || ''}"
                        value="${valueInPlan > 0 ? valueInPlan.toFixed(4) : ''}" 
                        min="0" max="${effectiveQty + valueInPlan}" step="0.001" 
                        class="form-input batch-selector-input w-full text-right" 
@@ -3190,10 +3294,21 @@
     }
 
     batchSelectorList.addEventListener('input', e => {
-        if (e.target.classList.contains('batch-selector-input')) {
+        const input = e.target;
+        if (input.classList.contains('batch-selector-input')) {
+            const isFlour = input.dataset.isFlour === 'true';
+            const status = input.dataset.status;
+            const quantity = parseFloat(input.value) || 0;
+
+            if (isFlour && status !== 'liberado' && quantity > 0) {
+                currentTestBatchInput = input;
+                testRecipeBatchCode.textContent = input.dataset.batchCode;
+                showModal(testRecipeModal);
+            }
+
             let totalSelected = 0;
-            document.querySelectorAll('.batch-selector-input').forEach(input => {
-                totalSelected += parseFloat(input.value) || 0;
+            document.querySelectorAll('.batch-selector-input').forEach(inp => {
+                totalSelected += parseFloat(inp.value) || 0;
             });
             batchSelectorSelected.textContent = totalSelected.toFixed(4);
             updateBatchSelectorColor();
@@ -3216,13 +3331,17 @@
                 newPlan.push({
                     batchId: parseInt(input.dataset.batchId),
                     batchCode: input.dataset.batchCode,
-                    quantity: quantity
+                    quantity: quantity,
+                    responsible: input.dataset.responsible || null
                 });
             }
         });
 
         currentBatchSelectorRow.dataset.consumptionPlan = JSON.stringify(newPlan);
-        const planText = newPlan.map(p => `${p.batchCode} (${p.quantity.toFixed(2)})`).join(', ');
+        const planText = newPlan.map(p => {
+             const testInfo = p.responsible ? ` (Teste: ${p.responsible})` : '';
+             return `${p.batchCode} (${p.quantity.toFixed(2)})${testInfo}`;
+        }).join(', ');
         currentBatchSelectorRow.querySelector('.plan-text').textContent = planText || 'N/A';
 
         hideModal(batchSelectorModal);
@@ -3231,6 +3350,30 @@
 
     closeBatchSelectorModalBtn.addEventListener('click', () => hideModal(batchSelectorModal));
     cancelBatchSelectionBtn.addEventListener('click', () => hideModal(batchSelectorModal));
+    
+    cancelTestRecipeBtn.addEventListener('click', () => {
+        if(currentTestBatchInput) {
+            currentTestBatchInput.value = '';
+            currentTestBatchInput.dispatchEvent(new Event('input')); // Recalcula o total
+        }
+        hideModal(testRecipeModal);
+        currentTestBatchInput = null;
+        testResponsibleName.value = '';
+    });
+
+    confirmTestRecipeBtn.addEventListener('click', () => {
+        const responsible = testResponsibleName.value.trim();
+        if (!responsible) {
+            showNotification('Por favor, insira o nome do responsável.', true);
+            return;
+        }
+        if (currentTestBatchInput) {
+            currentTestBatchInput.dataset.responsible = responsible;
+        }
+        hideModal(testRecipeModal);
+        currentTestBatchInput = null;
+        testResponsibleName.value = '';
+    });
     
 
     // --- INICIALIZAÇÃO E SINCRONIZAÇÃO COM DADOS LOCAIS ---
