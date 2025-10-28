@@ -84,7 +84,7 @@
         .animate-fade-in-out {
             animation: fade-in-out 4s ease-in-out forwards;
         }
-        
+
         @keyframes flash-red-bg {
             0%, 100% { background-color: #f1f5f9; } /* bg-slate-100 */
             50% { background-color: #fee2e2; } /* bg-red-100 */
@@ -108,7 +108,7 @@
     <div id="loading-overlay" class="fixed inset-0 z-[101] flex items-center justify-center bg-white">
         <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-600"></div>
     </div>
-    
+
     <!-- Low Stock Alert Bell -->
     <div id="low-stock-indicator" class="hidden fixed top-5 right-24 z-[100] cursor-pointer">
         <div class="relative">
@@ -173,11 +173,11 @@
 
         <!-- Main Content -->
         <main class="flex-1 p-6 md:p-8 overflow-y-auto">
-            
+
             <!-- Tela da Dashboard -->
             <div id="screen-dashboard">
                 <h1 class="text-3xl font-bold text-gray-800 mb-6">Visão Geral do Estoque</h1>
-                
+
                 <!-- Stat Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                     <div class="bg-white p-6 rounded-xl shadow flex items-center">
@@ -324,7 +324,7 @@
                 <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
                         <input type="text" id="search-inventory" placeholder="🔍 Buscar item..." class="w-full md:w-1/3 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none form-input">
-                        
+
                         <div class="flex items-center gap-2">
                             <select id="supplier-filter" class="form-input w-full">
                                 <option value="">Todos os Fornecedores</option>
@@ -389,7 +389,7 @@
                    </div>
                </div>
            </div>
-            
+
             <!-- Tela de Ordens de Produção -->
             <div id="screen-production" class="hidden">
                  <div class="flex justify-between items-center mb-6">
@@ -468,7 +468,7 @@
                     </div>
                  </div>
             </div>
-            
+
              <!-- Tela de Baixa por Requisição -->
             <div id="screen-requisitions" class="hidden">
                 <h1 class="text-3xl font-bold text-gray-800 mb-6">Baixa por Requisição</h1>
@@ -486,7 +486,7 @@
                                 </div>
                             </div>
                             <h3 class="text-lg font-medium pt-4">Itens</h3>
-                             
+
                             <div id="requisition-items-container" class="space-y-3">
                                 <!-- Itens serão adicionados aqui -->
                             </div>
@@ -598,7 +598,7 @@
 
         </main>
     </div>
-    
+
     <!-- Modal de Alerta de Shelf Life -->
     <div id="shelf-life-modal" class="modal">
         <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
@@ -630,7 +630,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Modal de Detalhes e Edição do Item -->
     <div id="item-details-modal" class="modal p-4">
         <div class="bg-white rounded-lg shadow-xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -646,7 +646,7 @@
                 </h2>
                 <button id="close-details-modal" class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
             </div>
-            
+
             <!-- View Mode -->
             <div id="item-details-view">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm pt-4">
@@ -708,7 +708,7 @@
                     <tbody id="details-batches-table"></tbody>
                 </table>
             </div>
-            
+
             <h3 class="text-xl font-semibold mt-6 mb-2">Histórico de Movimentação</h3>
             <div class="overflow-x-auto border rounded-lg max-h-60" id="details-history-container">
                 <!-- Histórico agrupado por data -->
@@ -799,7 +799,7 @@
                             <option>Confeitaria</option>
                         </select>
                     </div>
-                    
+
                     <h3 class="text-lg font-medium pt-4">Ingredientes</h3>
                     <div id="ingredients-container" class="space-y-3">
                         <!-- Ingredientes serão adicionados dinamicamente aqui -->
@@ -817,7 +817,7 @@
             </form>
         </div>
     </div>
-    
+
     <!-- Modal de Ordem de Produção -->
     <div id="production-order-modal" class="modal p-4">
         <div class="bg-white rounded-lg shadow-xl p-8 max-w-5xl w-full max-h-[90vh] overflow-y-auto">
@@ -893,7 +893,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Modal de Confirmação de Upload -->
     <div id="confirm-upload-modal" class="modal">
         <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
@@ -943,7 +943,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Modal de Informações da Dashboard -->
     <div id="info-list-modal" class="modal p-4">
          <div class="bg-white rounded-lg shadow-xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -1075,7 +1075,7 @@
                 request.onerror = () => reject(request.error);
             });
         }
-        
+
         async function getByIndex(storeName, indexName, value) {
             const db = await getDB();
             return new Promise((resolve, reject) => {
@@ -1109,7 +1109,7 @@
                 request.onerror = () => reject(request.error);
             });
         }
-        
+
         async function remove(storeName, key) {
              const db = await getDB();
             return new Promise((resolve, reject) => {
@@ -1120,7 +1120,7 @@
                 request.onerror = () => reject(request.error);
             });
         }
-        
+
         async function clear(storeName) {
             const db = await getDB();
             return new Promise((resolve, reject) => {
@@ -1139,7 +1139,7 @@
     let localInventory = [], localBatches = [], localHistory = [], localRecipes = [], localProductionOrders = [], localMonthlyConsumption = [], localResidualStock = [];
     let currentSort = { key: 'name', order: 'asc' };
     let tempEntryData = null;
-    let backupFileContent = null; 
+    let backupFileContent = null;
     let dailyOutputChart = null;
     let scheduledOutputChart = null;
     let abcCurveChart = null;
@@ -1216,7 +1216,7 @@
     const adjustmentBatchSelect = document.getElementById('adjustment-batch');
     const requisitionForm = document.getElementById('requisition-form');
     const requisitionItemsContainer = document.getElementById('requisition-items-container');
-    const addRequisitionItemBtn = document.getElementById('add-requisition-item-btn');
+    const addRequisitionItemBtn = document.getElementById('add-requisition-item-btn'); // Declaration needed here
     const consumptionMonthFilter = document.getElementById('consumption-month-filter');
     const consumptionYearFilter = document.getElementById('consumption-year-filter');
     const consumptionTableBody = document.getElementById('consumption-table-body');
@@ -1251,12 +1251,12 @@
     const lowStockAlertList = document.getElementById('low-stock-alert-list');
     const viewLowStockItemsBtn = document.getElementById('view-low-stock-items-btn');
     const batchSelectorModal = document.getElementById('batch-selector-modal');
-    const closeBatchSelectorModalBtn = document.getElementById('close-batch-selector-modal'); 
-    const cancelBatchSelectionBtn = document.getElementById('cancel-batch-selection'); 
-    const confirmBatchSelectionBtn = document.getElementById('confirm-batch-selection'); 
-    const batchSelectorList = document.getElementById('batch-selector-list'); 
-    const batchSelectorTitle = document.getElementById('batch-selector-title'); 
-    const batchSelectorNeeded = document.getElementById('batch-selector-needed'); 
+    const closeBatchSelectorModalBtn = document.getElementById('close-batch-selector-modal');
+    const cancelBatchSelectionBtn = document.getElementById('cancel-batch-selection');
+    const confirmBatchSelectionBtn = document.getElementById('confirm-batch-selection');
+    const batchSelectorList = document.getElementById('batch-selector-list');
+    const batchSelectorTitle = document.getElementById('batch-selector-title');
+    const batchSelectorNeeded = document.getElementById('batch-selector-needed');
     const batchSelectorSelected = document.getElementById('batch-selector-selected');
 
     // --- FUNÇÕES AUXILIARES ---
@@ -1277,7 +1277,7 @@
     function hideModal(modalElement) {
         modalElement.style.display = 'none';
     }
-    
+
     function showConfirmationModal(title, message, onConfirm) {
         document.getElementById('confirm-title').textContent = title;
         document.getElementById('confirm-message').innerHTML = message;
@@ -1301,9 +1301,9 @@
 
     function createSearchableSelect(container, items, placeholder, onSelect) {
         container.innerHTML = `
-            <input type="text" class="form-input w-full" placeholder="${placeholder}">
+            <input type="text" class="form-input w-full mt-1" placeholder="${placeholder}">
             <div class="searchable-dropdown hidden"></div>
-        `;
+        `; // Added mt-1 to align with other inputs
         const input = container.querySelector('input');
         const dropdown = container.querySelector('.searchable-dropdown');
 
@@ -1438,7 +1438,7 @@
     function calculateAllReservations() {
         const reservations = {}; // { productId: reservedQty }
         const pendingPOs = localProductionOrders.filter(p => p.status === 'pendente');
-        
+
         pendingPOs.forEach(po => {
             if (!po.ingredients) return;
             po.ingredients.forEach(ing => {
@@ -1460,7 +1460,7 @@
         const selectedSupplier = supplierFilter.value;
         const selectedExpiryMonth = expiryMonthFilter.value;
         const selectedExpiryYear = expiryYearFilter.value;
-        
+
         if (specialFilter) {
             searchInput.value = ''; // Clear search bar for special filters
             if (specialFilter === 'low-stock') {
@@ -1481,7 +1481,7 @@
             }
         } else {
             if (searchTerm) {
-                filteredInventory = filteredInventory.filter(item => 
+                filteredInventory = filteredInventory.filter(item =>
                     item.name.toLowerCase().includes(searchTerm) ||
                     (item.code && item.code.toLowerCase().includes(searchTerm)) ||
                     item.supplier.toLowerCase().includes(searchTerm)
@@ -1568,7 +1568,7 @@
         if (productBatches.length === 0) return null;
         return productBatches.sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate))[0].expiryDate;
     }
-    document.querySelectorAll('.table-header-sortable').forEach(header => { 
+    document.querySelectorAll('.table-header-sortable').forEach(header => {
         header.addEventListener('click', () => {
             const sortKey = header.dataset.sort;
             if (!sortKey) return;
@@ -1604,17 +1604,17 @@
     function populateExpiryFilters() {
         const years = [...new Set(localBatches.filter(b => b.expiryDate).map(b => b.expiryDate.substring(0, 4)))].sort((a, b) => b - a);
         const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-        
+
         expiryYearFilter.innerHTML = `<option value="">Ano</option>` + years.map(y => `<option value="${y}">${y}</option>`).join('');
         expiryMonthFilter.innerHTML = `<option value="">Mês</option>` + months.map((m, i) => `<option value="${i + 1}">${m}</option>`).join('');
     }
-    
+
     // --- ITEM DETAILS & EDIT MODAL ---
     function calculateConsumptionMetrics(productId) {
         const today = new Date();
         const currentPeriod = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
         const consumptionRecord = localMonthlyConsumption.find(c => c.period === currentPeriod && c.productId === productId);
-        
+
         const monthlyConsumption = consumptionRecord ? consumptionRecord.totalConsumed : 0;
         const avgConsumption = monthlyConsumption / 22; // Dias úteis no mês
 
@@ -1623,21 +1623,21 @@
 
         const minStock = avgConsumption * leadTime;
         const maxStock = minStock + (avgConsumption * replenishmentPeriod);
-        
+
         return { avgConsumption, minStock, maxStock };
     }
 
     function showItemDetails(productId) {
         const product = localInventory.find(p => p.id === productId);
         if (!product) return;
-        
+
         document.getElementById('details-product-name').textContent = product.name;
         document.getElementById('details-product-code').textContent = product.code;
         document.getElementById('details-supplier').textContent = product.supplier;
         document.getElementById('details-total-quantity').textContent = product.totalQuantity.toFixed(2);
-        
+
         const metrics = calculateConsumptionMetrics(productId);
-        
+
         document.getElementById('details-avg-consumption').textContent = metrics.avgConsumption.toFixed(2);
 
         if (product.minStock !== null && product.minStock !== undefined) {
@@ -1645,13 +1645,13 @@
         } else {
             document.getElementById('details-min-stock').innerHTML = `${metrics.minStock.toFixed(2)} <span class="text-xs text-gray-500">(sugestão)</span>`;
         }
-        
+
         if (product.maxStock !== null && product.maxStock !== undefined) {
              document.getElementById('details-max-stock').innerHTML = `${product.maxStock.toFixed(2)} <span class="text-xs text-gray-500">(sugestão: ${metrics.maxStock.toFixed(2)})</span>`;
         } else {
             document.getElementById('details-max-stock').innerHTML = `${metrics.maxStock.toFixed(2)} <span class="text-xs text-gray-500">(sugestão)</span>`;
         }
-        
+
         document.getElementById('edit-item-id').value = product.id;
         document.getElementById('btn-delete-item').dataset.productId = product.id;
         document.getElementById('edit-product-name').value = product.name;
@@ -1675,7 +1675,7 @@
                     <button class="delete-batch-btn text-red-500 hover:text-red-700 p-1" data-batch-id="${batch.id}" title="Excluir Lote"><i class="fa-solid fa-trash"></i></button>
                 </td>
             </tr>`).join('');
-        
+
         const groupedHistory = history.reduce((acc, entry) => {
             (acc[entry.date] = acc[entry.date] || []).push(entry);
             return acc;
@@ -1707,7 +1707,7 @@
     closeDetailsModalBtn.addEventListener('click', () => { hideModal(detailsModal) });
     btnEditItem.addEventListener('click', () => { itemDetailsView.classList.add('hidden'); itemDetailsEdit.classList.remove('hidden'); });
     btnCancelEdit.addEventListener('click', () => { itemDetailsView.classList.remove('hidden'); itemDetailsEdit.classList.add('hidden'); });
-    
+
     document.getElementById('btn-delete-item').addEventListener('click', (e) => {
         const productId = parseInt(e.currentTarget.dataset.productId);
         handleDeleteItem(productId);
@@ -1740,7 +1740,7 @@
             showNotification("Erro ao atualizar o item.", true);
         }
     });
-    
+
     // --- BATCH EDIT/DELETE/PRINT ---
     detailsBatchesTable.addEventListener('click', e => {
         const editBtn = e.target.closest('.edit-batch-btn');
@@ -1757,7 +1757,6 @@
         }
     });
 
-    // --- MODIFICADO ---
     async function handlePrintLabel(batchId) {
         try {
             const batch = localBatches.find(b => b.id === batchId);
@@ -1774,8 +1773,8 @@
             const expiryDate = batch.expiryDate ? new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A';
             const fileName = `Etiqueta_${product.name}_Lote_${batch.code}.doc`;
 
-            // 1. Criar o conteúdo HTML para o documento Word
-            // Usaremos estilos inline para imitar o layout (centralização, fontes)
+            // 1. Create HTML content for the Word document
+            // Use inline styles to mimic layout (centering, fonts)
             let htmlContent = `
                 <!DOCTYPE html>
                 <html lang="pt-BR">
@@ -1783,15 +1782,15 @@
                     <meta charset='UTF-8'>
                     <title>Etiqueta de Lote</title>
                     <style>
-                        /* Isso se aproxima de uma página A6 paisagem */
+                        /* Approximates A6 landscape page */
                         @page {
                             size: 148mm 105mm landscape;
                             margin: 10mm;
                         }
-                        body { 
-                            font-family: Arial, sans-serif; 
-                            width: 128mm; /* 148mm - 2*10mm margem */
-                            height: 85mm; /* 105mm - 2*10mm margem */
+                        body {
+                            font-family: Arial, sans-serif;
+                            width: 128mm; /* 148mm - 2*10mm margin */
+                            height: 85mm; /* 105mm - 2*10mm margin */
                             display: table;
                         }
                         .container {
@@ -1815,8 +1814,8 @@
                 </html>
             `;
 
-            // 2. Usar FileSaver.js (que já está carregado no HTML)
-            // A função 'saveAs' está disponível globalmente
+            // 2. Use FileSaver.js (already loaded in HTML)
+            // 'saveAs' function is globally available
             const blob = new Blob([htmlContent], { type: "application/msword;charset=utf-8" });
             saveAs(blob, fileName);
 
@@ -1825,7 +1824,6 @@
             showNotification("Erro ao gerar etiqueta Word.", true);
         }
     }
-    // --- FIM DA MODIFICAÇÃO ---
 
 
     async function handleEditBatch(batchId) {
@@ -1840,7 +1838,7 @@
     }
 
     closeEditBatchModal.addEventListener('click', () => hideModal(editBatchModal));
-    
+
     editBatchForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const batchId = parseInt(document.getElementById('edit-batch-id').value);
@@ -1913,7 +1911,7 @@
         const product = localInventory.find(p => p.id === productId);
         if (!product) return;
 
-        const isUsedInRecipe = localRecipes.some(recipe => 
+        const isUsedInRecipe = localRecipes.some(recipe =>
             recipe.ingredients.some(ing => ing.productId === productId)
         );
 
@@ -1938,7 +1936,7 @@
                     for (const record of historyToDelete) {
                         await DB.remove('history', record.id);
                     }
-                    
+
                     await DB.remove('residualStock', productId).catch(() => {});
 
                     const consumptionToDelete = localMonthlyConsumption.filter(c => c.productId === productId);
@@ -2033,11 +2031,11 @@
             handleDeleteRecipe(parseInt(deleteBtn.dataset.recipeId));
         }
     });
-    
+
     function handleEditRecipe(recipeId) {
         const recipe = localRecipes.find(r => r.id === recipeId);
         if (!recipe) return;
-        
+
         document.getElementById('edit-recipe-id').value = recipe.id;
         document.getElementById('recipe-name').value = recipe.name;
         document.getElementById('recipe-category').value = recipe.category;
@@ -2051,7 +2049,7 @@
         saveRecipeBtn.textContent = "Salvar Alterações";
         showModal(recipeModal);
     }
-    
+
     function handleDeleteRecipe(recipeId) {
          const recipe = localRecipes.find(r => r.id === recipeId);
          if(!recipe) return;
@@ -2083,7 +2081,7 @@
     });
 
     closeRecipeModalBtn.addEventListener('click', () => hideModal(recipeModal));
-    
+
     function addIngredientRow(selectedProductId = null, quantity = null) {
         const row = document.createElement('div');
         row.className = 'flex items-center space-x-2';
@@ -2108,7 +2106,7 @@
     }
     addIngredientBtn.addEventListener('click', () => addIngredientRow());
     ingredientsContainer.addEventListener('click', (e) => { if (e.target.classList.contains('remove-ingredient-btn')) e.target.parentElement.remove(); });
-    
+
     recipeForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const recipeId = document.getElementById('edit-recipe-id').value;
@@ -2126,11 +2124,11 @@
             });
 
             const recipeData = {
-                name: document.getElementById('recipe-name').value, 
+                name: document.getElementById('recipe-name').value,
                 category: document.getElementById('recipe-category').value,
                 ingredients
             };
-            
+
             if (recipeId) {
                 recipeData.id = parseInt(recipeId);
                 await DB.update('recipes', recipeData);
@@ -2155,7 +2153,7 @@
     function renderProductionOrders() {
         productionOrdersList.innerHTML = '';
         const filterDate = searchPoByDate.value;
-        
+
         let filteredOrders = localProductionOrders;
         if (filterDate) {
             filteredOrders = localProductionOrders.filter(po => po.date === filterDate);
@@ -2170,7 +2168,7 @@
              try {
                 const card = document.createElement('div');
                 card.className = 'relative bg-white rounded-xl shadow-md overflow-hidden transform hover:scale-[1.02] transition-transform duration-300';
-                
+
                 const statusClass = po.status === 'pendente' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800';
                 const statusBorderClass = po.status === 'pendente' ? 'border-yellow-400' : 'border-green-400';
 
@@ -2236,7 +2234,7 @@
         if (!po) return;
 
         document.getElementById('edit-po-id').value = po.id;
-        
+
         createSearchableSelect(poRecipeSearchableContainer, localRecipes, 'Buscar receita...', (recipe) => {
             if (recipe) {
                 updatePOIngredients();
@@ -2248,12 +2246,12 @@
 
         poQuantity.value = po.quantityProduced;
         poDate.value = po.date;
-        
+
         updatePOIngredients(po.ingredients);
 
         productionOrderModalTitle.textContent = "Editar Ordem de Produção";
         productionOrderForm.querySelector('button[type="submit"]').textContent = "Salvar Alterações";
-        
+
         showModal(productionOrderModal);
     }
 
@@ -2304,7 +2302,7 @@
         productionOrderForm.querySelector('button[type="submit"]').textContent = "Criar Ordem de Produção";
         showModal(productionOrderModal);
     });
-    
+
     function calculateConsumptionPlan(productId, quantityNeeded, poToExcludeId = null) {
         const otherPendingPOs = localProductionOrders.filter(p => p.status === 'pendente' && p.id !== poToExcludeId);
         const reservedByBatch = {}; // { batchId: reservedQty }
@@ -2364,18 +2362,18 @@
             const residual = localResidualStock.find(r => r.productId === product.id)?.quantity || 0;
             const neededQty = ing.quantity * recipeQuantity;
             const compensatedQty = Math.max(0, neededQty - residual);
-            
+
             const existingIng = existingIngredients ? existingIngredients.find(ei => ei.productId === ing.productId) : null;
             const plan = existingIng ? existingIng.consumptionPlan : calculateConsumptionPlan(product.id, compensatedQty, currentPoId).plan;
-            
+
             const totalInPlan = plan.reduce((sum, p) => sum + p.quantity, 0);
             const isSufficient = totalInPlan >= compensatedQty - 0.0001;
 
             const planText = plan.length > 0 ? plan.map(p => `${p.batchCode} (${p.quantity.toFixed(2)})`).join(', ') : 'Sem estoque disponível';
-            
+
             return `
-            <tr data-product-id="${product.id}" 
-                data-original-qty="${ing.quantity}" 
+            <tr data-product-id="${product.id}"
+                data-original-qty="${ing.quantity}"
                 data-consumption-plan='${JSON.stringify(plan)}'
                 class="${!isSufficient ? 'insufficient-stock-row' : ''}">
                 <td class="px-2 py-2">${product.name}</td>
@@ -2390,11 +2388,11 @@
             </tr>`;
         }).join('');
     }
-    
+
     poQuantity.addEventListener('input', () => updatePOIngredients());
-    
+
     closeProductionOrderModalBtn.addEventListener('click', () => { hideModal(productionOrderModal) });
-    
+
     productionOrderForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const poId = document.getElementById('edit-po-id').value;
@@ -2402,14 +2400,14 @@
             showNotification("Estoque insuficiente (considerando reservas) para um ou mais itens.", true);
             return;
         }
-        
+
         const recipeId = parseInt(poRecipeSearchableContainer.querySelector('input').dataset.selectedId);
         if (!recipeId) {
             showNotification("Por favor, selecione uma receita válida.", true);
             return;
         }
         const recipe = localRecipes.find(r => r.id === recipeId);
-        
+
         const ingredients = Array.from(poIngredientsBody.querySelectorAll('tr')).map(row => {
             return {
                 productId: parseInt(row.dataset.productId),
@@ -2444,14 +2442,14 @@
     });
 
     searchPoByDate.addEventListener('input', renderProductionOrders);
-    
+
     btnConfirmProduction.addEventListener('click', () => {
         const selectedCheckboxes = document.querySelectorAll('.po-select-checkbox:checked');
         if (selectedCheckboxes.length === 0) {
             showNotification("Selecione pelo menos uma ordem de produção para confirmar.", true);
             return;
         }
-        
+
         const selectedOrderIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.dataset.poId));
         const selectedOrders = localProductionOrders.filter(po => selectedOrderIds.includes(po.id));
 
@@ -2461,7 +2459,7 @@
 
     function populateConfirmationModal(orders) {
         const aggregatedItems = {};
-        
+
         orders.forEach(po => {
             if (!po.ingredients) return;
             po.ingredients.forEach(ing => {
@@ -2476,9 +2474,9 @@
                         plan: {} // { batchCode: totalQty }
                     };
                 }
-                
+
                 aggregatedItems[ing.productId].totalAdjusted += ing.adjustedQuantity;
-                
+
                 if (ing.consumptionPlan) {
                     ing.consumptionPlan.forEach(p => {
                         aggregatedItems[ing.productId].plan[p.batchCode] = (aggregatedItems[ing.productId].plan[p.batchCode] || 0) + p.quantity;
@@ -2486,7 +2484,7 @@
                 }
             });
         });
-        
+
         confirmProductionTbody.innerHTML = Object.values(aggregatedItems).map(item => {
             const planDetails = Object.keys(item.plan).map(batchCode => `${batchCode} (${item.plan[batchCode].toFixed(2)})`).join(', ');
             return `<tr>
@@ -2517,12 +2515,12 @@
             });
         }
     }
-    
+
     async function updateResidualStock(productId, difference) {
         let residualRecord = await DB.get('residualStock', productId);
         if (residualRecord) {
             residualRecord.quantity += difference;
-            if (Math.abs(residualRecord.quantity) < 0.0001) { 
+            if (Math.abs(residualRecord.quantity) < 0.0001) {
                 await DB.remove('residualStock', productId);
             } else {
                 await DB.update('residualStock', residualRecord);
@@ -2531,28 +2529,28 @@
             await DB.add('residualStock', { productId, quantity: difference });
         }
     }
-    
+
     btnExecuteStockConsumption.addEventListener('click', async () => {
         const orderIdsToConfirm = JSON.parse(confirmProductionTbody.dataset.orders || '[]');
-        if (orderIdsToConfirm.length === 0) { 
-            showNotification("Nenhuma ordem para confirmar.", true); 
-            return; 
+        if (orderIdsToConfirm.length === 0) {
+            showNotification("Nenhuma ordem para confirmar.", true);
+            return;
         }
-        
+
         try {
             loadingOverlay.classList.remove('hidden');
-            
+
             const ordersToConfirm = localProductionOrders.filter(po => orderIdsToConfirm.includes(po.id));
 
             for (const order of ordersToConfirm) {
                 if (!order.ingredients) continue;
-                
+
                 for (const ingredient of order.ingredients) {
                     if (!ingredient.consumptionPlan || ingredient.consumptionPlan.length === 0) {
                         const product = localInventory.find(p => p.id === ingredient.productId) || {};
                         throw new Error(`Ordem para '${order.recipeName}' tem um plano de consumo inválido para o item '${product.name}'. Por favor, edite e salve a ordem novamente.`);
                     }
-                    
+
                     const recipe = localRecipes.find(r => r.id === order.recipeId);
                     const recipeIng = recipe.ingredients.find(ri => ri.productId === ingredient.productId);
                     const originalNeeded = recipeIng.quantity * order.quantityProduced;
@@ -2562,7 +2560,7 @@
                     const differenceFromRecipe = originalNeeded - actualUsed;
                     const surplusFromSelection = totalFromBatches - actualUsed;
                     const totalResidualChange = differenceFromRecipe + surplusFromSelection;
-                    
+
                     // A quantidade total a ser baixada do estoque é a soma do plano de consumo
                     const totalToConsume = ingredient.consumptionPlan.reduce((sum, p) => sum + p.quantity, 0);
 
@@ -2571,19 +2569,19 @@
                         if (!batch || batch.quantity < planItem.quantity) {
                             throw new Error(`Estoque insuficiente no lote ${batch.code} para confirmar a produção. Necessário: ${planItem.quantity.toFixed(2)}, disponível: ${batch ? batch.quantity.toFixed(2) : 0}.`);
                         }
-                        
+
                         batch.quantity -= planItem.quantity;
                         await DB.update('batches', batch);
 
                         const product = await DB.get('inventory', ingredient.productId);
                         product.totalQuantity -= planItem.quantity;
                         await DB.update('inventory', product);
-                        
-                        await DB.add('history', { 
-                            productId: ingredient.productId, 
-                            batchCode: batch.code, 
-                            type: 'saída', 
-                            quantity: planItem.quantity, 
+
+                        await DB.add('history', {
+                            productId: ingredient.productId,
+                            batchCode: batch.code,
+                            type: 'saída',
+                            quantity: planItem.quantity,
                             date: new Date().toISOString().split('T')[0],
                             reason: `Produção: ${order.recipeName}`
                         });
@@ -2603,7 +2601,7 @@
         } catch (error) {
             console.error("Erro ao dar baixa no estoque: ", error);
             showNotification(error.message || "Erro ao dar baixa no estoque.", true);
-            await refreshLocalData(); 
+            await refreshLocalData();
         } finally {
             loadingOverlay.classList.add('hidden');
         }
@@ -2635,7 +2633,7 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            
+
             showNotification("Backup baixado com sucesso!");
 
         } catch (error) {
@@ -2674,7 +2672,7 @@
              backupFileContent = null;
         };
         reader.readAsText(file);
-        
+
         backupFileInput.value = '';
     });
 
@@ -2689,12 +2687,12 @@
             importData(backupFileContent);
         }
     });
-    
+
     async function importData(data) {
         try {
             loadingOverlay.classList.remove('hidden');
             const stores = ['inventory', 'batches', 'history', 'recipes', 'productionOrders', 'monthlyConsumption', 'residualStock'];
-            
+
             for (const storeName of stores) {
                 await DB.clear(storeName);
             }
@@ -2709,7 +2707,7 @@
                     idMaps.inventory[oldId] = newId;
                 }
             }
-            
+
              if (data.recipes) {
                 for (const recipe of data.recipes) {
                     const oldId = recipe.id;
@@ -2804,12 +2802,12 @@
             try {
                 const reservations = calculateAllReservations();
                 const dataToExport = [];
-                
+
                 localInventory.forEach(item => {
                     const reservedQty = reservations[item.id] || 0;
                     const availableQty = item.totalQuantity - reservedQty;
                     const itemBatches = localBatches.filter(b => b.productId === item.id && b.quantity > 0);
-                    
+
                     if (itemBatches.length > 0) {
                         itemBatches.forEach(batch => {
                             dataToExport.push({
@@ -2902,14 +2900,14 @@
         const lossRiskBatches = localBatches.filter(b => {
              const expiryDate = new Date(b.expiryDate);
              if (!b.expiryDate || expiryDate <= today || b.quantity <= 0) return false;
-             
+
              const metrics = calculateConsumptionMetrics(b.productId);
              const consumptionRate = metrics.avgConsumption;
              if (consumptionRate <= 0) return false;
 
              const daysToExpire = (expiryDate.getTime() - today.getTime()) / (1000 * 3600 * 24);
              const estimatedConsumption = daysToExpire * consumptionRate;
-             
+
              return b.quantity > estimatedConsumption;
         });
          const dataToExport = lossRiskBatches.map(batch => {
@@ -2927,7 +2925,7 @@
          XLSX.writeFile(workbook, "relatorio_risco_de_perda.xlsx");
          showNotification("Relatório exportado!");
     });
-    
+
     btnExportWord.addEventListener('click', exportProductionOrdersToWord);
     btnExportPoExcel.addEventListener('click', exportProductionOrdersToExcel);
 
@@ -2965,14 +2963,14 @@
                 });
             });
         });
-        
+
         const worksheet = XLSX.utils.json_to_sheet(dataToExport);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Ordens de Produção");
 
-        worksheet['!cols'] = [ 
-            { wch: 15 }, { wch: 20 }, { wch: 30 }, { wch: 15 }, { wch: 10 }, 
-            { wch: 30 }, { wch: 15 }, { wch: 40 }, { wch: 20 } 
+        worksheet['!cols'] = [
+            { wch: 15 }, { wch: 20 }, { wch: 30 }, { wch: 15 }, { wch: 10 },
+            { wch: 30 }, { wch: 15 }, { wch: 40 }, { wch: 20 }
         ];
 
         XLSX.writeFile(workbook, `Ordens_de_Producao_${filterDate}.xlsx`);
@@ -3037,7 +3035,7 @@
             for (const order of ordersInLine) {
                 htmlContent += `<div class="order-container">`;
                 htmlContent += `<h3>Receita: ${order.recipeName} (Quantidade: ${order.quantityProduced})</h3>`;
-                
+
                 htmlContent += `
                     <table>
                         <thead>
@@ -3124,7 +3122,7 @@
 
         const currentLowStockIds = new Set(lowStockItems.map(item => item.id));
         const hasNewItems = [...currentLowStockIds].some(id => !previouslyNotifiedLowStockIds.has(id));
-        
+
         if (hasNewItems) {
             if (!hasFlashedScreen) {
                 document.body.classList.add('flash-red');
@@ -3134,12 +3132,12 @@
 
             lowStockIndicator.classList.add('shake-alert');
             showModal(lowStockAlertModal);
-            
+
             previouslyNotifiedLowStockIds = currentLowStockIds;
         }
     }
 
-    // --- LÓGICA DE SELEÇÃO DE LOTE (CORREÇÃO DO BUG) ---
+    // --- BATCH SELECTION LOGIC ---
 
     function openBatchSelector(button) {
         currentBatchSelectorRow = button.closest('tr');
@@ -3150,7 +3148,7 @@
         const product = localInventory.find(p => p.id === productId);
         const existingPlan = JSON.parse(currentBatchSelectorRow.dataset.consumptionPlan || '[]');
         const poToExcludeId = parseInt(document.getElementById('edit-po-id').value) || null;
-        
+
         const otherPendingPOs = localProductionOrders.filter(p => p.status === 'pendente' && p.id !== poToExcludeId);
         const reservedByBatch = {};
         otherPendingPOs.forEach(po => {
@@ -3170,7 +3168,7 @@
         batchSelectorTitle.textContent = `Selecionar lotes para ${product.name}`;
         batchSelectorNeeded.textContent = neededQty.toFixed(4);
         batchSelectorList.innerHTML = '';
-        
+
         let totalSelected = 0;
 
         availableBatches.forEach(batch => {
@@ -3186,10 +3184,10 @@
                 <div class="text-sm"><strong>${batch.code}</strong></div>
                 <div class="text-xs text-gray-600">Val: ${new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR')}</div>
                 <div class="text-xs text-gray-600">Disp: ${(effectiveQty).toFixed(2)}</div>
-                <input type="number" data-batch-id="${batch.id}" data-batch-code="${batch.code}" 
-                       value="${valueInPlan > 0 ? valueInPlan.toFixed(4) : ''}" 
-                       min="0" max="${effectiveQty + valueInPlan}" step="0.001" 
-                       class="form-input batch-selector-input w-full text-right" 
+                <input type="number" data-batch-id="${batch.id}" data-batch-code="${batch.code}"
+                       value="${valueInPlan > 0 ? valueInPlan.toFixed(4) : ''}"
+                       min="0" max="${effectiveQty + valueInPlan}" step="0.001"
+                       class="form-input batch-selector-input w-full text-right"
                        placeholder="0.00">
             `;
             batchSelectorList.appendChild(row);
@@ -3203,7 +3201,7 @@
     function updateBatchSelectorColor() {
         const needed = parseFloat(batchSelectorNeeded.textContent);
         const selected = parseFloat(batchSelectorSelected.textContent);
-        
+
         batchSelectorSelected.classList.remove('text-green-600', 'text-red-600', 'text-orange-500');
         if (selected < needed - 0.0001) {
             batchSelectorSelected.classList.add('text-red-600');
@@ -3256,9 +3254,9 @@
 
     closeBatchSelectorModalBtn.addEventListener('click', () => hideModal(batchSelectorModal));
     cancelBatchSelectionBtn.addEventListener('click', () => hideModal(batchSelectorModal));
-    
 
-    // --- INICIALIZAÇÃO E SINCRONIZAÇÃO COM DADOS LOCAIS ---
+
+    // --- INITIALIZATION AND SYNC ---
     async function refreshLocalData() {
         try {
             localInventory = await DB.getAll('inventory');
@@ -3268,7 +3266,7 @@
             localProductionOrders = await DB.getAll('productionOrders');
             localMonthlyConsumption = await DB.getAll('monthlyConsumption');
             localResidualStock = await DB.getAll('residualStock');
-            
+
             renderInventoryTable();
             renderRecipes();
             renderProductionOrders();
@@ -3277,14 +3275,14 @@
             renderResidualStock();
             populateSupplierFilter();
             populateExpiryFilters();
-            
+
             updateLowStockAlerts();
         } catch (error) {
             console.error("Erro ao carregar dados locais:", error);
             showNotification("Falha ao carregar dados do banco de dados local.", true);
         }
     }
-    
+
     // --- DASHBOARD ---
     function renderDashboard() {
         const today = new Date();
@@ -3302,7 +3300,7 @@
         const thirtyDaysFromNow = new Date();
         thirtyDaysFromNow.setDate(today.getDate() + 30);
         const expiringBatches = localBatches.filter(b => b.quantity > 0 && b.expiryDate && new Date(b.expiryDate) <= thirtyDaysFromNow);
-        
+
         document.getElementById('stat-total-items').textContent = localInventory.length;
         document.getElementById('stat-total-quantity').textContent = localInventory.reduce((sum, item) => sum + item.totalQuantity, 0).toFixed(2);
         document.getElementById('stat-low-stock').textContent = lowStockItems.length;
@@ -3310,21 +3308,21 @@
 
         const dailyOutputs = localHistory.filter(h => h.date === todayStr && (h.type === 'saída' || h.type === 'requisição'));
         dailyOutputChart = renderDashboardChart('daily-output-chart', dailyOutputChart, 'Top 10 Saídas de Hoje', dailyOutputs, false, 'btn-export-daily-output');
-        
+
         const scheduledOutputs = localProductionOrders.filter(po => (po.date === todayStr || po.date === tomorrowStr) && po.status === 'pendente');
         scheduledOutputChart = renderDashboardChart('scheduled-output-chart', scheduledOutputChart, 'Top 10 Saídas Programadas (48h)', scheduledOutputs, true, 'btn-export-scheduled-output');
-        
+
         const lossRiskBatches = localBatches.filter(b => {
              const expiryDate = new Date(b.expiryDate);
              if (!b.expiryDate || expiryDate <= today || b.quantity <= 0) return false;
-             
+
              const metrics = calculateConsumptionMetrics(b.productId);
              const consumptionRate = metrics.avgConsumption;
              if (consumptionRate <= 0) return false;
 
              const daysToExpire = (expiryDate.getTime() - today.getTime()) / (1000 * 3600 * 24);
              const estimatedConsumption = daysToExpire * consumptionRate;
-             
+
              return b.quantity > estimatedConsumption;
         });
 
@@ -3340,7 +3338,7 @@
                         <td class="py-1 pl-2 text-xs text-right">${new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
                     </tr>`;
         }, ['Produto (Lote)', 'Qtd', 'Validade']);
-        
+
         renderAlertTable('loss-risk-container', lossRiskBatches, (batch) => {
             const product = localInventory.find(p => p.id === batch.productId);
             return `<tr>
@@ -3369,11 +3367,11 @@
     function renderDashboardChart(canvasId, chartInstance, title, data, isScheduled = false, exportBtnId) {
         const ctx = document.getElementById(canvasId);
         if (!ctx) return null;
-        
+
         if (Chart.getChart(ctx)) {
             Chart.getChart(ctx).destroy();
         }
-        
+
         const consumption = {};
         if (isScheduled) {
              data.forEach(po => {
@@ -3387,7 +3385,7 @@
                 consumption[h.productId] = (consumption[h.productId] || 0) + h.quantity;
             });
         }
-        
+
         const sortedData = Object.keys(consumption)
             .map(productId => ({ productId: parseInt(productId), total: consumption[productId] }))
             .sort((a,b) => b.total - a.total)
@@ -3422,7 +3420,7 @@
         return newChartInstance;
     }
 
-    
+
     cardLowStock.addEventListener('click', () => {
         const lowStockItems = localInventory.filter(i => {
             const metrics = calculateConsumptionMetrics(i.id);
@@ -3473,7 +3471,7 @@
             adjustmentBatchSelect.innerHTML = `<option value="">Selecione um lote...</option>` + batches.map(b => `<option value="${b.id}">${b.code} (Qtd: ${b.quantity.toFixed(2)})</option>`).join('');
         });
     }
-    
+
     adjustmentForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const batchId = parseInt(adjustmentBatchSelect.value);
@@ -3492,7 +3490,7 @@
             const product = await DB.get('inventory', batch.productId);
             product.totalQuantity += difference;
             await DB.update('inventory', product);
-            
+
             await DB.add('history', {
                 productId: product.id, batchCode: batch.code,
                 type: 'ajuste', quantity: difference,
@@ -3513,28 +3511,37 @@
 
     function addRequisitionItemRow() {
         const row = document.createElement('div');
-        row.className = 'requisition-item-row flex items-end space-x-2';
+        row.className = 'requisition-item-row grid grid-cols-[2fr_auto_1fr_1fr_auto] gap-2 items-end'; // Adjusted grid for code
         row.innerHTML = `
-            <div class="flex-1 searchable-container"></div>
-            <div class="flex-1">
+            <div class="searchable-container">
+                 <label class="block text-sm font-medium text-gray-700">Produto</label>
+                 <!-- Searchable select input will be placed here -->
+            </div>
+            <div class="requisition-product-code pt-5 text-xs text-gray-500 whitespace-nowrap">
+                <!-- Product code will appear here -->
+            </div>
+            <div>
                 <label class="block text-sm font-medium text-gray-700">Lote</label>
-                <select class="requisition-batch w-full form-input"></select>
+                <select class="requisition-batch w-full form-input mt-1"></select>
             </div>
-            <div class="w-24">
+            <div>
                 <label class="block text-sm font-medium text-gray-700">Qtd.</label>
-                <input type="number" class="requisition-quantity w-full form-input" required min="0.0001" step="0.0001">
+                <input type="number" class="requisition-quantity w-full form-input mt-1" required min="0.0001" step="0.0001">
             </div>
-            <button type="button" class="remove-requisition-item-btn text-red-500 hover:text-red-700 h-10">&times;</button>
+            <button type="button" class="remove-requisition-item-btn text-red-500 hover:text-red-700 h-10 mb-1">&times;</button>
         `;
         requisitionItemsContainer.appendChild(row);
 
         const searchableContainer = row.querySelector('.searchable-container');
         const batchSelect = row.querySelector('.requisition-batch');
-        
+        const codeDisplay = row.querySelector('.requisition-product-code'); // Get the code display element
+
         createSearchableSelect(searchableContainer, localInventory, 'Buscar produto...', (product) => {
             const productId = product.id;
             const batches = localBatches.filter(b => b.productId === productId && b.quantity > 0);
             batchSelect.innerHTML = batches.map(b => `<option value="${b.id}">${b.code} (Qtd: ${b.quantity.toFixed(2)})</option>`).join('');
+            // Display the product code
+            codeDisplay.textContent = `Código: ${product.code || 'N/A'}`;
         });
     }
 
@@ -3542,14 +3549,16 @@
         requisitionItemsContainer.innerHTML = '';
         addRequisitionItemRow();
     }
-    
-    addRequisitionItemBtn.addEventListener('click', addRequisitionItemRow);
+
+    // Moved event listeners inside initialize function
+    // addRequisitionItemBtn.addEventListener('click', addRequisitionItemRow); // Removed from here
+
     requisitionItemsContainer.addEventListener('click', (e) => {
         if (e.target.closest('.remove-requisition-item-btn')) {
             e.target.closest('.requisition-item-row').remove();
         }
     });
-    
+
     requisitionForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const reason = document.getElementById('requisition-reason').value;
@@ -3571,7 +3580,7 @@
                     throw new Error(`Quantidade requisitada para o lote ${batch.code} é maior que o estoque.`);
                 }
                 const product = await DB.get('inventory', batch.productId);
-                
+
                 batch.quantity -= item.quantity;
                 product.totalQuantity -= item.quantity;
 
@@ -3591,7 +3600,7 @@
             console.error(error);
         }
     });
-    
+
     // --- CONSUMPTION REPORT ---
     function populateConsumptionFilters() {
         const years = [...new Set(localMonthlyConsumption.map(c => c.period.substring(0, 4)))];
@@ -3602,7 +3611,7 @@
 
         if (!years.includes(String(currentYear))) years.push(String(currentYear));
         years.sort((a,b) => b-a);
-        
+
         const selectedYear = consumptionYearFilter.value || currentYear;
         const selectedMonth = consumptionMonthFilter.value || (currentMonth + 1);
 
@@ -3716,8 +3725,8 @@
         hideModal(editResidualModal);
         showNotification('Saldo residual atualizado.');
     });
-    
-    // --- CÓDIGO CORRIGIDO/ADICIONADO PARA RASTREABILIDADE ---
+
+    // --- TRACEABILITY ---
     function initializeTraceabilityScreen() {
         createSearchableSelect(traceProductSearchable, localInventory, 'Buscar produto...', null);
     }
@@ -3812,7 +3821,7 @@
                      });
                      resultsHtml += '</ul>';
                 }
-                
+
                 if (!entryRecord && productionUsages.length === 0 && otherMovements.length === 0) {
                      resultsHtml += `<p class="text-center text-gray-500 mt-4">Nenhuma movimentação encontrada para este lote.</p>`;
                 }
@@ -3853,7 +3862,7 @@
                     resultsHtml += `<p class="text-center text-gray-500 mt-4">Nenhuma produção encontrada para este manipulador.</p>`;
                 }
             }
-            
+
             traceResultsContainer.innerHTML = resultsHtml;
 
         }, 200);
@@ -3871,7 +3880,7 @@
         }, {});
 
         const totalConsumption = Object.values(consumptionData).reduce((sum, qty) => sum + qty, 0);
-        
+
         const canvas = document.getElementById('abc-curve-chart');
         const ctx = canvas.getContext('2d');
         if (abcCurveChart) {
@@ -3897,7 +3906,7 @@
 
         let cumulativePercentage = 0;
         const classifiedItems = { A: 0, B: 0, C: 0 };
-        
+
         sortedItems.forEach(item => {
             cumulativePercentage += item.percentage;
             if (cumulativePercentage <= 80) {
@@ -3982,6 +3991,7 @@
         searchPoByDate.value = today;
         navigateTo('dashboard');
 
+        // Add event listeners that are safe to add globally here
         btnExportExcel.addEventListener('click', exportInventoryToExcel);
         lowStockIndicator.addEventListener('click', () => {
             showModal(lowStockAlertModal);
@@ -3995,15 +4005,24 @@
             navigateTo('inventory');
             renderInventoryTable('low-stock');
         });
+        // Moved requisition button listener here for safety
+        if (addRequisitionItemBtn) {
+           addRequisitionItemBtn.addEventListener('click', addRequisitionItemRow);
+        } else {
+           console.error("Button with ID 'add-requisition-item-btn' not found during initialization.");
+        }
+
 
         try {
-            await DB.getDB(); // Inicializa e abre o banco
+            await DB.getDB(); // Initialize and open the database
             await refreshLocalData();
         } catch (error) {
             console.error("Erro na inicialização do IndexedDB:", error);
             loadingOverlay.innerHTML = "Erro ao iniciar o banco de dados offline.";
+            // Keep loading overlay visible on error
+            return; // Stop initialization if DB fails
         }
-        loadingOverlay.classList.add('hidden');
+        loadingOverlay.classList.add('hidden'); // Hide loading only on success
     }
 
     initialize();
@@ -4011,3 +4030,4 @@
 
 </body>
 </html>
+
