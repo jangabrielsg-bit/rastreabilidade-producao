@@ -702,6 +702,7 @@
                             <th class="px-4 py-2">Quantidade</th>
                             <th class="px-4 py-2">Data de Validade</th>
                              <th class="px-4 py-2">Shelf Life (%)</th>
+                            <th class="px-4 py-2">Status</th>
                             <th class="px-4 py-2 text-center">Ações</th>
                         </tr>
                     </thead>
@@ -1216,7 +1217,7 @@
     const adjustmentBatchSelect = document.getElementById('adjustment-batch');
     const requisitionForm = document.getElementById('requisition-form');
     const requisitionItemsContainer = document.getElementById('requisition-items-container');
-    const addRequisitionItemBtn = document.getElementById('add-requisition-item-btn'); // Declaration needed here
+    const addRequisitionItemBtn = document.getElementById('add-requisition-item-btn');
     const consumptionMonthFilter = document.getElementById('consumption-month-filter');
     const consumptionYearFilter = document.getElementById('consumption-year-filter');
     const consumptionTableBody = document.getElementById('consumption-table-body');
@@ -1303,7 +1304,7 @@
         container.innerHTML = `
             <input type="text" class="form-input w-full mt-1" placeholder="${placeholder}">
             <div class="searchable-dropdown hidden"></div>
-        `; // Added mt-1 to align with other inputs
+        `;
         const input = container.querySelector('input');
         const dropdown = container.querySelector('.searchable-dropdown');
 
@@ -1408,7 +1409,8 @@
                 product.totalQuantity += data.quantity;
                 await DB.update('inventory', product);
             }
-            await DB.add('batches', { productId, code: data.batchCode, quantity: data.quantity, mfgDate: data.mfgDate, receiptDate: data.receiptDate, expiryDate: data.expiryDate, shelfLife: data.shelfLife, authorizedBy });
+            const isFarinha = data.code === '8110';
+            await DB.add('batches', { productId, code: data.batchCode, quantity: data.quantity, mfgDate: data.mfgDate, receiptDate: data.receiptDate, expiryDate: data.expiryDate, shelfLife: data.shelfLife, authorizedBy, isReleased: !isFarinha });
             await DB.add('history', { productId, batchCode: data.batchCode, type: 'entrada', quantity: data.quantity, date: data.receiptDate });
             showNotification('Entrada registrada com sucesso!');
             entryForm.reset();
@@ -1663,18 +1665,39 @@
         const batches = localBatches.filter(b => b.productId === productId && b.quantity > 0);
         const history = localHistory.filter(h => h.productId === productId).sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        detailsBatchesTable.innerHTML = batches.map(batch => `
+        detailsBatchesTable.innerHTML = batches.map(batch => {
+            const isFarinhaBatch = product.code === '8110';
+            // Para Farinha: verifica o status. Para outros: considera 'true' (Liberado/N/A).
+            const isActuallyReleased = isFarinhaBatch ? batch.isReleased === true : true;
+
+            let statusHtml = '';
+            if (isFarinhaBatch) {
+                statusHtml = `
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" class="batch-release-toggle sr-only peer" data-batch-id="${batch.id}" ${isActuallyReleased ? 'checked' : ''}>
+                        <div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-blue-300 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                        <span class="ml-2 text-xs font-medium ${isActuallyReleased ? 'text-green-600' : 'text-red-600'} batch-status-text-${batch.id}">
+                            ${isActuallyReleased ? 'Liberado' : 'Não Liberado'}
+                        </span>
+                    </label>`;
+            } else {
+                statusHtml = '<span class="text-xs text-gray-500">N/A</span>';
+            }
+
+            return `
             <tr class="border-b">
                 <td class="px-4 py-2">${batch.code}</td>
                 <td class="px-4 py-2">${batch.quantity.toFixed(2)}</td>
                 <td class="px-4 py-2">${batch.expiryDate ? new Date(batch.expiryDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'}</td>
                 <td class="px-4 py-2">${typeof batch.shelfLife === 'number' ? batch.shelfLife.toFixed(1) : (batch.shelfLife || 'N/A')}</td>
+                <td class="px-4 py-2">${statusHtml}</td>
                 <td class="px-4 py-2 text-center">
                     <button class="print-label-btn text-gray-500 hover:text-gray-700 p-1" data-batch-id="${batch.id}" title="Imprimir Etiqueta"><i class="fa-solid fa-print"></i></button>
                     <button class="edit-batch-btn text-blue-500 hover:text-blue-700 p-1" data-batch-id="${batch.id}" title="Editar Lote"><i class="fa-solid fa-pencil"></i></button>
                     <button class="delete-batch-btn text-red-500 hover:text-red-700 p-1" data-batch-id="${batch.id}" title="Excluir Lote"><i class="fa-solid fa-trash"></i></button>
                 </td>
-            </tr>`).join('');
+            </tr>`
+        }).join('');
 
         const groupedHistory = history.reduce((acc, entry) => {
             (acc[entry.date] = acc[entry.date] || []).push(entry);
@@ -1756,6 +1779,42 @@
             handlePrintLabel(parseInt(printBtn.dataset.batchId));
         }
     });
+
+    detailsBatchesTable.addEventListener('change', async e => {
+        const toggle = e.target.closest('.batch-release-toggle');
+        if (toggle) {
+            const batchId = parseInt(toggle.dataset.batchId);
+            const isReleased = toggle.checked;
+            const statusText = document.querySelector(`.batch-status-text-${batchId}`);
+
+            try {
+                const batch = await DB.get('batches', batchId);
+                if (batch) {
+                    batch.isReleased = isReleased;
+                    await DB.update('batches', batch);
+
+                    // Update UI text immediately
+                    if (statusText) {
+                        statusText.textContent = isReleased ? 'Liberado' : 'Não Liberado';
+                        statusText.classList.toggle('text-green-600', isReleased);
+                        statusText.classList.toggle('text-red-600', !isReleased);
+                    }
+
+                    // No full refresh needed, but must update local state
+                    const localBatch = localBatches.find(b => b.id === batchId);
+                    if (localBatch) localBatch.isReleased = isReleased;
+
+                    showNotification('Status do lote atualizado!', false);
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar status do lote:', error);
+                showNotification('Erro ao atualizar status.', true);
+                // Revert checkbox on error
+                toggle.checked = !isReleased;
+            }
+        }
+    });
+
 
     async function handlePrintLabel(batchId) {
         try {
@@ -2318,8 +2377,22 @@
 
         const plan = [];
         let remainingNeeded = quantityNeeded;
+
+        const product = localInventory.find(p => p.id === productId); // Need product to check code
+        const isFarinha = product && product.code === '8110';
+
         const availableBatches = localBatches
-            .filter(b => b.productId === productId && b.quantity > 0)
+            .filter(b => {
+                if (b.productId !== productId || b.quantity <= 0) {
+                    return false;
+                }
+                if (isFarinha) {
+                    // If it's Farinha, it MUST be explicitly released
+                    return b.isReleased === true;
+                }
+                // For all other products, they are considered released
+                return true;
+            })
             .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
 
         for (const batch of availableBatches) {
@@ -2364,12 +2437,11 @@
             const compensatedQty = Math.max(0, neededQty - residual);
 
             const existingIng = existingIngredients ? existingIngredients.find(ei => ei.productId === ing.productId) : null;
-            const plan = existingIng ? existingIng.consumptionPlan : calculateConsumptionPlan(product.id, compensatedQty, currentPoId).plan;
+            const planResult = calculateConsumptionPlan(product.id, compensatedQty, currentPoId);
+            const plan = existingIng ? existingIng.consumptionPlan : planResult.plan;
+            const isSufficient = planResult.isSufficient; // Use the result from calculation
 
-            const totalInPlan = plan.reduce((sum, p) => sum + p.quantity, 0);
-            const isSufficient = totalInPlan >= compensatedQty - 0.0001;
-
-            const planText = plan.length > 0 ? plan.map(p => `${p.batchCode} (${p.quantity.toFixed(2)})`).join(', ') : 'Sem estoque disponível';
+            const planText = plan.length > 0 ? plan.map(p => `${p.batchCode} (${p.quantity.toFixed(2)})`).join(', ') : (isSufficient ? 'N/A' : 'Sem estoque liberado disponível');
 
             return `
             <tr data-product-id="${product.id}"
@@ -2397,7 +2469,7 @@
         e.preventDefault();
         const poId = document.getElementById('edit-po-id').value;
         if (poIngredientsBody.querySelectorAll('.insufficient-stock-row').length > 0) {
-            showNotification("Estoque insuficiente (considerando reservas) para um ou mais itens.", true);
+            showNotification("Estoque insuficiente ou não liberado (para Farinha 8110) para um ou mais itens.", true);
             return;
         }
 
@@ -2417,8 +2489,15 @@
             }
         });
 
-        if (ingredients.some(ing => !ing.consumptionPlan)) {
-            showNotification("Um ou mais itens não têm um plano de consumo. Verifique o estoque.", true);
+        if (ingredients.some(ing => !ing.consumptionPlan || ing.consumptionPlan.length === 0)) {
+             // Check if the item is Farinha (8110)
+            const missingPlanItem = ingredients.find(ing => !ing.consumptionPlan || ing.consumptionPlan.length === 0);
+            const product = localInventory.find(p => p.id === missingPlanItem.productId);
+            if(product && product.code === '8110'){
+                 showNotification("Um ou mais itens (Farinha 8110) não têm um plano de consumo. Verifique se há lotes liberados com estoque suficiente.", true);
+            } else {
+                 showNotification("Um ou mais itens não têm um plano de consumo. Verifique o estoque.", true);
+            }
             return;
         }
         const poData = {
@@ -3161,8 +3240,17 @@
             }
         });
 
+        const isFarinha = product && product.code === '8110';
         const availableBatches = localBatches
-            .filter(b => b.productId === productId && b.quantity > 0)
+            .filter(b => {
+                if (b.productId !== productId || b.quantity <= 0) {
+                    return false;
+                }
+                if (isFarinha) {
+                    return b.isReleased === true;
+                }
+                return true;
+            })
             .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
 
         batchSelectorTitle.textContent = `Selecionar lotes para ${product.name}`;
@@ -3386,6 +3474,10 @@
             });
         }
 
+        // --- START OF FIX: Removed misplaced code block ---
+        // The erroneous code block related to batch filtering was here
+        // --- END OF FIX ---
+
         const sortedData = Object.keys(consumption)
             .map(productId => ({ productId: parseInt(productId), total: consumption[productId] }))
             .sort((a,b) => b.total - a.total)
@@ -3549,9 +3641,6 @@
         requisitionItemsContainer.innerHTML = '';
         addRequisitionItemRow();
     }
-
-    // Moved event listeners inside initialize function
-    // addRequisitionItemBtn.addEventListener('click', addRequisitionItemRow); // Removed from here
 
     requisitionItemsContainer.addEventListener('click', (e) => {
         if (e.target.closest('.remove-requisition-item-btn')) {
