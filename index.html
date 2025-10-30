@@ -2521,19 +2521,59 @@
     });
 
     searchPoByDate.addEventListener('input', renderProductionOrders);
-
-    btnConfirmProduction.addEventListener('click', () => {
+    
+    btnConfirmProduction.addEventListener('click', async () => { // <-- Make async
         const selectedCheckboxes = document.querySelectorAll('.po-select-checkbox:checked');
         if (selectedCheckboxes.length === 0) {
             showNotification("Selecione pelo menos uma ordem de produção para confirmar.", true);
             return;
         }
-
+        
         const selectedOrderIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.dataset.poId));
-        const selectedOrders = localProductionOrders.filter(po => selectedOrderIds.includes(po.id));
+        // We need to get deep copies to modify them
+        const selectedOrders = localProductionOrders
+            .filter(po => selectedOrderIds.includes(po.id))
+            .map(po => JSON.parse(JSON.stringify(po))); // <-- Deep copy
 
-        populateConfirmationModal(selectedOrders);
-        showModal(confirmProductionModal);
+        try {
+            loadingOverlay.classList.remove('hidden'); // Show loading during validation
+            
+            // Re-validate all orders before showing confirmation
+            for (const order of selectedOrders) {
+                const currentPoId = order.id; // We are validating this PO's plan
+                
+                for (const ing of order.ingredients) {
+                    const product = localInventory.find(p => p.id === ing.productId);
+                    if (!product) throw new Error(`Produto não encontrado para a ordem ${order.recipeName}`);
+                    
+                    const residual = localResidualStock.find(r => r.productId === product.id)?.quantity || 0;
+                    // We must use the *original* adjusted quantity for validation
+                    const compensatedQty = Math.max(0, ing.adjustedQuantity - residual);
+
+                    // Re-calculate the plan, excluding this PO's *current* reservations
+                    // (which are implicitly handled by calculateConsumptionPlan checking *other* OPs)
+                    const planResult = calculateConsumptionPlan(product.id, compensatedQty, currentPoId);
+
+                    if (!planResult.isSufficient) {
+                        throw new Error(`Estoque insuficiente para "${product.name}" na ordem "${order.recipeName}". Por favor, edite a ordem para recalcular.`);
+                    }
+                    
+                    // The plan is sufficient, update it to the fresh plan
+                    // This handles cases where stock shifted but is still available
+                    ing.consumptionPlan = planResult.plan; 
+                }
+            }
+            
+            loadingOverlay.classList.add('hidden'); // Hide loading
+            
+            // If we're here, all orders are valid
+            populateConfirmationModal(selectedOrders);
+            showModal(confirmProductionModal);
+
+        } catch (error) {
+            loadingOverlay.classList.add('hidden');
+            showNotification(error.message || "Erro ao validar ordens.", true);
+        }
     });
 
     function populateConfirmationModal(orders) {
@@ -3473,9 +3513,26 @@
                 consumption[h.productId] = (consumption[h.productId] || 0) + h.quantity;
             });
         }
+        
+        // --- START OF FIX: Removed buggy code block ---
+        /*
+        const product = localInventory.find(p => p.id === productId); // productId is not defined here
+        const isFarinha = product && product.code === '8110';
 
-        // --- START OF FIX: Removed misplaced code block ---
-        // The erroneous code block related to batch filtering was here
+        const availableBatches = localBatches
+            .filter(b => {
+                if (b.productId !== productId || b.quantity <= 0) { // productId is undefined
+                    return false;
+                }
+                if (isFarinha) { // isFarinha is undefined
+                    // If it's Farinha, it MUST be explicitly released
+                    return b.isReleased === true;
+                }
+                // For all other products, they are considered released
+                return true; 
+            })
+            .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+        */
         // --- END OF FIX ---
 
         const sortedData = Object.keys(consumption)
