@@ -1,2603 +1,583 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>IMAC Controle de Qualidade</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: { brand: { 50: '#fffcf2', 100: '#fff7e0', 200: '#ffebb3', 300: '#ffdb80', 400: '#facc15', 500: '#f5b915', 600: '#d99d0b', 700: '#b37a06', 800: '#8f5f0b', 900: '#754b0e' } },
-        fontFamily: { sans: ['Inter', 'sans-serif'] }
-      }
-    }
-  }
-</script>
-<script src="https://unpkg.com/@phosphor-icons/web"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --amarelo: #f5b915;
-    --amarelo-claro: #fff3d6;
-    --marrom: #6b4423;
-    --marrom-claro: #a78355;
-    --bg: #ffffff;
-    --card: #ffffff;
-    --border: #e8c667;
-    --border-suave: #f2ddab;
-    --success: #3d8b53;
-    --danger: #c0392b;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
-  body { background: var(--bg); color: var(--marrom); padding-bottom: 20px; }
-  button, input { font-family: inherit; }
-
-  .app-shell { min-height: 100vh; }
-
-  .topbar { background: var(--card); border-bottom: 2px solid var(--border); padding: 16px 15px; display: flex; align-items: center; position: sticky; top: 0; z-index: 800; }
-  .topbar-titulo { flex: 1; text-align: center; font-weight: 800; color: var(--marrom); font-size: 1.05rem; }
-  .voltar-btn { background: none; border: none; color: var(--marrom-claro); font-weight: bold; font-size: 0.95rem; width: 70px; text-align: left; }
-
-  .container { padding: 15px; max-width: 640px; margin: 0 auto; }
-
-  /* Início */
-  .inicio-container { display: flex; flex-direction: column; align-items: center; padding: 15px; max-width: 500px; margin: 0 auto; }
-  .inicio-titulo { font-weight: 900; font-size: 1.6rem; color: var(--marrom); margin: 30px 0 25px; }
-  .inicio-grid { display: flex; flex-direction: column; gap: 14px; width: 100%; }
-  .menu-card { background: var(--card); border: 3px solid var(--amarelo); border-radius: 18px; padding: 22px 20px; text-align: left; box-shadow: 0 2px 8px rgba(107,68,35,0.06); }
-  .menu-card:active { background: var(--amarelo-claro); }
-  .menu-label { font-weight: 800; font-size: 1.25rem; color: var(--marrom); }
-  .menu-desc { font-size: 0.88rem; color: var(--marrom-claro); margin-top: 3px; }
-  .admin-link { margin-top: 30px; background: none; border: none; color: var(--marrom-claro); font-weight: bold; font-size: 0.85rem; padding: 10px; }
-
-  .cat-heading { font-size: 1rem; font-weight: 800; color: var(--marrom); margin: 20px 0 10px; padding-left: 10px; border-left: 4px solid var(--amarelo); }
-  .cat-heading:first-child { margin-top: 4px; }
-
-  .card { background: var(--card); border: 2px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(107,68,35,0.05); border-left: 6px solid var(--amarelo); }
-  .card.concluido { border-color: var(--success); border-left-color: var(--success); background: #f5faf6; }
-  .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .nome { font-weight: 800; font-size: 1.02rem; color: var(--marrom); }
-
-  .toolbar { background: var(--card); border: 2px solid var(--border); padding: 14px; border-radius: 16px; margin-bottom: 16px; box-shadow: 0 2px 4px rgba(107,68,35,0.04); display: flex; align-items: center; gap: 10px; }
-  .toolbar-data { position: relative; }
-  .toolbar-data-centro { flex: 1; text-align: center; position: relative; }
-  .input-data { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; }
-
-  .btn { border: 2px solid transparent; border-radius: 14px; font-weight: bold; padding: 14px 18px; font-size: 1rem; }
-  .btn-primary { background: var(--amarelo); color: var(--marrom); border-color: var(--amarelo); }
-  .btn-outline { background: var(--card); color: var(--marrom); border: 2px solid var(--amarelo); }
-  .btn-block { width: 100%; }
-  .btn:disabled { opacity: 0.5; }
-
-  .status-msg { text-align: center; padding: 40px 20px; color: var(--marrom-claro); font-weight: 500; line-height: 1.6; }
-
-  .reorder-row { display: flex; align-items: center; gap: 10px; }
-  .order-num { width: 30px; height: 30px; border-radius: 50%; background: var(--amarelo); color: var(--marrom); font-weight: 900; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; }
-  .arrow-col { display: flex; flex-direction: column; gap: 4px; }
-  .arrow-btn { width: 40px; height: 34px; border-radius: 10px; border: 2px solid var(--border); background: var(--amarelo-claro); font-size: 1rem; font-weight: bold; color: var(--marrom); }
-  .arrow-btn:disabled { opacity: 0.25; }
-  .remover-btn { background: none; border: none; color: var(--danger); font-size: 1.2rem; font-weight: bold; padding: 6px 10px; }
-
-  .meta-stepper { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-  .meta-stepper button { min-width: 44px; height: 40px; border-radius: 10px; border: 2px solid var(--border); background: var(--amarelo-claro); font-size: 1rem; font-weight: bold; color: var(--marrom); padding: 0 8px; }
-  .meta-stepper .valor { font-weight: 800; font-size: 1.05rem; min-width: 90px; text-align: center; color: var(--marrom); }
-  .meta-quick { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-  .meta-quick button { flex: 1; height: 38px; border-radius: 10px; border: 2px solid var(--border); background: var(--card); font-size: 0.9rem; font-weight: bold; color: var(--marrom-claro); }
-  .meta-quick button:active { background: var(--amarelo-claro); color: var(--marrom); }
-
-  .contagem-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 10px; }
-  .contagem-num { font-size: 1.6rem; font-weight: 900; color: var(--marrom); }
-  .contagem-num .meta { font-size: 1rem; color: var(--marrom-claro); font-weight: bold; }
-  .btn-mais { background: var(--amarelo); color: var(--marrom); border: 2px solid var(--amarelo); border-radius: 16px; width: 74px; height: 74px; font-size: 2rem; font-weight: 900; box-shadow: 0 3px 8px rgba(245,185,21,0.4); flex-shrink: 0; }
-  .btn-mais:active { transform: scale(0.94); }
-  .btn-mais:disabled { opacity: 0.4; box-shadow: none; }
-  .btn-menos { background: var(--card); color: var(--marrom-claro); border: 2px solid var(--border); border-radius: 16px; width: 54px; height: 74px; font-size: 1.3rem; font-weight: 900; flex-shrink: 0; }
-  .btn-menos:active { background: var(--amarelo-claro); color: var(--marrom); }
-  .btn-menos:disabled { opacity: 0.3; }
-  .cat-heading-concluidos { border-left-color: var(--success); margin-top: 30px; }
-  .btn-desfazer { background: none; border: none; color: var(--marrom-claro); font-size: 0.8rem; font-weight: bold; margin-top: 8px; padding: 6px; }
-  .progress-bar { background: var(--border-suave); border-radius: 20px; height: 10px; margin-top: 10px; overflow: hidden; }
-  .progress-fill { background: var(--success); height: 100%; transition: width 0.25s ease; }
-  .selo-ok { background: var(--success); color: white; font-size: 0.72rem; font-weight: bold; padding: 4px 10px; border-radius: 20px; }
-
-  .rel-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-suave); }
-  .rel-row:last-child { border-bottom: none; }
-  .rel-nome { font-weight: bold; font-size: 0.95rem; color: var(--marrom); }
-  .rel-sub { color: var(--marrom-claro); font-size: 0.78rem; }
-  .rel-vel { font-weight: 900; color: var(--marrom); text-align: right; font-size: 0.95rem; }
-
-  .input-texto { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid var(--border); font-size: 1rem; background: var(--amarelo-claro); color: var(--marrom); }
-  .input-texto::placeholder { color: var(--marrom-claro); }
-
-  .modal-fundo { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(107,68,35,0.5); z-index: 1000; display: flex; align-items: flex-end; }
-  .modal-caixa { background: var(--bg); width: 100%; max-height: 80vh; border-top-left-radius: 24px; border-top-right-radius: 24px; border-top: 3px solid var(--amarelo); display: flex; flex-direction: column; }
-  .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 18px; border-bottom: 2px solid var(--border); font-weight: 800; color: var(--marrom); font-size: 1.1rem; }
-  .fechar-btn { background: none; border: none; font-size: 1.4rem; color: var(--marrom-claro); }
-  .modal-scroll { overflow-y: auto; padding: 15px; }
-  .produto-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 6px; }
-  .produto-btn { background: var(--card); border: 2px solid var(--amarelo-claro); border-radius: 12px; padding: 16px 10px; font-weight: 700; color: var(--marrom); text-align: center; }
-  .produto-btn:active { background: var(--amarelo-claro); }
-
-  .fechamento-resumo { font-size: 0.85rem; color: var(--marrom-claro); font-weight: bold; margin-bottom: 10px; }
-  .fechamento-linha { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-top: 1px solid var(--border-suave); font-size: 0.92rem; font-weight: 600; }
-  .valor-pill { background: var(--amarelo-claro); border: 2px solid var(--amarelo); border-radius: 20px; padding: 8px 16px; font-weight: 800; color: var(--marrom); font-size: 0.95rem; }
-  .valor-pill-vazio { background: var(--card); border-color: var(--border); color: var(--marrom-claro); font-weight: 700; }
-
-  .teclado-display { text-align: center; font-size: 2.2rem; font-weight: 900; color: var(--marrom); padding: 20px 15px 10px; }
-  .teclado-unidade { font-size: 1.1rem; color: var(--marrom-claro); font-weight: bold; }
-  .teclado-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 15px; }
-  .teclado-btn { height: 58px; border-radius: 14px; border: 2px solid var(--border); background: var(--card); font-size: 1.4rem; font-weight: 800; color: var(--marrom); }
-  .teclado-btn:active { background: var(--amarelo-claro); }
-  .teclado-limpar { color: var(--danger); border-color: var(--danger); }
-  .teclado-acoes { display: flex; gap: 10px; padding: 15px; }
-
-  .livro-linha { font-size: 0.85rem; color: var(--marrom-claro); font-weight: 600; margin-top: 3px; }
-
-  .ops-linha { font-size: 0.78rem; color: var(--marrom-claro); font-weight: 700; margin-top: 2px; }
-  .card-conferida { border-left-color: var(--success); background: #f5faf6; opacity: 0.85; }
-  .order-num-ok { background: var(--success); color: #fff; }
-  .btn-conferir { width: 100%; margin-top: 12px; background: var(--card); border: 2px solid var(--success); color: var(--success); border-radius: 12px; padding: 12px; font-weight: 800; font-size: 0.92rem; }
-  .btn-conferir:active { background: #eaf7ee; }
-  .btn-desmarcar { width: 100%; margin-top: 12px; background: none; border: 2px solid var(--border); color: var(--marrom-claro); border-radius: 12px; padding: 10px; font-weight: 700; font-size: 0.85rem; }
-
-  /* ── PAINEL TV (monitoramento ao vivo) ── */
-  .menu-card-tv { border-color: var(--marrom); background: var(--marrom); }
-  .menu-card-tv .menu-label, .menu-card-tv .menu-desc { color: #fff2d6; }
-  .menu-card-tv .menu-desc { color: #d9bd90; }
-
-  .tv-shell { min-height: 100vh; background: #241608; color: #fff8ea; padding: 28px 40px; }
-  .tv-topo { display: flex; align-items: center; gap: 24px; margin-bottom: 24px; }
-  .tv-data { font-size: 1.6rem; font-weight: 800; text-transform: capitalize; }
-  .tv-relogio { font-size: 1.6rem; font-weight: 800; color: var(--amarelo); flex: 1; }
-  .tv-fs-btn { background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.2); color: #fff8ea; padding: 10px 18px; border-radius: 12px; font-weight: bold; font-size: 0.95rem; }
-
-  .tv-vazio { text-align: center; padding: 100px 20px; font-size: 2rem; color: #d9bd90; font-weight: 700; }
-
-  .tv-resumo { text-align: center; margin-bottom: 30px; }
-  .tv-resumo-num { font-size: 4rem; font-weight: 900; color: var(--amarelo); }
-  .tv-resumo-meta { font-size: 2rem; color: #d9bd90; }
-  .tv-resumo-label { font-size: 1.2rem; color: #d9bd90; font-weight: 600; margin-top: -6px; }
-  .tv-barra-geral { background: rgba(255,255,255,0.12); border-radius: 20px; height: 22px; max-width: 700px; margin: 14px auto 6px; overflow: hidden; }
-  .tv-barra-geral-fill { background: var(--amarelo); height: 100%; transition: width 0.4s ease; }
-  .tv-resumo-pct { font-size: 1.1rem; font-weight: 800; color: var(--amarelo); }
-
-  .tv-ativo { background: linear-gradient(135deg, #3a2410, #241608); border: 3px solid var(--amarelo); border-radius: 22px; padding: 26px 32px; margin-bottom: 30px; }
-  .tv-ativo-concluido { border-color: var(--success); text-align: center; padding: 40px; }
-  .tv-ativo-tag { font-size: 1rem; font-weight: 900; letter-spacing: 3px; color: var(--amarelo); margin-bottom: 8px; }
-  .tv-ativo-nome { font-size: 2.6rem; font-weight: 900; color: #fff8ea; }
-  .tv-ativo-setor { font-size: 1.2rem; color: #d9bd90; font-weight: 600; margin-top: 2px; }
-  .tv-ativo-linha { display: flex; align-items: center; gap: 40px; margin-top: 18px; flex-wrap: wrap; }
-  .tv-ativo-contagem { font-size: 2.4rem; font-weight: 900; color: var(--amarelo); }
-  .tv-ativo-contagem span { font-size: 1.3rem; color: #d9bd90; font-weight: 700; }
-  .tv-cronometro-label { font-size: 0.85rem; color: #d9bd90; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-  .tv-cronometro-valor { font-size: 1.8rem; font-weight: 900; color: #fff8ea; }
-  .tv-barra-ativo { margin-top: 18px; max-width: 100%; }
-
-  .tv-grid-setores { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
-  .tv-setor-col { background: rgba(255,255,255,0.04); border-radius: 16px; padding: 16px 18px; }
-  .tv-setor-titulo { font-size: 1.1rem; font-weight: 900; color: var(--amarelo); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid rgba(255,255,255,0.1); }
-  .tv-item-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 1.05rem; font-weight: 700; color: #d9bd90; }
-  .tv-item-status { width: 22px; text-align: center; font-size: 1.1rem; color: rgba(255,255,255,0.25); }
-  .tv-item-nome { flex: 1; }
-  .tv-item-contagem { color: #fff8ea; font-weight: 800; }
-  .tv-item-concluido { color: #7fdb96; }
-  .tv-item-concluido .tv-item-status { color: var(--success); }
-  .tv-item-ativo { color: #fff8ea; }
-  .tv-item-ativo .tv-item-status { color: var(--amarelo); }
-  .tv-item-ativo .tv-item-nome { font-weight: 900; }
-</style>
-</head>
-<body>
-
-<div id="root"></div>
-
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBYriLi3N0Z4ktETeBep8SweiN2rVHRAvs",
-    authDomain: "rastreio-producao.firebaseapp.com",
-    projectId: "rastreio-producao",
-    storageBucket: "rastreio-producao.firebasestorage.app",
-    messagingSenderId: "706467121350",
-    appId: "1:706467121350:web:5193f6b64d8671b0c1afc7"
-  };
-  firebase.initializeApp(firebaseConfig);
-  window.db = firebase.firestore();
-  window.authPronto = false;
-  firebase.auth().onAuthStateChanged(user => {
-    if (user) { window.authPronto = true; }
-  });
-  firebase.auth().signInAnonymously().catch(e => console.error('Erro no login anônimo:', e.message));
-</script>
-
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
-<script>
-const {
-  useState,
-  useEffect,
-  useCallback
-} = React;
-function paraISO(d) {
-  const ano = d.getFullYear(),
-    mes = String(d.getMonth() + 1).padStart(2, '0'),
-    dia = String(d.getDate()).padStart(2, '0');
-  return `${ano}-${mes}-${dia}`;
-}
-function amanhaISO() {
-  const d = new Date();
-  d.setDate(d.getDate() + 1);
-  return paraISO(d);
-}
-function hojeISO() {
-  return paraISO(new Date());
-}
-function formatarDataBR(iso) {
-  if (!iso || iso.indexOf('-') === -1) return iso;
-  const [a, m, d] = iso.split('-');
-  const data = new Date(a, parseInt(m, 10) - 1, d);
-  const dias = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
-  return `${d}/${m}/${a} (${dias[data.getDay()]})`;
-}
-function horaCurta(iso) {
-  return new Date(iso).toLocaleTimeString('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-}
-function formatarKg(n) {
-  return (n || 0).toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-}
-function useFirebasePronto() {
-  const [pronto, setPronto] = useState(!!window.db && !!window.authPronto);
-  useEffect(() => {
-    if (window.db && window.authPronto) {
-      setPronto(true);
-      return;
-    }
-    const t = setInterval(() => {
-      if (window.db && window.authPronto) {
-        setPronto(true);
-        clearInterval(t);
-      }
-    }, 100);
-    return () => clearInterval(t);
-  }, []);
-  return pronto;
-}
-function useProdutos() {
-  const [produtos, setProdutos] = useState([]);
-  const [carregando, setCarregando] = useState(true);
-  useEffect(() => {
-    const unsub = window.db.collection('produtos').orderBy('categoria').onSnapshot(snap => {
-      const lista = [];
-      snap.forEach(d => lista.push({
-        id: d.id,
-        ...d.data()
-      }));
-      setProdutos(lista);
-      setCarregando(false);
-    });
-    return unsub;
-  }, []);
-  return {
-    produtos,
-    carregando
-  };
-}
-
-// ═══════════════════════ TECLADO NUMÉRICO TOUCH (kg) ═══════════════════════
-function ModalTeclado({
-  titulo,
-  valorInicial,
-  aoConfirmar,
-  aoFechar
-}) {
-  const [valor, setValor] = useState(valorInicial ? String(valorInicial).replace('.', ',') : '');
-  function digitar(d) {
-    if (d === ',') {
-      if (valor.includes(',')) return;
-      setValor(valor === '' ? '0,' : valor + ',');
-    } else if (d === '⌫') {
-      setValor(valor.slice(0, -1));
-    } else if (d === 'C') {
-      setValor('');
-    } else {
-      if (valor.length >= 8) return;
-      setValor(valor + d);
-    }
-  }
-  function confirmar() {
-    const num = parseFloat(valor.replace(',', '.')) || 0;
-    aoConfirmar(num);
-  }
-  return /*#__PURE__*/React.createElement("div", {
-    className: "modal-fundo",
-    onClick: aoFechar
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "modal-caixa",
-    onClick: e => e.stopPropagation()
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "modal-header"
-  }, /*#__PURE__*/React.createElement("span", null, titulo), /*#__PURE__*/React.createElement("button", {
-    className: "fechar-btn",
-    onClick: aoFechar
-  }, "✕")), /*#__PURE__*/React.createElement("div", {
-    className: "teclado-display"
-  }, valor === '' ? '0' : valor, " ", /*#__PURE__*/React.createElement("span", {
-    className: "teclado-unidade"
-  }, "kg")), /*#__PURE__*/React.createElement("div", {
-    className: "teclado-grid"
-  }, ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', ','].map(d => /*#__PURE__*/React.createElement("button", {
-    key: d,
-    className: "teclado-btn" + (d === 'C' ? ' teclado-limpar' : ''),
-    onClick: () => digitar(d)
-  }, d))), /*#__PURE__*/React.createElement("div", {
-    className: "teclado-acoes"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-outline btn-block",
-    onClick: () => digitar('⌫')
-  }, "⌫ Apagar"), /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-primary btn-block",
-    onClick: confirmar
-  }, "Confirmar"))));
-}
-
-// ═══════════════════════ INÍCIO ═══════════════════════
-function TelaInicio({ ir }) {
-  const currentUser = JSON.parse(localStorage.getItem('imac_user')) || { setor: 'pcp' };
-  const s = currentUser.setor;
-  
-  // Define visibility rules based on sector
-  const show = {
-    lider: s === 'lider' || s === 'pcp',
-    operador: s === 'lider' || s === 'producao' || s === 'pcp',
-    relatorio: s === 'lider' || s === 'pcp',
-    fechamento: s === 'lider' || s === 'pcp',
-    livro: s === 'lider' || s === 'pcp',
-    produtos: s === 'pcp',
-    pcp: s === 'pcp',
-    expedicao: s === 'expedicao' || s === 'pcp',
-    embaladora: s === 'embaladora' || s === 'pcp'
-  };
-
-  return React.createElement("div", { className: "grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto" },
-    show.lider && React.createElement("button", { onClick: () => ir('lider'), className: "bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:border-brand-400 hover:shadow-md transition-all group" },
-      React.createElement("div", { className: "w-16 h-16 rounded-full bg-brand-50 text-brand-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" }, React.createElement("i", { className: "ph ph-users text-3xl" })),
-      React.createElement("span", { className: "font-bold text-gray-800" }, "Conferência de Receitas")
-    ),
-    show.operador && React.createElement("button", { onClick: () => ir('operador'), className: "bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:border-brand-400 hover:shadow-md transition-all group" },
-      React.createElement("div", { className: "w-16 h-16 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" }, React.createElement("i", { className: "ph ph-cooking-pot text-3xl" })),
-      React.createElement("span", { className: "font-bold text-gray-800" }, "Produção")
-    ),
-    show.embaladora && React.createElement("button", { onClick: () => ir('embaladora'), className: "bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:border-brand-400 hover:shadow-md transition-all group" },
-      React.createElement("div", { className: "w-16 h-16 rounded-full bg-pink-50 text-pink-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" }, React.createElement("i", { className: "ph ph-package text-3xl" })),
-      React.createElement("span", { className: "font-bold text-gray-800" }, "Embaladora")
-    ),
-    show.relatorio && React.createElement("button", { onClick: () => ir('relatorio'), className: "bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:border-brand-400 hover:shadow-md transition-all group" },
-      React.createElement("div", { className: "w-16 h-16 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" }, React.createElement("i", { className: "ph ph-chart-line-up text-3xl" })),
-      React.createElement("span", { className: "font-bold text-gray-800" }, "Relatório")
-    ),
-    show.fechamento && React.createElement("button", { onClick: () => ir('fechamento'), className: "bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:border-brand-400 hover:shadow-md transition-all group" },
-      React.createElement("div", { className: "w-16 h-16 rounded-full bg-green-50 text-green-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" }, React.createElement("i", { className: "ph ph-check-circle text-3xl" })),
-      React.createElement("span", { className: "font-bold text-gray-800" }, "Fechamento")
-    ),
-    show.livro && React.createElement("button", { onClick: () => ir('livro'), className: "bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:border-brand-400 hover:shadow-md transition-all group" },
-      React.createElement("div", { className: "w-16 h-16 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" }, React.createElement("i", { className: "ph ph-book-open text-3xl" })),
-      React.createElement("span", { className: "font-bold text-gray-800" }, "Livro de Produção")
-    ),
-    show.produtos && React.createElement("button", { onClick: () => ir('produtos'), className: "bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:border-brand-400 hover:shadow-md transition-all group" },
-      React.createElement("div", { className: "w-16 h-16 rounded-full bg-yellow-50 text-yellow-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" }, React.createElement("i", { className: "ph ph-package text-3xl" })),
-      React.createElement("span", { className: "font-bold text-gray-800" }, "Produtos")
-    ),
-    show.pcp && React.createElement("button", { onClick: () => ir('pcp'), className: "bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:border-brand-400 hover:shadow-md transition-all group" },
-      React.createElement("div", { className: "w-16 h-16 rounded-full bg-cyan-50 text-cyan-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" }, React.createElement("i", { className: "ph ph-chart-bar text-3xl" })),
-      React.createElement("span", { className: "font-bold text-gray-800" }, "Lançamentos PCP")
-    ),
-    show.pcp && React.createElement("button", { onClick: () => ir('resumo_pcp'), className: "bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:border-brand-400 hover:shadow-md transition-all group" },
-      React.createElement("div", { className: "w-16 h-16 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" }, React.createElement("i", { className: "ph ph-monitor-play text-3xl" })),
-      React.createElement("span", { className: "font-bold text-gray-800" }, "Painel TV (Resumos)")
-    ),
-    show.expedicao && React.createElement("button", { onClick: () => ir('expedicao'), className: "bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:border-brand-400 hover:shadow-md transition-all group" },
-      React.createElement("div", { className: "w-16 h-16 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" }, React.createElement("i", { className: "ph ph-snowflake text-3xl" })),
-      React.createElement("span", { className: "font-bold text-gray-800" }, "Expedição Câmaras")
-    ),
-    show.expedicao && React.createElement("button", { onClick: () => window.location.href = 'https://jangabrielsg-bit.github.io/expedicao/', className: "bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:border-gray-400 hover:shadow-md transition-all group" },
-      React.createElement("div", { className: "w-16 h-16 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" }, React.createElement("i", { className: "ph ph-truck text-3xl" })),
-      React.createElement("span", { className: "font-bold text-gray-800" }, "App Expedição / Estoque")
-    )
-  );
-}
-\n// ═══════════════════════ MODAL: ESCOLHER PRODUTO ═══════════════════════
-function ModalEscolherProduto({
-  produtos,
-  aoEscolher,
-  aoFechar
-}) {
-  const porCategoria = {};
-  produtos.forEach(p => {
-    const cat = p.categoria || 'Sem setor';
-    if (!porCategoria[cat]) porCategoria[cat] = [];
-    porCategoria[cat].push(p);
-  });
-  return /*#__PURE__*/React.createElement("div", {
-    className: "modal-fundo",
-    onClick: aoFechar
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "modal-caixa",
-    onClick: e => e.stopPropagation()
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "modal-header"
-  }, /*#__PURE__*/React.createElement("span", null, "Escolha a receita"), /*#__PURE__*/React.createElement("button", {
-    className: "fechar-btn",
-    onClick: aoFechar
-  }, "✕")), /*#__PURE__*/React.createElement("div", {
-    className: "modal-scroll"
-  }, Object.keys(porCategoria).length === 0 && /*#__PURE__*/React.createElement("div", {
-    className: "status-msg"
-  }, "Nenhum produto cadastrado ainda. Vá em \"Produtos e Setores\" no início."), Object.keys(porCategoria).sort().map(cat => /*#__PURE__*/React.createElement("div", {
-    key: cat
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "cat-heading"
-  }, cat), /*#__PURE__*/React.createElement("div", {
-    className: "produto-grid"
-  }, porCategoria[cat].map(p => /*#__PURE__*/React.createElement("button", {
-    key: p.id,
-    className: "produto-btn",
-    onClick: () => aoEscolher(p)
-  }, p.nome))))))));
-}
-
-// ═══════════════════════ TELA DO LÍDER ═══════════════════════
-function TelaLider() {
-  const [dataAlvo, setDataAlvo] = useState(amanhaISO());
-  const {
-    produtos,
-    carregando: carregandoProdutos
-  } = useProdutos();
-  const [itens, setItens] = useState([]);
-  const [carregando, setCarregando] = useState(true);
-  const [modalAberto, setModalAberto] = useState(false);
-  const [salvando, setSalvando] = useState(false);
-  const [importando, setImportando] = useState(false);
-  const [statusRascunho, setStatusRascunho] = useState(''); // '', 'salvando', 'salvo'
-  const pulaAutosaveRef = React.useRef(true); // evita salvar rascunho assim que os dados acabaram de carregar
-
-  useEffect(() => {
-    setCarregando(true);
-    pulaAutosaveRef.current = true;
-    (async () => {
-      // 1) Se já existe programação CONFIRMADA pra essa data, usa ela (inclui progresso do operador)
-      const refConfirmada = window.db.collection('producaoDiaria').doc(dataAlvo);
-      const snapConfirmada = await refConfirmada.get();
-      if (snapConfirmada.exists && snapConfirmada.data().itens && snapConfirmada.data().itens.length) {
-        setItens(snapConfirmada.data().itens.map(it => ({
-          ...it
-        })));
-        setCarregando(false);
-        return;
-      }
-      // 2) Senão, tenta um rascunho salvo automaticamente (importações/edições ainda não confirmadas)
-      const refRascunho = window.db.collection('producaoRascunho').doc(dataAlvo);
-      const snapRascunho = await refRascunho.get();
-      if (snapRascunho.exists && snapRascunho.data().itens) {
-        setItens(snapRascunho.data().itens.map(it => ({
-          ...it
-        })));
-      } else {
-        setItens([]);
-      }
-      setCarregando(false);
-    })();
-  }, [dataAlvo]);
-
-  // Autosave: qualquer mudança na lista (importar, ajustar, conferir, reordenar) salva sozinha como rascunho
-  useEffect(() => {
-    if (carregando) return;
-    if (pulaAutosaveRef.current) {
-      pulaAutosaveRef.current = false;
-      return;
-    }
-    setStatusRascunho('salvando');
-    const t = setTimeout(async () => {
-      try {
-        const ref = window.db.collection('producaoRascunho').doc(dataAlvo);
-        if (itens.length === 0) {
-          await ref.delete().catch(() => {});
-        } else {
-          await ref.set({
-            data: dataAlvo,
-            itens,
-            atualizadoEm: new Date().toISOString()
-          });
-        }
-        setStatusRascunho('salvo');
-      } catch (e) {
-        console.error('Erro ao salvar rascunho:', e.message);
-        setStatusRascunho('');
-      }
-    }, 700);
-    return () => clearTimeout(t);
-  }, [itens]);
-  function mudarDia(delta) {
-    const d = new Date(dataAlvo + 'T12:00:00');
-    d.setDate(d.getDate() + delta);
-    setDataAlvo(paraISO(d));
-  }
-  function adicionarProduto(produto) {
-    setItens(prev => [...prev, {
-      codigo: produto.id,
-      produto: produto.nome,
-      categoria: produto.categoria || 'Sem setor',
-      metaLotes: 1,
-      ops: [],
-      conferido: false,
-      feitos: 0,
-      batidas: [],
-      massaPerdidaProd: 0,
-      massaPerdidaEmb: 0,
-      peDeMassa: 0,
-      rendimentoTeorico: 0,
-      finalizado: false
-    }]);
-    setModalAberto(false);
-  }
-  async function importarDoWinthor() {
-    setImportando(true);
-    try {
-      const ref = window.db.collection('winthorSugestoes').doc(dataAlvo);
-      const snap = await ref.get();
-      if (!snap.exists) {
-        alert('Nenhuma sugestão do Winthor encontrada ainda para ' + formatarDataBR(dataAlvo) + '. O computador com o bridge_winthor.js precisa estar rodando e já ter sincronizado essa data.');
-        return;
-      }
-      const categorias = snap.data().categorias || {};
-      let qtdNovos = 0;
-      let qtdAtualizados = 0;
-      setItens(prev => {
-        const lista = [...prev];
-        const indicePorCodigo = new Map(lista.map((it, i) => [it.codigo, i]));
-        Object.keys(categorias).sort().forEach(cat => {
-          categorias[cat].forEach(sug => {
-            const idxExistente = indicePorCodigo.get(sug.codigo);
-            if (idxExistente != null) {
-              // Já está na lista — checa se a ordem/quantidade do Winthor mudou desde a última importação.
-              // Preserva conferido/feitos/batidas/fechamento, só atualiza quantidade e OPs.
-              const atual = lista[idxExistente];
-              const opsIguais = JSON.stringify(atual.ops || []) === JSON.stringify(sug.ops || []);
-              if (atual.metaLotes !== sug.metaLotes || !opsIguais || atual.rendimentoTeorico !== sug.rendimentoTeorico) {
-                lista[idxExistente] = {
-                  ...atual,
-                  metaLotes: sug.metaLotes,
-                  rendimentoTeorico: sug.rendimentoTeorico || 0,
-                  ops: sug.ops || []
-                };
-                qtdAtualizados++;
-              }
-            } else {
-              lista.push({
-                codigo: sug.codigo,
-                produto: sug.produto,
-                categoria: sug.categoria || cat,
-                metaLotes: sug.metaLotes,
-                ops: sug.ops || [],
-                conferido: false,
-                feitos: 0,
-                batidas: [],
-                massaPerdidaProd: 0,
-                massaPerdidaEmb: 0,
-                peDeMassa: 0,
-                rendimentoTeorico: sug.rendimentoTeorico || 0,
-                finalizado: false
-              });
-              indicePorCodigo.set(sug.codigo, lista.length - 1);
-              qtdNovos++;
-            }
-          });
-        });
-        return lista;
-      });
-      if (qtdNovos === 0 && qtdAtualizados === 0) {
-        alert('Nada novo — a lista já está igual ao que o Winthor tem pra essa data.');
-      } else {
-        alert(`${qtdNovos} receita(s) nova(s), ${qtdAtualizados} atualizada(s).`);
-      }
-    } catch (e) {
-      alert('Erro ao importar: ' + e.message);
-    } finally {
-      setImportando(false);
-    }
-  }
-  function removerItem(index) {
-    setItens(prev => prev.filter((_, i) => i !== index));
-  }
-  function moverReal(idxA, idxB) {
-    setItens(prev => {
-      if (idxA < 0 || idxB < 0 || idxA >= prev.length || idxB >= prev.length) return prev;
-      const nova = [...prev];
-      [nova[idxA], nova[idxB]] = [nova[idxB], nova[idxA]];
-      return nova;
-    });
-  }
-  function alternarConferido(index) {
-    setItens(prev => {
-      const item = prev[index];
-      if (!item.conferido) {
-        // Marca como conferida e move pro final da lista (fica na seção "Conferidas")
-        const semEle = prev.filter((_, i) => i !== index);
-        return [...semEle, {
-          ...item,
-          conferido: true
-        }];
-      }
-      const nova = [...prev];
-      nova[index] = {
-        ...nova[index],
-        conferido: false
-      };
-      return nova;
-    });
-  }
-  function ajustarMeta(index, delta) {
-    setItens(prev => {
-      const nova = [...prev];
-      nova[index] = {
-        ...nova[index],
-        metaLotes: Math.max(1, nova[index].metaLotes + delta)
-      };
-      return nova;
-    });
-  }
-  async function confirmarEProgramar() {
-    if (itens.length === 0) {
-      alert('Adicione pelo menos uma receita antes de confirmar.');
-      return;
-    }
-    setSalvando(true);
-    try {
-      // Preserva o progresso já feito pelo operador (feitos, batidas, fechamento) —
-      // só a ordem é recalculada aqui; os demais campos vêm do que já estava salvo.
-      const itensFinal = itens.map((it, idx) => ({
-        ...it,
-        ordem: idx
-      }));
-      const ref = window.db.collection('producaoDiaria').doc(dataAlvo);
-      await ref.set({
-        data: dataAlvo,
-        confirmadoEm: new Date().toISOString(),
-        itens: itensFinal
-      });
-      await window.db.collection('producaoRascunho').doc(dataAlvo).delete().catch(() => {});
-      alert('Produção de ' + formatarDataBR(dataAlvo) + ' programada com sucesso!');
-    } catch (e) {
-      alert('Erro ao salvar: ' + e.message);
-    } finally {
-      setSalvando(false);
-    }
-  }
-  if (carregando || carregandoProdutos) return /*#__PURE__*/React.createElement("div", {
-    className: "status-msg"
-  }, "Carregando...");
-  return /*#__PURE__*/React.createElement("div", {
-    className: "container"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "toolbar toolbar-data"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "arrow-btn",
-    onClick: () => mudarDia(-1)
-  }, "‹"), /*#__PURE__*/React.createElement("div", {
-    className: "toolbar-data-centro"
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontWeight: 800
-    }
-  }, formatarDataBR(dataAlvo)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '0.78rem',
-      color: 'var(--marrom-claro)'
-    }
-  }, itens.length, " receita(s) na lista", statusRascunho === 'salvando' && ' · salvando...', statusRascunho === 'salvo' && ' · rascunho salvo'), /*#__PURE__*/React.createElement("input", {
-    type: "date",
-    className: "input-data",
-    value: dataAlvo,
-    onChange: e => e.target.value && setDataAlvo(e.target.value)
-  })), /*#__PURE__*/React.createElement("button", {
-    className: "arrow-btn",
-    onClick: () => mudarDia(1)
-  }, "›")), (() => {
-    const pendentes = [];
-    const conferidas = [];
-    itens.forEach((item, idx) => {
-      if (item.conferido) conferidas.push({
-        item,
-        idx
-      });else pendentes.push({
-        item,
-        idx
-      });
-    });
-    function renderCard({
-      item,
-      idx
-    }, posicaoNaSecao, totalNaSecao, real) {
-      return /*#__PURE__*/React.createElement("div", {
-        className: "card" + (item.conferido ? ' card-conferida' : ''),
-        key: idx
-      }, /*#__PURE__*/React.createElement("div", {
-        className: "reorder-row"
-      }, /*#__PURE__*/React.createElement("div", {
-        className: "order-num" + (item.conferido ? ' order-num-ok' : '')
-      }, item.conferido ? '✓' : posicaoNaSecao + 1), /*#__PURE__*/React.createElement("div", {
-        style: {
-          flex: 1
-        }
-      }, /*#__PURE__*/React.createElement("div", {
-        className: "nome"
-      }, item.produto), item.ops && item.ops.length > 0 && /*#__PURE__*/React.createElement("div", {
-        className: "ops-linha"
-      }, "OP", item.ops.length > 1 ? 's' : '', " Winthor: ", item.ops.join(', ')), /*#__PURE__*/React.createElement("div", {
-        className: "meta-stepper"
-      }, /*#__PURE__*/React.createElement("button", {
-        onClick: () => ajustarMeta(idx, -1)
-      }, "−1"), /*#__PURE__*/React.createElement("div", {
-        className: "valor"
-      }, item.metaLotes, " receita", item.metaLotes === 1 ? '' : 's'), /*#__PURE__*/React.createElement("button", {
-        onClick: () => ajustarMeta(idx, 1)
-      }, "+1")), /*#__PURE__*/React.createElement("div", {
-        className: "meta-quick"
-      }, /*#__PURE__*/React.createElement("button", {
-        onClick: () => ajustarMeta(idx, -10)
-      }, "−10"), /*#__PURE__*/React.createElement("button", {
-        onClick: () => ajustarMeta(idx, 10)
-      }, "+10"), /*#__PURE__*/React.createElement("button", {
-        onClick: () => ajustarMeta(idx, 100)
-      }, "+100"))), real ? /*#__PURE__*/React.createElement("div", {
-        className: "arrow-col"
-      }, /*#__PURE__*/React.createElement("button", {
-        className: "arrow-btn",
-        disabled: posicaoNaSecao === 0,
-        onClick: () => moverReal(idx, pendentes[posicaoNaSecao - 1] && pendentes[posicaoNaSecao - 1].idx)
-      }, "↑"), /*#__PURE__*/React.createElement("button", {
-        className: "arrow-btn",
-        disabled: posicaoNaSecao === totalNaSecao - 1,
-        onClick: () => moverReal(idx, pendentes[posicaoNaSecao + 1] && pendentes[posicaoNaSecao + 1].idx)
-      }, "↓")) : null, /*#__PURE__*/React.createElement("button", {
-        className: "remover-btn",
-        onClick: () => removerItem(idx)
-      }, "✕")), /*#__PURE__*/React.createElement("button", {
-        className: item.conferido ? "btn-desmarcar" : "btn-conferir",
-        onClick: () => alternarConferido(idx)
-      }, item.conferido ? '↺ Desmarcar conferência' : '✓ Conferir (bate com o físico)'));
-    }
-    let categoriaAnterior = null;
-    return /*#__PURE__*/React.createElement(React.Fragment, null, pendentes.map((par, pos) => {
-      const mostrarCategoria = par.item.categoria !== categoriaAnterior;
-      categoriaAnterior = par.item.categoria;
-      return /*#__PURE__*/React.createElement(React.Fragment, {
-        key: par.idx
-      }, mostrarCategoria && /*#__PURE__*/React.createElement("div", {
-        className: "cat-heading"
-      }, par.item.categoria), renderCard(par, pos, pendentes.length, true));
-    }), pendentes.length === 0 && conferidas.length > 0 && /*#__PURE__*/React.createElement("div", {
-      className: "status-msg"
-    }, "Todas as receitas foram conferidas."), conferidas.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-      className: "cat-heading cat-heading-concluidos"
-    }, "Conferidas"), conferidas.map((par, pos) => renderCard(par, pos, conferidas.length, false))));
-  })(), /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-outline btn-block",
-    disabled: importando,
-    onClick: importarDoWinthor,
-    style: {
-      marginTop: 14
-    }
-  }, importando ? 'Importando...' : '⇩ Importar do Winthor'), /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-outline btn-block",
-    onClick: () => setModalAberto(true),
-    style: {
-      marginTop: 10
-    }
-  }, "+ Adicionar Receita"), /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-primary btn-block",
-    disabled: salvando,
-    onClick: confirmarEProgramar,
-    style: {
-      marginTop: 14
-    }
-  }, salvando ? 'Salvando...' : 'Confirmar Programação'), modalAberto && /*#__PURE__*/React.createElement(ModalEscolherProduto, {
-    produtos: produtos,
-    aoEscolher: adicionarProduto,
-    aoFechar: () => setModalAberto(false)
-  }));
-}
-
-// ═══════════════════════ TELA DO OPERADOR ═══════════════════════
-function TelaOperador() {
-  const [dataAlvo, setDataAlvo] = useState(hojeISO());
-  const [carregando, setCarregando] = useState(true);
-  const [existe, setExiste] = useState(false);
-
-  const [tunelProd, setTunelProd] = useState('');
-  const [tunelTempo, setTunelTempo] = useState(35);
-  const [tunelHora, setTunelHora] = useState(() => {
-    const d = new Date();
-    return d.toTimeString().slice(0,5);
-  });
-  const [salvandoTunel, setSalvandoTunel] = useState(false);
-
-  async function registrarEntradaTunel() {
-    if (!tunelProd) { alert("Selecione um produto."); return; }
-    setSalvandoTunel(true);
-    try {
-      const registro = {
-        produto: tunelProd,
-        horaEntrada: tunelHora,
-        tempo: parseInt(tunelTempo) || 35,
-        timestamp: new Date().toISOString()
-      };
-      const ref = window.db.collection('tunel_helicoidal').doc(dataAlvo);
-      await ref.set({ registros: firebase.firestore.FieldValue.arrayUnion(registro) }, { merge: true });
-      alert("Entrada no túnel registrada!");
-    } catch (e) {
-      alert("Erro ao registrar: " + e.message);
-    }
-    setSalvandoTunel(false);
-  }
-
-  const [itens, setItens] = useState([]);
-  
-  function mudarDia(delta) {
-    const d = new Date(dataAlvo + 'T12:00:00');
-    d.setDate(d.getDate() + delta);
-    setDataAlvo(paraISO(d));
-  }
-  
-  useEffect(() => {
-    setCarregando(true);
-    const ref = window.db.collection('producaoDiaria').doc(dataAlvo);
-    const unsub = ref.onSnapshot(snap => {
-      setCarregando(false);
-      if (snap.exists && snap.data().itens) {
-        setExiste(true);
-        setItens(snap.data().itens);
-      } else {
-        setExiste(false);
-        setItens([]);
-      }
-    });
-    return unsub;
-  }, [dataAlvo]);
-  
-  async function bater(index) {
-    const item = itens[index];
-    if (item.feitos >= item.metaLotes) return;
-    const nova = [...itens];
-    nova[index] = {
-      ...nova[index],
-      feitos: nova[index].feitos + 1,
-      batidas: [...(nova[index].batidas || []), new Date().toISOString()]
-    };
-    setItens(nova);
-    try {
-      await window.db.collection('producaoDiaria').doc(dataAlvo).update({
-        itens: nova
-      });
-    } catch (e) {
-      console.error('Erro ao salvar contagem:', e.message);
-    }
-  }
-  
-  async function desfazer(index) {
-    const item = itens[index];
-    if (item.feitos <= 0) return;
-    const nova = [...itens];
-    const batidas = [...(nova[index].batidas || [])];
-    batidas.pop();
-    nova[index] = {
-      ...nova[index],
-      feitos: Math.max(0, nova[index].feitos - 1),
-      batidas
-    };
-    setItens(nova);
-    try {
-      await window.db.collection('producaoDiaria').doc(dataAlvo).update({
-        itens: nova
-      });
-    } catch (e) {
-      console.error('Erro ao desfazer:', e.message);
-    }
-  }
-  
-  const ativos = [];
-  const concluidos = [];
-  itens.forEach((item, idx) => {
-    if (item.feitos >= item.metaLotes) concluidos.push({
-      item,
-      idx
-    });else ativos.push({
-      item,
-      idx
-    });
-  });
-  
-  function renderCard({
-    item,
-    idx
-  }) {
-    const concluido = item.feitos >= item.metaLotes;
-    const pct = item.metaLotes > 0 ? Math.min(100, Math.round(item.feitos / item.metaLotes * 100)) : 0;
-    return /*#__PURE__*/React.createElement("div", {
-      className: "card" + (concluido ? ' concluido' : ''),
-      key: idx
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "card-top"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "nome"
-    }, item.produto), concluido && /*#__PURE__*/React.createElement("span", {
-      className: "selo-ok"
-    }, "Concluído")), /*#__PURE__*/React.createElement("div", {
-      className: "contagem-row"
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        flex: 1
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "contagem-num"
-    }, item.feitos, /*#__PURE__*/React.createElement("span", {
-      className: "meta"
-    }, " / ", item.metaLotes)), /*#__PURE__*/React.createElement("div", {
-      className: "progress-bar"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "progress-fill",
-      style: {
-        width: pct + '%'
-      }
-    }))), /*#__PURE__*/React.createElement("button", {
-      className: "btn-menos",
-      disabled: item.feitos <= 0,
-      onClick: () => desfazer(idx)
-    }, "−1"), /*#__PURE__*/React.createElement("button", {
-      className: "btn-mais",
-      disabled: concluido,
-      onClick: () => bater(idx)
-    }, "+1")));
-  }
-  let categoriaAnterior = null;
-  return /*#__PURE__*/React.createElement("div", {
-    className: "container"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "toolbar toolbar-data"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "arrow-btn",
-    onClick: () => mudarDia(-1)
-  }, "‹"), /*#__PURE__*/React.createElement("div", {
-    className: "toolbar-data-centro"
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontWeight: 800
-    }
-  }, formatarDataBR(dataAlvo)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: '0.78rem',
-      color: 'var(--marrom-claro)'
-    }
-  }, "Progresso de Produção"), /*#__PURE__*/React.createElement("input", {
-    type: "date",
-    className: "input-data",
-    value: dataAlvo,
-    onChange: e => e.target.value && setDataAlvo(e.target.value)
-  })), /*#__PURE__*/React.createElement("button", {
-    className: "arrow-btn",
-    onClick: () => mudarDia(1)
-  }, "›")), 
-  carregando ? /*#__PURE__*/React.createElement("div", {
-    className: "status-msg"
-  }, "Carregando produção...") : 
-  !existe ? /*#__PURE__*/React.createElement("div", {
-    className: "status-msg"
-  }, "Nenhuma produção programada para esta data ainda.", /*#__PURE__*/React.createElement("br", null), "Fale com o líder de produção.") : 
-  /*#__PURE__*/React.createElement(React.Fragment, null, 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação Executiva - Rastreabilidade IMAC</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Libre+Barcode+39+Text&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
     
-    /*#__PURE__*/React.createElement("div", { className: "bg-white p-4 rounded-xl shadow-sm border border-blue-200 mb-6" },
-      /*#__PURE__*/React.createElement("h3", { className: "font-bold text-blue-800 mb-2 flex items-center" }, 
-        /*#__PURE__*/React.createElement("i", { className: "ph ph-thermometer-cold text-xl mr-2" }), "Registro Manual do Túnel Helicoidal"
-      ),
-      /*#__PURE__*/React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-3" },
-        /*#__PURE__*/React.createElement("div", null,
-          /*#__PURE__*/React.createElement("label", { className: "block text-xs font-bold text-gray-600 mb-1" }, "Produto"),
-          /*#__PURE__*/React.createElement("select", { className: "w-full p-2 border border-gray-300 rounded focus:border-blue-500 text-sm", value: tunelProd, onChange: e => setTunelProd(e.target.value) },
-            /*#__PURE__*/React.createElement("option", { value: "" }, "Selecione o produto..."),
-            itens.map((it, i) => React.createElement("option", { key: i, value: it.produto }, it.produto))
-          )
-        ),
-        /*#__PURE__*/React.createElement("div", null,
-          /*#__PURE__*/React.createElement("label", { className: "block text-xs font-bold text-gray-600 mb-1" }, "Hora de Entrada"),
-          /*#__PURE__*/React.createElement("input", { type: "time", className: "w-full p-2 border border-gray-300 rounded focus:border-blue-500 text-sm", value: tunelHora, onChange: e => setTunelHora(e.target.value) })
-        ),
-        /*#__PURE__*/React.createElement("div", null,
-          /*#__PURE__*/React.createElement("label", { className: "block text-xs font-bold text-gray-600 mb-1" }, "Tempo de Congelamento (min)"),
-          /*#__PURE__*/React.createElement("input", { type: "number", className: "w-full p-2 border border-gray-300 rounded focus:border-blue-500 text-sm", value: tunelTempo, onChange: e => setTunelTempo(e.target.value) })
-        )
-      ),
-      /*#__PURE__*/React.createElement("button", { className: "w-full mt-3 bg-blue-600 text-white font-bold py-2 rounded shadow-sm hover:bg-blue-700 disabled:opacity-50", onClick: registrarEntradaTunel, disabled: salvandoTunel || !tunelProd }, salvandoTunel ? "Registrando..." : "Registrar Entrada no Túnel")
-    ),
-ativos.map(({
-      item,
-      idx
-    }) => {
-      const mostrarCategoria = item.categoria !== categoriaAnterior;
-      categoriaAnterior = item.categoria;
-      return /*#__PURE__*/React.createElement(React.Fragment, {
-        key: idx
-      }, mostrarCategoria && /*#__PURE__*/React.createElement("div", {
-        className: "cat-heading"
-      }, item.categoria), renderCard({
-        item,
-        idx
-      }));
-    }), 
-    ativos.length === 0 && concluidos.length > 0 && /*#__PURE__*/React.createElement("div", {
-      className: "status-msg"
-    }, "Todas as receitas desta data foram concluídas."), 
-    concluidos.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-      className: "cat-heading cat-heading-concluidos"
-    }, "Concluídos"), concluidos.map(par => renderCard(par)))
-  ));
-}
-
-// ═══════════════════════ PAINEL TV (monitoramento ao vivo — PCP) ═══════════════════════
-function TelaPainelTV({
-  sair
-}) {
-  const dataHoje = hojeISO();
-  const [itens, setItens] = useState([]);
-  const [existe, setExiste] = useState(false);
-  const [carregando, setCarregando] = useState(true);
-  const [agora, setAgora] = useState(new Date());
-  const [emTelaCheia, setEmTelaCheia] = useState(false);
-  const [mostrarPesagens, setMostrarPesagens] = useState(false);
-  const [pesagens, setPesagens] = useState([]);
-
-  useEffect(() => {
-    if (!mostrarPesagens) return;
-    const refExp = window.db.collection('expedicaoDiaria').doc(dataHoje);
-    const unsubExp = refExp.onSnapshot(snap => {
-      if (snap.exists && snap.data().lancamentos) {
-        setPesagens([...snap.data().lancamentos].reverse());
-      } else {
-        setPesagens([]);
-      }
-    });
-    return unsubExp;
-  }, [dataHoje, mostrarPesagens]);
-
-  useEffect(() => {
-    const ref = window.db.collection('producaoDiaria').doc(dataHoje);
-    const unsub = ref.onSnapshot(snap => {
-      setCarregando(false);
-      if (snap.exists && snap.data().itens) {
-        setExiste(true);
-        setItens(snap.data().itens);
-      } else {
-        setExiste(false);
-        setItens([]);
-      }
-    });
-    return unsub;
-  }, [dataHoje]);
-  useEffect(() => {
-    const t = setInterval(() => setAgora(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
-  function alternarTelaCheia() {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
-      setEmTelaCheia(true);
-    } else {
-      document.exitFullscreen().catch(() => {});
-      setEmTelaCheia(false);
-    }
-  }
-  function tempoDecorrido(desdeIso) {
-    if (!desdeIso) return null;
-    const ms = agora.getTime() - new Date(desdeIso).getTime();
-    const totalSeg = Math.max(0, Math.floor(ms / 1000));
-    const min = Math.floor(totalSeg / 60);
-    const seg = totalSeg % 60;
-    return `${String(min).padStart(2, '0')}:${String(seg).padStart(2, '0')}`;
-  }
-  function velocidadeMedia(item) {
-    const b = item.batidas || [];
-    if (b.length < 2) return null;
-    const primeiro = new Date(b[0]).getTime();
-    const ultimo = new Date(b[b.length - 1]).getTime();
-    return (ultimo - primeiro) / 60000 / (b.length - 1);
-  }
-  const totalProgramado = itens.reduce((s, it) => s + (it.metaLotes || 0), 0);
-  const totalFeito = itens.reduce((s, it) => s + (it.feitos || 0), 0);
-  const pctGeral = totalProgramado > 0 ? Math.round(totalFeito / totalProgramado * 100) : 0;
-
-  // Item ativo = primeiro na ordem que ainda não bateu a meta
-  const ordenados = [...itens].sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
-  const ativoIdx = ordenados.findIndex(it => it.feitos < it.metaLotes);
-  const itemAtivo = ativoIdx >= 0 ? ordenados[ativoIdx] : null;
-  const porCategoria = {};
-  ordenados.forEach(it => {
-    const cat = it.categoria || 'Sem setor';
-    if (!porCategoria[cat]) porCategoria[cat] = [];
-    porCategoria[cat].push(it);
-  });
-  
-  if (mostrarPesagens) {
-    return /*#__PURE__*/React.createElement("div", {
-      className: "tv-shell", style: { backgroundColor: '#1a1a1a' }
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "tv-topo"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "tv-data"
-    }, formatarDataBR(dataHoje)), /*#__PURE__*/React.createElement("div", {
-      className: "tv-relogio"
-    }, agora.toLocaleTimeString('pt-BR')), /*#__PURE__*/React.createElement("button", {
-      className: "tv-fs-btn",
-      onClick: alternarTelaCheia
-    }, emTelaCheia ? 'Sair da Tela Cheia' : 'Tela Cheia'), /*#__PURE__*/React.createElement("button", {
-      className: "tv-fs-btn",
-      style: { marginLeft: '10px' },
-      onClick: () => setMostrarPesagens(false)
-    }, "Voltar ao Painel")), /*#__PURE__*/React.createElement("div", {
-      style: { padding: '40px', color: '#fff', fontSize: '24px', flex: 1, overflowY: 'auto' }
-    }, /*#__PURE__*/React.createElement("h2", {
-      style: { color: '#f5b915', marginBottom: '30px', fontSize: '32px' }
-    }, "Últimas Pesagens (Expedição Câmaras)"), pesagens.length === 0 ? /*#__PURE__*/React.createElement("div", null, "Nenhuma pesagem realizada hoje.") : /*#__PURE__*/React.createElement("table", {
-      style: { width: '100%', borderCollapse: 'collapse' }
-    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
-      style: { borderBottom: '2px solid rgba(255,255,255,0.1)', color: '#aaa', textAlign: 'left' }
-    }, /*#__PURE__*/React.createElement("th", {
-      style: { padding: '15px' }
-    }, "Horário"), /*#__PURE__*/React.createElement("th", null, "Produto"), /*#__PURE__*/React.createElement("th", null, "Lote"), /*#__PURE__*/React.createElement("th", null, "Operador"), /*#__PURE__*/React.createElement("th", {
-      style: { textAlign: 'right', padding: '15px' }
-    }, "Peso"))), /*#__PURE__*/React.createElement("tbody", null, pesagens.map((p, i) => /*#__PURE__*/React.createElement("tr", {
-      key: i,
-      style: { borderBottom: '1px solid rgba(255,255,255,0.05)' }
-    }, /*#__PURE__*/React.createElement("td", {
-      style: { padding: '20px 15px', color: '#aaa' }
-    }, new Date(p.dataEntrada || p.data || new Date()).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })), /*#__PURE__*/React.createElement("td", {
-      style: { fontWeight: 'bold' }
-    }, p.nome), /*#__PURE__*/React.createElement("td", null, p.lote), /*#__PURE__*/React.createElement("td", { style: { color: '#aaa' } }, p.operador || '-'), /*#__PURE__*/React.createElement("td", {
-      style: { textAlign: 'right', padding: '15px', color: '#f5b915', fontWeight: 'bold' }
-    }, window.fmtQtd ? window.fmtQtd(p.qtd) : p.qtd, " ", p.und)))))));
-  }
-
-  return /*#__PURE__*/React.createElement("div", {
-    className: "tv-shell"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "tv-topo"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "tv-data"
-  }, formatarDataBR(dataHoje)), /*#__PURE__*/React.createElement("div", {
-    className: "tv-relogio"
-  }, agora.toLocaleTimeString('pt-BR')), /*#__PURE__*/React.createElement("button", {
-    className: "tv-fs-btn",
-    onClick: alternarTelaCheia
-  }, emTelaCheia ? 'Sair da Tela Cheia' : 'Tela Cheia'), /*#__PURE__*/React.createElement("button", {
-    className: "tv-fs-btn",
-    style: { marginLeft: '10px' },
-    onClick: () => setMostrarPesagens(true)
-  }, "Ver Pesagens"), sair && /*#__PURE__*/React.createElement("button", {
-    className: "tv-fs-btn",
-    style: { marginLeft: '10px' },
-    onClick: sair
-  }, "Voltar")), carregando && /*#__PURE__*/React.createElement("div", {
-    className: "status-msg"
-  }, "Carregando painel..."), !carregando && !existe && /*#__PURE__*/React.createElement("div", {
-    className: "tv-vazio"
-  }, "Nenhuma produção programada para hoje."), !carregando && existe && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    className: "tv-resumo"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "tv-resumo-num"
-  }, totalFeito, /*#__PURE__*/React.createElement("span", {
-    className: "tv-resumo-meta"
-  }, " / ", totalProgramado)), /*#__PURE__*/React.createElement("div", {
-    className: "tv-resumo-label"
-  }, "receitas produzidas hoje"), /*#__PURE__*/React.createElement("div", {
-    className: "tv-barra-geral"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "tv-barra-geral-fill",
-    style: {
-      width: pctGeral + '%'
-    }
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "tv-resumo-pct"
-  }, pctGeral, "%")), itemAtivo && /*#__PURE__*/React.createElement("div", {
-    className: "tv-ativo"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "tv-ativo-tag"
-  }, "PRODUZINDO AGORA"), /*#__PURE__*/React.createElement("div", {
-    className: "tv-ativo-nome"
-  }, itemAtivo.produto), /*#__PURE__*/React.createElement("div", {
-    className: "tv-ativo-setor"
-  }, itemAtivo.categoria), /*#__PURE__*/React.createElement("div", {
-    className: "tv-ativo-linha"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "tv-ativo-contagem"
-  }, itemAtivo.feitos, " ", /*#__PURE__*/React.createElement("span", null, "/ ", itemAtivo.metaLotes, " receitas")), itemAtivo.batidas && itemAtivo.batidas.length > 0 && /*#__PURE__*/React.createElement("div", {
-    className: "tv-ativo-cronometro"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "tv-cronometro-label"
-  }, "tempo desde a última"), /*#__PURE__*/React.createElement("div", {
-    className: "tv-cronometro-valor"
-  }, tempoDecorrido(itemAtivo.batidas[itemAtivo.batidas.length - 1]))), velocidadeMedia(itemAtivo) != null && /*#__PURE__*/React.createElement("div", {
-    className: "tv-ativo-velocidade"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "tv-cronometro-label"
-  }, "velocidade média"), /*#__PURE__*/React.createElement("div", {
-    className: "tv-cronometro-valor"
-  }, velocidadeMedia(itemAtivo).toFixed(1), " min"))), /*#__PURE__*/React.createElement("div", {
-    className: "tv-barra-geral tv-barra-ativo"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "tv-barra-geral-fill",
-    style: {
-      width: Math.min(100, Math.round(itemAtivo.feitos / itemAtivo.metaLotes * 100)) + '%'
-    }
-  }))), !itemAtivo && /*#__PURE__*/React.createElement("div", {
-    className: "tv-ativo tv-ativo-concluido"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "tv-ativo-tag"
-  }, "TUDO CONCLUÍDO"), /*#__PURE__*/React.createElement("div", {
-    className: "tv-ativo-nome"
-  }, "Programação de hoje finalizada 🎉")), /*#__PURE__*/React.createElement("div", {
-    className: "tv-grid-setores"
-  }, Object.keys(porCategoria).sort().map(cat => /*#__PURE__*/React.createElement("div", {
-    className: "tv-setor-col",
-    key: cat
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "tv-setor-titulo"
-  }, cat), porCategoria[cat].map((it, i) => {
-    const concluido = it.feitos >= it.metaLotes;
-    const ativo = itemAtivo && it === itemAtivo;
-    return /*#__PURE__*/React.createElement("div", {
-      className: "tv-item-row" + (concluido ? ' tv-item-concluido' : '') + (ativo ? ' tv-item-ativo' : ''),
-      key: i
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "tv-item-status"
-    }, concluido ? '✔' : ativo ? '●' : '—'), /*#__PURE__*/React.createElement("span", {
-      className: "tv-item-nome"
-    }, it.produto), /*#__PURE__*/React.createElement("span", {
-      className: "tv-item-contagem"
-    }, it.feitos, "/", it.metaLotes));
-  }))))));
-}
-
-// ═══════════════════════ TELA DO PCP (Lançamentos Winthor) ═══════════════════════
-function TelaPCP() {
-  const dataHoje = hojeISO();
-  const [carregando, setCarregando] = useState(true);
-  const [registros, setRegistros] = useState([]);
-  const [producao, setProducao] = useState({});
-
-  useEffect(() => {
-    const unsubExp = window.db.collection('expedicaoDiaria').doc(dataHoje).onSnapshot(snap => {
-      if (snap.exists && snap.data().registros) setRegistros(snap.data().registros);
-      else setRegistros([]);
-      setCarregando(false);
-    });
-
-    const unsubProd = window.db.collection('producaoDiaria').doc(dataHoje).onSnapshot(snap => {
-      if (snap.exists && snap.data().itens) {
-        const prodMap = {};
-        snap.data().itens.forEach(it => {
-          prodMap[it.codigo] = it.rendimentoTeorico || 0;
-        });
-        setProducao(prodMap);
-      } else {
-        setProducao({});
-      }
-    });
-
-    return () => { unsubExp(); unsubProd(); };
-  }, [dataHoje]);
-
-  if (carregando) return /*#__PURE__*/React.createElement("div", { className: "status-msg" }, "Buscando dados da c\xE2mara...");
-
-  const agrupado = {};
-  registros.forEach(r => {
-    const key = r.codigoProduto + '_' + r.lote;
-    if (!agrupado[key]) agrupado[key] = { codigoProduto: r.codigoProduto, produto: r.produto, lote: r.lote, ops: r.ops || [], pesoTotal: 0, patinhas: 0 };
-    agrupado[key].pesoTotal += r.peso;
-    agrupado[key].patinhas += 1;
-  });
-
-  const lista = Object.values(agrupado);
-
-  return /*#__PURE__*/React.createElement("div", { className: "container" },
-    /*#__PURE__*/React.createElement("div", { className: "cat-heading" }, `Entradas Consolidadas (${formatarDataBR(dataHoje)})`),
-    lista.length === 0 && /*#__PURE__*/React.createElement("div", { className: "status-msg" }, "Nenhuma entrada na c\xE2mara hoje."),
-    lista.map((item, idx) => {
-      const teorico = producao[item.codigoProduto] || 0;
-      let divergenciaPct = 0;
-      if (teorico > 0) divergenciaPct = ((item.pesoTotal - teorico) / teorico) * 100;
-      
-      const corDivergencia = divergenciaPct >= 0 ? 'var(--success)' : 'var(--danger)';
-      const pctFormatado = divergenciaPct > 0 ? '+' + divergenciaPct.toFixed(2) + '%' : divergenciaPct.toFixed(2) + '%';
-
-      return /*#__PURE__*/React.createElement("div", { className: "card", key: idx },
-        /*#__PURE__*/React.createElement("div", { className: "nome", style: { color: 'var(--marrom)', marginBottom: 8 } }, item.produto),
-        /*#__PURE__*/React.createElement("div", { style: { display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: 4 } },
-          /*#__PURE__*/React.createElement("span", { style: { color: 'var(--marrom-claro)', fontWeight: 'bold' } }, "OP Winthor:"),
-          /*#__PURE__*/React.createElement("span", null, item.ops.length > 0 ? item.ops.join(', ') : 'N/A')
-        ),
-        /*#__PURE__*/React.createElement("div", { style: { display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: 4 } },
-          /*#__PURE__*/React.createElement("span", { style: { color: 'var(--marrom-claro)', fontWeight: 'bold' } }, "Lote F\xEDsico:"),
-          /*#__PURE__*/React.createElement("span", null, item.lote)
-        ),
-        /*#__PURE__*/React.createElement("div", { style: { display: 'flex', justifyContent: 'space-between', marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border-suave)' } },
-          /*#__PURE__*/React.createElement("span", { style: { color: 'var(--marrom)', fontWeight: 800 } }, `PESO TOTAL (${item.patinhas} carros):`),
-          /*#__PURE__*/React.createElement("span", { style: { color: 'var(--success)', fontWeight: 900, fontSize: '1.2rem' } }, formatarKg(item.pesoTotal), " kg")
-        ),
-        teorico > 0 && /*#__PURE__*/React.createElement("div", { style: { display: 'flex', justifyContent: 'space-between', marginTop: 4, paddingTop: 4 } },
-          /*#__PURE__*/React.createElement("span", { style: { color: 'var(--marrom-claro)', fontWeight: 'bold' } }, "Rendimento Te\u00f3rico:"),
-          /*#__PURE__*/React.createElement("span", { style: { fontWeight: 'bold', color: 'var(--marrom)' } }, formatarKg(teorico), " kg")
-        ),
-        teorico > 0 && /*#__PURE__*/React.createElement("div", { style: { display: 'flex', justifyContent: 'space-between', marginTop: 4, paddingTop: 4 } },
-          /*#__PURE__*/React.createElement("span", { style: { color: 'var(--marrom-claro)', fontWeight: 'bold' } }, "Diverg\u00eancia:"),
-          /*#__PURE__*/React.createElement("span", { style: { color: corDivergencia, fontWeight: 'bold' } }, pctFormatado)
-        )
-      );
-    })
-  );
-}
-
-// ═══════════════════════ TELA DE FECHAMENTO ═══════════════════════
-function TelaFechamento() {
-  const [dataAlvo, setDataAlvo] = useState(hojeISO());
-  const [carregando, setCarregando] = useState(true);
-  const [existe, setExiste] = useState(false);
-  const [itens, setItens] = useState([]);
-  const [salvando, setSalvando] = useState(false);
-  const [teclado, setTeclado] = useState(null); // { index, campo, titulo, valorInicial }
-
-  // Estoque OS Integration
-  const [estoque, setEstoque] = useState({ recipes: [], inventory: [], batches: [] });
-  const [loadingEstoque, setLoadingEstoque] = useState(false);
-  const [mostrarBuscaReceita, setMostrarBuscaReceita] = useState(null); // idx
-  const [termoBuscaReceita, setTermoBuscaReceita] = useState('');
-
-  // Auxiliares de conciliação
-  function normalizarTexto(t) {
-    if(!t) return '';
-    return t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
-  }
-
-  function buscarReceita(nomeWinthor) {
-    if (!estoque.recipes.length) return null;
-    const n = normalizarTexto(nomeWinthor);
-    // exata
-    let m = estoque.recipes.find(r => normalizarTexto(r.name) === n);
-    if(m) return m;
-    // parcial
-    m = estoque.recipes.find(r => {
-      const rn = normalizarTexto(r.name);
-      return rn.includes(n) || n.includes(rn);
-    });
-    return m || null;
-  }
-
-  useEffect(() => {
-    setCarregando(true);
-    (async () => {
-      // 1. Load OP
-      const ref = window.db.collection('producaoDiaria').doc(dataAlvo);
-      const snap = await ref.get();
-      if (snap.exists && snap.data().itens) {
-        setItens(snap.data().itens.map(it => ({
-          massaPerdidaProd: 0,
-          massaPerdidaEmb: 0,
-          peDeMassa: 0,
-          finalizado: false,
-          insumosConsumidos: [], // para o novo registro
-          receitaIdOverride: null, // caso selecione manualmente
-          ...it
-        })));
-        setExiste(true);
-      } else {
-        setItens([]);
-        setExiste(false);
-      }
-      setCarregando(false);
-
-      // 2. Load Estoque OS
-      setLoadingEstoque(true);
-      try {
-        const pDoc = await window.db.collection('global_settings').doc('company_db').get();
-        if (pDoc.exists && pDoc.data().masterUid) {
-          const mUid = pDoc.data().masterUid;
-          const [recS, invS, batS] = await Promise.all([
-            window.db.collection('users').doc(mUid).collection('recipes').get(),
-            window.db.collection('users').doc(mUid).collection('inventory').get(),
-            window.db.collection('users').doc(mUid).collection('batches').where('quantity', '>', 0).get()
-          ]);
-          
-          const recipes = recS.docs.map(d => ({id: d.id, ...d.data()}));
-          const inventory = invS.docs.map(d => ({id: d.id, ...d.data()}));
-          const batches = batS.docs.map(d => ({id: d.id, ...d.data()}))
-                                  .sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate));
-          setEstoque({ recipes, inventory, batches });
-        }
-      } catch (e) {
-        console.error('Erro ao carregar Estoque OS', e);
-      }
-      setLoadingEstoque(false);
-    })();
-  }, [dataAlvo]);
-  function mudarDia(delta) {
-    const d = new Date(dataAlvo + 'T12:00:00');
-    d.setDate(d.getDate() + delta);
-    setDataAlvo(paraISO(d));
-  }
-  function abrirTeclado(index, campo, titulo) {
-    setTeclado({
-      index,
-      campo,
-      titulo,
-      valorInicial: itens[index][campo]
-    });
-  }
-  function confirmarTeclado(valor) {
-    setItens(prev => {
-      const nova = [...prev];
-      nova[teclado.index] = {
-        ...nova[teclado.index],
-        [teclado.campo]: valor
-      };
-      return nova;
-    });
-    setTeclado(null);
-  }
-  function alternarPeDeMassa(index) {
-    setItens(prev => {
-      const nova = [...prev];
-      const usou = nova[index].peDeMassa > 0 || nova[index].usouPeDeMassa;
-      nova[index] = {
-        ...nova[index],
-        usouPeDeMassa: !usou,
-        peDeMassa: !usou ? nova[index].peDeMassa : 0
-      };
-      return nova;
-    });
-  }
-  async function salvarFechamento() {
-    setSalvando(true);
-    try {
-      const itensFinal = itens.map(it => ({
-        ...it,
-        finalizado: true
-      }));
-      const ref = window.db.collection('producaoDiaria').doc(dataAlvo);
-      await ref.update({
-        itens: itensFinal
-      });
-      alert('Fechamento de ' + formatarDataBR(dataAlvo) + ' salvo com sucesso!');
-    } catch (e) {
-      alert('Erro ao salvar: ' + e.message);
-    } finally {
-      setSalvando(false);
-    }
-  }
-  if (carregando) return /*#__PURE__*/React.createElement("div", {
-    className: "status-msg"
-  }, "Carregando...");
-  function renderEstoqueOS(item, idx) {
-    if(!estoque || !estoque.recipes.length) return React.createElement('div', {className: 'fechamento-linha', style: {fontSize:'0.8rem', color:'#888'}}, 'Carregando banco de dados do Estoque OS...');
-
-    // Receita selecionada ou assimilada
-    let receita = null;
-    if (item.receitaIdOverride) {
-      receita = estoque.recipes.find(r => r.id === item.receitaIdOverride);
-    } else {
-      receita = buscarReceita(item.produto);
-    }
-
-    if (!receita) {
-      return React.createElement('div', {style: {marginTop: 10, padding: 10, border: '1px solid #facc15', borderRadius: 8, backgroundColor: '#fffcf2'}}, 
-        React.createElement('div', {style: {color: '#d99d0b', fontWeight: 'bold', marginBottom: 5}}, '⚠️ Receita não encontrada no Estoque OS'),
-        React.createElement('select', {
-          className: 'input-data',
-          style: {width: '100%'},
-          value: '',
-          onChange: (e) => {
-            if(e.target.value) {
-              const nova = [...itens];
-              nova[idx].receitaIdOverride = e.target.value;
-              setItens(nova);
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'],
+                        barcode: ['Libre Barcode 39 Text', 'cursive'],
+                        mono: ['Space Mono', 'monospace']
+                    },
+                    colors: { 
+                        imac: {
+                            yellow: '#F5B915',
+                            yellowLight: '#FEF0C7',
+                            brown: '#4A2F18',
+                            brownLight: '#6B4423'
+                        }
+                    }
+                }
             }
-          }
-        }, 
-          React.createElement('option', {value: ''}, 'Selecione a ficha técnica...'),
-          estoque.recipes.map(r => React.createElement('option', {key: r.id, value: r.id}, r.name))
-        )
-      );
-    }
-
-    // Calcula os insumos que deveriam ser consumidos
-    const opsProduzidas = item.feitos || 0;
-
-    const preencherAutomatico = () => {
-      const consumidos = [];
-      receita.ingredients.forEach(ing => {
-        const invItem = estoque.inventory.find(i => i.id === ing.productId);
-        if(!invItem) return;
-        let qtdNecessaria = ing.quantity * opsProduzidas;
-        
-        const lotesProd = estoque.batches.filter(b => b.productId === ing.productId).sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate));
-        
-        lotesProd.forEach(lote => {
-          if(qtdNecessaria <= 0) return;
-          const aUsar = Math.min(qtdNecessaria, lote.quantity);
-          consumidos.push({
-            productId: ing.productId,
-            productName: invItem.name,
-            batchId: lote.id,
-            batchNumber: lote.batchNumber,
-            expiryDate: lote.expiryDate,
-            quantity: Number(aUsar.toFixed(4))
-          });
-          qtdNecessaria -= aUsar;
-        });
-        
-        if (qtdNecessaria > 0) {
-           consumidos.push({
-            productId: ing.productId,
-            productName: invItem.name,
-            batchId: 'SEM_LOTE',
-            batchNumber: 'Falta no Sist.',
-            expiryDate: '',
-            quantity: Number(qtdNecessaria.toFixed(4))
-          });
         }
-      });
-      
-      const nova = [...itens];
-      nova[idx].insumosConsumidos = consumidos;
-      setItens(nova);
-    };
-
-    return React.createElement('div', {style: {marginTop: 15, padding: 10, border: '1px solid var(--border-suave)', borderRadius: 8, backgroundColor: 'rgba(0,0,0,0.02)'}},
-      React.createElement('div', {style: {display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10}},
-        React.createElement('div', {style: {fontWeight: 'bold', color: 'var(--marrom)', fontSize: '0.9rem'}}, '📦 Ficha Técnica: ' + receita.name),
-        !item.finalizado && React.createElement('button', {
-          onClick: () => { const nova = [...itens]; nova[idx].receitaIdOverride = null; setItens(nova); },
-          style: {fontSize: '0.75rem', color: '#666', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer'}
-        }, 'Trocar')
-      ),
-      (!item.insumosConsumidos || item.insumosConsumidos.length === 0) ? (
-        opsProduzidas > 0 ? 
-        React.createElement('button', {
-          onClick: preencherAutomatico,
-          className: 'btn btn-primary',
-          style: {width: '100%', fontSize: '0.8rem', padding: '6px'}
-        }, 'Carregar Lotes e Validades (PVPS)') : React.createElement('div', {style: {fontSize: '0.8rem', color: '#888'}}, 'Apontamento zerado. Nada a consumir.')
-      ) : (
-        React.createElement('div', null, 
-          item.insumosConsumidos.map((ins, iIns) => {
-            return React.createElement('div', {key: iIns, style: {display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', borderBottom: '1px solid #eee', padding: '4px 0'}},
-              React.createElement('div', null, 
-                React.createElement('strong', null, ins.productName), 
-                React.createElement('br'),
-                React.createElement('span', {style: {color: '#888', fontSize: '0.7rem'}}, 'Lote: ' + ins.batchNumber)
-              ),
-              React.createElement('div', {style: {display: 'flex', alignItems: 'center', gap: '5px'}},
-                item.finalizado ? React.createElement('span', {style:{fontWeight: 'bold'}}, formatarKg(ins.quantity) + ' kg') :
-                React.createElement('input', {
-                  type: 'number',
-                  style: {width: '60px', padding: '2px', textAlign: 'right', border: '1px solid #ccc', borderRadius: '4px'},
-                  value: ins.quantity,
-                  onChange: (e) => {
-                    const nova = [...itens];
-                    nova[idx].insumosConsumidos[iIns].quantity = parseFloat(e.target.value) || 0;
-                    setItens(nova);
-                  }
-                }),
-                !item.finalizado && React.createElement('span', null, 'kg')
-              )
-            );
-          }),
-          !item.finalizado && React.createElement('div', {style: {marginTop: '8px', textAlign: 'right'}},
-            React.createElement('button', {
-              onClick: preencherAutomatico,
-              style: {fontSize: '0.75rem', background: 'none', border: 'none', color: 'var(--brand-600)', cursor: 'pointer', textDecoration: 'underline'}
-            }, 'Recalcular Sugestão')
-          )
-        )
-      )
-    );
-  }
-
-  let categoriaAnterior = null;
-  return /*#__PURE__*/React.createElement("div", {
-    className: "container"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "toolbar toolbar-data"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "arrow-btn",
-    onClick: () => mudarDia(-1)
-  }, "‹"), /*#__PURE__*/React.createElement("div", {
-    className: "toolbar-data-centro"
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontWeight: 800
-    }
-  }, formatarDataBR(dataAlvo)), /*#__PURE__*/React.createElement("input", {
-    type: "date",
-    className: "input-data",
-    value: dataAlvo,
-    onChange: e => e.target.value && setDataAlvo(e.target.value)
-  })), /*#__PURE__*/React.createElement("button", {
-    className: "arrow-btn",
-    onClick: () => mudarDia(1)
-  }, "›")), !existe && /*#__PURE__*/React.createElement("div", {
-    className: "status-msg"
-  }, "Nenhuma produção programada nesse dia."), existe && itens.map((item, idx) => {
-    const mostrarCategoria = item.categoria !== categoriaAnterior;
-    categoriaAnterior = item.categoria;
-    const usaPeDeMassa = item.usouPeDeMassa || item.peDeMassa > 0;
-    return /*#__PURE__*/React.createElement(React.Fragment, {
-      key: idx
-    }, mostrarCategoria && /*#__PURE__*/React.createElement("div", {
-      className: "cat-heading"
-    }, item.categoria), /*#__PURE__*/React.createElement("div", {
-      className: "card" + (item.finalizado ? ' concluido' : '')
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "card-top"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "nome"
-    }, idx + 1, ". ", item.produto), item.finalizado && /*#__PURE__*/React.createElement("span", {
-      className: "selo-ok"
-    }, "Salvo")), item.ops && item.ops.length > 0 && /*#__PURE__*/React.createElement("div", {
-      className: "ops-linha"
-    }, "OP", item.ops.length > 1 ? 's' : '', " Winthor: ", item.ops.join(', ')), /*#__PURE__*/React.createElement("div", {
-      className: "fechamento-resumo"
-    }, "Programadas: ", /*#__PURE__*/React.createElement("strong", null, item.metaLotes), " · Realizadas: ", /*#__PURE__*/React.createElement("strong", null, item.feitos)), /*#__PURE__*/React.createElement("div", {
-      className: "fechamento-linha"
-    }, /*#__PURE__*/React.createElement("span", null, "Massa perdida (produção)"), /*#__PURE__*/React.createElement("button", {
-      className: "valor-pill",
-      onClick: () => abrirTeclado(idx, 'massaPerdidaProd', 'Massa perdida — Produção')
-    }, formatarKg(item.massaPerdidaProd), " kg")), /*#__PURE__*/React.createElement("div", {
-      className: "fechamento-linha"
-    }, /*#__PURE__*/React.createElement("span", null, "Massa perdida (embalagem)"), /*#__PURE__*/React.createElement("button", {
-      className: "valor-pill",
-      onClick: () => abrirTeclado(idx, 'massaPerdidaEmb', 'Massa perdida — Embalagem')
-    }, formatarKg(item.massaPerdidaEmb), " kg")), /*#__PURE__*/React.createElement("div", {
-      className: "fechamento-linha"
-    }, /*#__PURE__*/React.createElement("span", null, "Pé de massa utilizado"), usaPeDeMassa ? /*#__PURE__*/React.createElement("button", {
-      className: "valor-pill",
-      onClick: () => abrirTeclado(idx, 'peDeMassa', 'Pé de massa utilizado')
-    }, formatarKg(item.peDeMassa), " kg") : /*#__PURE__*/React.createElement("button", {
-      className: "valor-pill valor-pill-vazio",
-      onClick: () => alternarPeDeMassa(idx)
-    }, "Não utilizado")), usaPeDeMassa && /*#__PURE__*/React.createElement("button", {
-      className: "btn-desfazer",
-      onClick: () => alternarPeDeMassa(idx)
-    }, "Marcar como não utilizado"),
-    renderEstoqueOS(item, idx)
-    ));
-  }), existe && /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-primary btn-block",
-    disabled: salvando,
-    onClick: salvarFechamento,
-    style: {
-      marginTop: 14
-    }
-  }, salvando ? 'Salvando...' : 'Salvar Fechamento'), teclado && /*#__PURE__*/React.createElement(ModalTeclado, {
-    titulo: teclado.titulo,
-    valorInicial: teclado.valorInicial,
-    aoConfirmar: confirmarTeclado,
-    aoFechar: () => setTeclado(null)
-  }));
-}
-
-// ═══════════════════════ TELA DE RELATÓRIO ═══════════════════════
-function TelaRelatorio() {
-  const [data, setData] = useState(hojeISO());
-  const [carregando, setCarregando] = useState(true);
-  const [itens, setItens] = useState([]);
-  const [existe, setExiste] = useState(false);
-  useEffect(() => {
-    setCarregando(true);
-    (async () => {
-      const ref = window.db.collection('producaoDiaria').doc(data);
-      const snap = await ref.get();
-      if (snap.exists && snap.data().itens) {
-        setItens(snap.data().itens);
-        setExiste(true);
-      } else {
-        setItens([]);
-        setExiste(false);
-      }
-      setCarregando(false);
-    })();
-  }, [data]);
-  function velocidade(item) {
-    const b = item.batidas || [];
-    if (b.length < 2) return null;
-    const primeiro = new Date(b[0]).getTime();
-    const ultimo = new Date(b[b.length - 1]).getTime();
-    return (ultimo - primeiro) / 60000 / (b.length - 1);
-  }
-  function mudarDia(delta) {
-    const d = new Date(data + 'T12:00:00');
-    d.setDate(d.getDate() + delta);
-    setData(paraISO(d));
-  }
-  return /*#__PURE__*/React.createElement("div", {
-    className: "container"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "toolbar"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "arrow-btn",
-    onClick: () => mudarDia(-1)
-  }, "‹"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontWeight: 800,
-      flex: 1,
-      textAlign: 'center'
-    }
-  }, formatarDataBR(data)), /*#__PURE__*/React.createElement("button", {
-    className: "arrow-btn",
-    onClick: () => mudarDia(1)
-  }, "›")), carregando && /*#__PURE__*/React.createElement("div", {
-    className: "status-msg"
-  }, "Carregando relatório..."), !carregando && !existe && /*#__PURE__*/React.createElement("div", {
-    className: "status-msg"
-  }, "Nenhuma produção registrada nesse dia."), !carregando && existe && /*#__PURE__*/React.createElement("div", {
-    className: "card"
-  }, itens.map((item, idx) => {
-    const vel = velocidade(item);
-    const b = item.batidas || [];
-    return /*#__PURE__*/React.createElement("div", {
-      className: "rel-row",
-      key: idx
-    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-      className: "rel-nome"
-    }, item.produto), /*#__PURE__*/React.createElement("div", {
-      className: "rel-sub"
-    }, item.feitos, "/", item.metaLotes, " receitas", b.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, " · ", horaCurta(b[0]), " → ", horaCurta(b[b.length - 1])))), /*#__PURE__*/React.createElement("div", {
-      className: "rel-vel"
-    }, vel != null ? /*#__PURE__*/React.createElement(React.Fragment, null, vel.toFixed(1), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: '0.7rem',
-        fontWeight: 'normal'
-      }
-    }, " min/receita")) : '—'));
-  })));
-}
-
-// ═══════════════════════ LIVRO DE PRODUÇÃO ═══════════════════════
-function TelaLivroDeProducao() {
-  const [carregando, setCarregando] = useState(true);
-  const [linhas, setLinhas] = useState([]);
-  const [exportando, setExportando] = useState(false);
-  useEffect(() => {
-    (async () => {
-      const snap = await window.db.collection('producaoDiaria').orderBy('data', 'desc').limit(60).get();
-      const todasLinhas = [];
-      snap.forEach(doc => {
-        const d = doc.data();
-        (d.itens || []).forEach(it => {
-          todasLinhas.push({
-            data: d.data,
-            ordem: (it.ordem != null ? it.ordem : 0) + 1,
-            codigo: it.codigo,
-            produto: it.produto,
-            categoria: it.categoria,
-            metaLotes: it.metaLotes,
-            feitos: it.feitos,
-            ops: it.ops || [],
-            massaPerdidaProd: it.massaPerdidaProd || 0,
-            massaPerdidaEmb: it.massaPerdidaEmb || 0,
-            peDeMassa: it.peDeMassa || 0,
-            finalizado: !!it.finalizado
-          });
-        });
-      });
-      setLinhas(todasLinhas);
-      setCarregando(false);
-    })();
-  }, []);
-  function exportarExcel() {
-    setExportando(true);
-    try {
-      const dadosPlanilha = linhas.map(l => ({
-        'Data': formatarDataBR(l.data),
-        'Ordem': l.ordem,
-        'Código': l.codigo,
-        'OPs Winthor': (l.ops || []).join(', '),
-        'Produto': l.produto,
-        'Setor': l.categoria,
-        'Receitas Programadas': l.metaLotes,
-        'Receitas Realizadas': l.feitos,
-        'Massa Perdida Produção (kg)': l.massaPerdidaProd,
-        'Massa Perdida Embalagem (kg)': l.massaPerdidaEmb,
-        'Pé de Massa Utilizado (kg)': l.peDeMassa,
-        'Fechamento Confirmado': l.finalizado ? 'Sim' : 'Não'
-      }));
-      const ws = XLSX.utils.json_to_sheet(dadosPlanilha);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Livro de Produção');
-      XLSX.writeFile(wb, 'livro_producao_imac.xlsx');
-    } catch (e) {
-      alert('Erro ao exportar: ' + e.message);
-    } finally {
-      setExportando(false);
-    }
-  }
-  if (carregando) return /*#__PURE__*/React.createElement("div", {
-    className: "status-msg"
-  }, "Carregando histórico...");
-  if (linhas.length === 0) return /*#__PURE__*/React.createElement("div", {
-    className: "status-msg"
-  }, "Nenhum registro de produção encontrado ainda.");
-  let dataAnterior = null;
-  return /*#__PURE__*/React.createElement("div", {
-    className: "container"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-primary btn-block",
-    disabled: exportando,
-    onClick: exportarExcel,
-    style: {
-      marginBottom: 16
-    }
-  }, exportando ? 'Exportando...' : 'Exportar Excel'), linhas.map((l, idx) => {
-    const mostrarData = l.data !== dataAnterior;
-    dataAnterior = l.data;
-    return /*#__PURE__*/React.createElement(React.Fragment, {
-      key: idx
-    }, mostrarData && /*#__PURE__*/React.createElement("div", {
-      className: "cat-heading"
-    }, formatarDataBR(l.data)), /*#__PURE__*/React.createElement("div", {
-      className: "card"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "card-top"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "nome"
-    }, l.ordem, ". ", l.produto), l.finalizado && /*#__PURE__*/React.createElement("span", {
-      className: "selo-ok"
-    }, "Fechado")), /*#__PURE__*/React.createElement("div", {
-      className: "livro-linha"
-    }, "Setor: ", l.categoria), /*#__PURE__*/React.createElement("div", {
-      className: "livro-linha"
-    }, "Programadas: ", l.metaLotes, " · Realizadas: ", l.feitos), /*#__PURE__*/React.createElement("div", {
-      className: "livro-linha"
-    }, "Perda produção: ", formatarKg(l.massaPerdidaProd), " kg · Perda embalagem: ", formatarKg(l.massaPerdidaEmb), " kg"), l.peDeMassa > 0 && /*#__PURE__*/React.createElement("div", {
-      className: "livro-linha"
-    }, "Pé de massa: ", formatarKg(l.peDeMassa), " kg")));
-  }));
-}
-
-// ═══════════════════════ TELA DE PRODUTOS (ADMIN) ═══════════════════════
-function TelaProdutos() {
-  const {
-    produtos,
-    carregando
-  } = useProdutos();
-  const [nome, setNome] = useState('');
-  const [categoria, setCategoria] = useState('');
-  const [salvando, setSalvando] = useState(false);
-  const categoriasExistentes = Array.from(new Set(produtos.map(p => p.categoria).filter(Boolean))).sort();
-  async function adicionar() {
-    if (!nome.trim() || !categoria.trim()) {
-      alert('Preencha o nome e o setor.');
-      return;
-    }
-    setSalvando(true);
-    try {
-      await window.db.collection('produtos').add({
-        nome: nome.trim(),
-        categoria: categoria.trim()
-      });
-      setNome('');
-      setCategoria('');
-    } catch (e) {
-      alert('Erro ao salvar: ' + e.message);
-    } finally {
-      setSalvando(false);
-    }
-  }
-  async function remover(id) {
-    if (!confirm('Remover este produto?')) return;
-    await window.db.collection('produtos').doc(id).delete();
-  }
-  const porCategoria = {};
-  produtos.forEach(p => {
-    const cat = p.categoria || 'Sem setor';
-    if (!porCategoria[cat]) porCategoria[cat] = [];
-    porCategoria[cat].push(p);
-  });
-  return /*#__PURE__*/React.createElement("div", {
-    className: "container"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "card"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "nome",
-    style: {
-      marginBottom: 10
-    }
-  }, "Novo produto"), /*#__PURE__*/React.createElement("input", {
-    className: "input-texto",
-    placeholder: "Nome do produto (ex: Coxinha de Frango)",
-    value: nome,
-    onChange: e => setNome(e.target.value)
-  }), /*#__PURE__*/React.createElement("input", {
-    className: "input-texto",
-    placeholder: "Setor (ex: Massas, Recheios, Empanados)",
-    value: categoria,
-    onChange: e => setCategoria(e.target.value),
-    list: "lista-setores",
-    style: {
-      marginTop: 8
-    }
-  }), /*#__PURE__*/React.createElement("datalist", {
-    id: "lista-setores"
-  }, categoriasExistentes.map(c => /*#__PURE__*/React.createElement("option", {
-    key: c,
-    value: c
-  }))), /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-primary btn-block",
-    disabled: salvando,
-    onClick: adicionar,
-    style: {
-      marginTop: 10
-    }
-  }, salvando ? 'Salvando...' : '+ Adicionar Produto')), carregando && /*#__PURE__*/React.createElement("div", {
-    className: "status-msg"
-  }, "Carregando produtos..."), Object.keys(porCategoria).sort().map(cat => /*#__PURE__*/React.createElement("div", {
-    key: cat
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "cat-heading"
-  }, cat), porCategoria[cat].map(p => /*#__PURE__*/React.createElement("div", {
-    className: "card",
-    key: p.id,
-    style: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "nome"
-  }, p.nome), /*#__PURE__*/React.createElement("button", {
-    className: "remover-btn",
-    onClick: () => remover(p.id)
-  }, "✕"))))));
-}
-
-// ═══════════════════════ TELA EXPEDIÇÃO CÂMARAS (Patinhas) ═══════════════════════
-function TelaExpedicao() {
-  const dataHoje = hojeISO();
-  const [producaoHoje, setProducaoHoje] = useState([]);
-  const [carregando, setCarregando] = useState(true);
-  const [listaEntrada, setListaEntrada] = useState([]);
-  const [salvando, setSalvando] = useState(false);
-  
-  const [produtoIdx, setProdutoIdx] = useState('');
-  const [dataPesagem, setDataPesagem] = useState(dataHoje);
-  const [lote, setLote] = useState('');
-  const [qtd, setQtd] = useState('');
-  const [und, setUnd] = useState('kg');
-  const [validade, setValidade] = useState('');
-  const [nomeOperador, setNomeOperador] = useState(localStorage.getItem('nomeOperador') || '');
-  const [tecladoAberto, setTecladoAberto] = useState(false);
-
-  useEffect(() => {
-    const unsub = window.db.collection('producaoDiaria').doc(dataHoje).onSnapshot(snap => {
-      if (snap.exists && snap.data().itens) {
-        setProducaoHoje(snap.data().itens);
-      } else {
-        setProducaoHoje([]);
-      }
-      setCarregando(false);
-    });
-    return unsub;
-  }, [dataHoje]);
-
-  function adicionarPatinha() {
-    if (produtoIdx === '') return alert('Selecione um produto!');
-    if (!qtd || qtd <= 0) return alert('Insira um peso válido!');
-    if (!lote.trim()) return alert('Insira o lote físico!');
-    if (!nomeOperador.trim()) return alert('Informe o nome do responsável pela pesagem!');
-
-    localStorage.setItem('nomeOperador', nomeOperador.trim());
-
-    const itemProg = producaoHoje[produtoIdx];
-    setListaEntrada(prev => [...prev, {
-      operador: nomeOperador.trim(),
-      nome: itemProg.produto,
-      codigo: itemProg.codigo,
-      ops: itemProg.ops || [],
-      setor: itemProg.categoria || 'Câmara',
-      dataEntrada: dataPesagem,
-      lote: lote.trim(),
-      qtd: parseFloat(qtd),
-      und: und,
-      validade: validade
-    }]);
-    setQtd('');
-  }
-
-  function removerPatinha(idx) {
-    setListaEntrada(prev => prev.filter((_, i) => i !== idx));
-  }
-
-  async function salvarEntradas() {
-    if (listaEntrada.length === 0) return;
-    setSalvando(true);
-    try {
-      const batch = window.db.batch();
-      const timestamp = new Date().toISOString();
-      const nomeOp = "Expedição (App)";
-
-      listaEntrada.forEach(item => {
-        const refEstoque = window.db.collection('estoque').doc();
-        batch.set(refEstoque, { nome: item.nome, setor: item.setor, lote: item.lote, qtd: item.qtd, und: item.und, validade: item.validade, dataEntrada: item.dataEntrada, isTeste: false });
+    </script>
+    
+    <style>
+        body { scroll-behavior: smooth; background-color: #F9FAFB; }
         
-        const refMovimento = window.db.collection('movimentos').doc();
-        batch.set(refMovimento, { tipo: 'ENTRADA', nome: item.nome, lote: item.lote, qtd: item.qtd, und: item.und, data: timestamp, usuario: nomeOp });
-
-        const refExpedicao = window.db.collection('expedicaoDiaria').doc(dataHoje);
-        const regExp = { id: Date.now().toString() + Math.random(), codigoProduto: item.codigo, produto: item.nome, ops: item.ops, lote: item.lote, peso: item.qtd, horario: timestamp };
-        batch.set(refExpedicao, { data: dataHoje, registros: firebase.firestore.FieldValue.arrayUnion(regExp) }, { merge: true });
-      });
-
-      await batch.commit();
-      alert(`${listaEntrada.length} patinhas registradas e comunicadas à TV!`);
-      setListaEntrada([]);
-      setQtd('');
-    } catch(e) {
-      alert(e.message);
-    } finally {
-      setSalvando(false);
-    }
-  }
-
-  if (carregando) return /*#__PURE__*/React.createElement("div", { className: "status-msg" }, "Buscando produ\xE7\xE3o de hoje...");
-
-  return /*#__PURE__*/React.createElement("div", { className: "container" },
-    /*#__PURE__*/React.createElement("div", { className: "card", style: { borderLeftColor: 'var(--success)' } },
-      /*#__PURE__*/React.createElement("div", { className: "nome", style: { marginBottom: 15 } }, "Pesagem de Patinhas (Entrada da Produ\xE7\xE3o)"),
-      /*#__PURE__*/React.createElement("div", { style: { marginBottom: 10 } },
-        /*#__PURE__*/React.createElement("div", { className: "ops-linha", style: { marginBottom: 4 } }, "Respons\xE1vel pela Pesagem"),
-        /*#__PURE__*/React.createElement("input", { className: "input-texto", value: nomeOperador, onChange: e => setNomeOperador(e.target.value), placeholder: "Digite seu nome (Ex: Jo\xE3o)" })
-      ),
-      /*#__PURE__*/React.createElement("div", { style: { marginBottom: 10 } },
-        /*#__PURE__*/React.createElement("div", { className: "ops-linha", style: { marginBottom: 4 } }, "Produto Programado (Hoje)"),
-        /*#__PURE__*/React.createElement("select", { className: "input-texto", value: produtoIdx, onChange: e => setProdutoIdx(e.target.value) },
-          /*#__PURE__*/React.createElement("option", { value: "" }, "Selecione o produto que acabou de chegar..."),
-          producaoHoje.map((it, i) => /*#__PURE__*/React.createElement("option", { key: i, value: i }, it.produto))
-        )
-      ),
-      /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 10, marginBottom: 10 } },
-        /*#__PURE__*/React.createElement("div", { style: { flex: 1 } },
-          /*#__PURE__*/React.createElement("div", { className: "ops-linha", style: { marginBottom: 4 } }, "Lote F\xEDsico"),
-          /*#__PURE__*/React.createElement("input", { className: "input-texto", value: lote, onChange: e => setLote(e.target.value), placeholder: "Ex: L-0307" })
-        ),
-        /*#__PURE__*/React.createElement("div", { style: { flex: 1 } },
-          /*#__PURE__*/React.createElement("div", { className: "ops-linha", style: { marginBottom: 4 } }, "Data da Pesagem"),
-          /*#__PURE__*/React.createElement("input", { type: "date", className: "input-texto", value: dataPesagem, onChange: e => setDataPesagem(e.target.value) })
-        )
-      ),
-      /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 10, marginBottom: 15 } },
-        /*#__PURE__*/React.createElement("div", { style: { flex: 2 } },
-          /*#__PURE__*/React.createElement("div", { className: "ops-linha", style: { marginBottom: 4, color: 'var(--marrom)' } }, "Peso da Patinha"),
-          /*#__PURE__*/React.createElement("button", { className: "input-texto", style: { backgroundColor: '#fffbe6', borderColor: '#fcd34d', fontWeight: 900, textAlign: 'left', minHeight: 52 }, onClick: () => setTecladoAberto(true) }, qtd ? `${formatarKg(qtd)} ${und}` : "Tocar para digitar peso...")
-        ),
-        /*#__PURE__*/React.createElement("div", { style: { flex: 1 } },
-          /*#__PURE__*/React.createElement("div", { className: "ops-linha", style: { marginBottom: 4 } }, "Unidade"),
-          /*#__PURE__*/React.createElement("select", { className: "input-texto", value: und, onChange: e => setUnd(e.target.value) },
-            /*#__PURE__*/React.createElement("option", { value: "kg" }, "kg"),
-            /*#__PURE__*/React.createElement("option", { value: "und" }, "und")
-          )
-        )
-      ),
-      /*#__PURE__*/React.createElement("button", { className: "btn btn-outline btn-block", onClick: adicionarPatinha }, "+ Pesar Patinha")
-    ),
-    listaEntrada.length > 0 && /*#__PURE__*/React.createElement("div", { className: "card" },
-      /*#__PURE__*/React.createElement("div", { className: "nome", style: { marginBottom: 10 } }, "Aguardando Confirma\xE7\xE3o"),
-      listaEntrada.map((item, idx) => /*#__PURE__*/React.createElement("div", { key: idx, className: "rel-row" },
-        /*#__PURE__*/React.createElement("div", null,
-          /*#__PURE__*/React.createElement("div", { className: "rel-nome" }, item.nome),
-          /*#__PURE__*/React.createElement("div", { className: "rel-sub" }, `Lote: ${item.lote} | OP: ${item.ops.join(', ')}`)
-        ),
-        /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 10 } },
-          /*#__PURE__*/React.createElement("div", { className: "rel-vel", style: { color: 'var(--success)', fontSize: '1.1rem' } }, `${formatarKg(item.qtd)} ${item.und}`),
-          /*#__PURE__*/React.createElement("button", { className: "remover-btn", onClick: () => removerPatinha(idx) }, "✕")
-        )
-      )),
-      /*#__PURE__*/React.createElement("button", { className: "btn btn-primary btn-block", style: { marginTop: 15 }, onClick: salvarEntradas, disabled: salvando }, salvando ? "Salvando..." : "\u2713 Dar Entrada na C\xE2mara")
-    ),
-    tecladoAberto && /*#__PURE__*/React.createElement(ModalTeclado, { titulo: "Peso da Patinha", valorInicial: qtd, aoConfirmar: v => { setQtd(v); setTecladoAberto(false); }, aoFechar: () => setTecladoAberto(false) })
-  );
-}
-
-// ═══════════════════════ APP RAIZ ═══════════════════════
-
-// ==================== AUTENTICAÇÃO E LOGIN ====================
-function gerarSenhaAleatoria() {
-  return Math.random().toString(36).slice(-6).toUpperCase();
-}
-
-function TelaLogin({ onLogin }) {
-  const [usuario, setUsuario] = useState('');
-  const [senha, setSenha] = useState('');
-  const [erro, setErro] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    // Ao iniciar a tela de login, verifica se existem usuarios. Se nao, cria.
-    async function initUsers() {
-      try {
-        const snap = await window.db.collection('usuarios_sistema').get();
-        if (snap.empty) {
-          const perfis = ['lider', 'producao', 'expedicao', 'embaladora', 'pcp'];
-          const batch = window.db.batch();
-          const senhas = [];
-          for (let p of perfis) {
-            const pwd = gerarSenhaAleatoria();
-            const ref = window.db.collection('usuarios_sistema').doc(p);
-            batch.set(ref, { senha: pwd, setor: p });
-            senhas.push(`${p}: ${pwd}`);
-          }
-          await batch.commit();
-          alert("Senhas iniciais geradas:\n" + senhas.join("\n") + "\nAnote-as! Elas podem ser trocadas no cabeçalho após o login.");
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease-out forwards; }
+        
+        /* Animação Hover para Cards (Elegante e Sutil) */
+        .hover-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #E5E7EB;
         }
-      } catch (e) {
-        console.error("Erro ao inicializar usuarios", e);
-      }
-    }
-    if (window.db) initUsers();
-  }, []);
-
-  async function handleLogin(e) {
-    e.preventDefault();
-    setErro('');
-    setLoading(true);
-    try {
-      const doc = await window.db.collection('usuarios_sistema').doc(usuario.toLowerCase().trim()).get();
-      if (!doc.exists) {
-        setErro('Usuário não encontrado.');
-      } else {
-        const dados = doc.data();
-        if (dados.senha === senha) {
-          onLogin({ id: doc.id, setor: dados.setor });
-        } else {
-          setErro('Senha incorreta.');
+        .hover-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px -8px rgba(74, 47, 24, 0.15); /* Sombra marrom suave */
+            border-color: #F5B915; /* Borda amarela IMAC */
         }
-      }
-    } catch (err) {
-      setErro('Erro ao fazer login: ' + err.message);
-    }
-    setLoading(false);
-  }
+        
+        /* Botões de Navegação */
+        .tab-btn {
+            background-color: #FFFFFF;
+            border: 2px solid #E5E7EB;
+            color: #6B7280;
+            transition: all 0.3s ease;
+        }
+        .tab-btn:hover {
+            border-color: #F5B915;
+            background-color: #FFFAEB;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 185, 21, 0.1);
+        }
+        .tab-btn.active {
+            background-color: #F5B915;
+            border-color: #F5B915;
+            color: #4A2F18; /* Marrom IMAC */
+            box-shadow: 0 4px 15px -3px rgba(245, 185, 21, 0.4);
+        }
+        
+        /* Etiqueta Zebra Realista */
+        .etiqueta-zebra {
+            background-color: #FFFFFF;
+            color: #000000;
+            padding: 1.5rem;
+            border-radius: 4px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+            position: relative;
+            border: 1px solid #D1D5DB;
+        }
+        
+        /* Overlay Escuro para o Header fotográfico */
+        .header-bg {
+            background-image: 
+                linear-gradient(rgba(17, 24, 39, 0.8), rgba(74, 47, 24, 0.9)), /* Degradê indo para o marrom da IMAC */
+                url('https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=2072&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+</head>
+<body class="text-gray-800 font-sans antialiased min-h-screen flex flex-col">
 
-  return React.createElement('div', { className: 'flex h-screen w-full items-center justify-center bg-gray-100 p-4' },
-    React.createElement('div', { className: 'bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm' },
-      React.createElement('div', { className: 'text-center mb-8' },
-        React.createElement('i', { className: 'ph ph-user-circle text-6xl text-brand-500 mb-2' }),
-        React.createElement('h1', { className: 'text-2xl font-bold text-gray-800' }, 'Acesso ao Sistema'),
-        React.createElement('p', { className: 'text-sm text-gray-500 mt-1' }, 'Insira suas credenciais')
-      ),
-      erro && React.createElement('div', { className: 'bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm text-center' }, erro),
-      React.createElement('form', { onSubmit: handleLogin, className: 'space-y-4' },
-        React.createElement('div', null,
-          React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'Usuário'),
-          React.createElement('input', {
-            type: 'text',
-            className: 'w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500',
-            value: usuario,
-            onChange: e => setUsuario(e.target.value),
-            required: true
-          })
-        ),
-        React.createElement('div', null,
-          React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'Senha'),
-          React.createElement('input', {
-            type: 'password',
-            className: 'w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500',
-            value: senha,
-            onChange: e => setSenha(e.target.value),
-            required: true
-          })
-        ),
-        React.createElement('button', {
-          type: 'submit',
-          disabled: loading,
-          className: 'w-full bg-brand-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-brand-700 transition-colors mt-2'
-        }, loading ? 'Entrando...' : 'Entrar')
-      )
-    )
-  );
-}
+    <!-- Navbar -->
+    <nav class="w-full bg-white border-b border-gray-200 z-50 shadow-sm relative sticky top-0">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <img src="logo.png" alt="IMAC Logo" class="h-12 object-contain">
+            </div>
+            <div class="hidden md:flex text-sm font-black text-imac-brown uppercase tracking-widest bg-imac-yellowLight px-4 py-2 rounded-full">
+                Projeto Rastreabilidade
+            </div>
+        </div>
+    </nav>
 
-function ModalTrocarSenha({ usuarioId, aoFechar }) {
-  const [senhaAntiga, setSenhaAntiga] = useState('');
-  const [senhaNova, setSenhaNova] = useState('');
-  const [salvando, setSalvando] = useState(false);
+    <!-- Header com Imagem de Fundo e Overlay Escuro -->
+    <header class="header-bg text-white py-16 px-6 relative shadow-inner border-b-8 border-imac-yellow">
+        <div class="max-w-4xl mx-auto relative z-10 text-center">
+            <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight text-white tracking-tight drop-shadow-lg">
+                Controle de Ponta a Ponta
+            </h1>
+            <p class="text-lg md:text-xl text-gray-200 font-medium leading-relaxed drop-shadow-md">
+                Visão interativa do novo fluxo de rastreabilidade para nossas linhas de <strong class="text-imac-yellow text-2xl">pães congelados, salgados, confeitaria e pães de queijo</strong>. <br>Clique nas etapas abaixo para explorar.
+            </p>
+        </div>
+    </header>
 
-  async function salvar(e) {
-    e.preventDefault();
-    setSalvando(true);
-    try {
-      const docRef = window.db.collection('usuarios_sistema').doc(usuarioId);
-      const doc = await docRef.get();
-      if (doc.data().senha !== senhaAntiga) {
-        alert('Senha antiga incorreta!');
-      } else {
-        await docRef.update({ senha: senhaNova });
-        alert('Senha alterada com sucesso!');
-        aoFechar();
-      }
-    } catch(err) {
-      alert('Erro: ' + err.message);
-    }
-    setSalvando(false);
-  }
+    <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-10 relative z-20">
+        
+        <!-- Botões de Navegação -->
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 mb-8">
+            
+            <button onclick="openTab('tab-estoque', this)" class="tab-btn active rounded-2xl p-4 text-left group flex flex-col justify-center">
+                <div class="text-3xl mb-2 group-[.active]:text-imac-brown text-gray-400 transition-colors"><i class="ph-fill ph-stack"></i></div>
+                <h3 class="font-black text-base mb-0 leading-tight">1. Estoque OS</h3>
+                <p class="text-xs mt-1 group-[.active]:text-imac-brownLight text-gray-500 font-medium">Insumos e PCP</p>
+            </button>
 
-  return React.createElement('div', { className: 'modal-fundo', onClick: aoFechar },
-    React.createElement('div', { className: 'modal-caixa', onClick: e => e.stopPropagation() },
-      React.createElement('div', { className: 'modal-header' },
-        React.createElement('span', null, 'Alterar Senha'),
-        React.createElement('button', { className: 'fechar-btn', onClick: aoFechar }, '✕')
-      ),
-      React.createElement('div', { className: 'modal-body' },
-        React.createElement('form', { onSubmit: salvar, className: 'space-y-4' },
-          React.createElement('div', null,
-            React.createElement('label', { className: 'block text-sm text-gray-700 mb-1' }, 'Senha Atual'),
-            React.createElement('input', { type: 'password', className: 'input-data w-full', value: senhaAntiga, onChange: e => setSenhaAntiga(e.target.value), required: true })
-          ),
-          React.createElement('div', null,
-            React.createElement('label', { className: 'block text-sm text-gray-700 mb-1' }, 'Nova Senha'),
-            React.createElement('input', { type: 'text', className: 'input-data w-full', value: senhaNova, onChange: e => setSenhaNova(e.target.value), required: true })
-          ),
-          React.createElement('button', { type: 'submit', disabled: salvando, className: 'btn btn-primary btn-block' }, salvando ? 'Salvando...' : 'Salvar Nova Senha')
-        )
-      )
-    )
-  );
-}
-\n
-// ==================== TELA EMBALADORA ====================
-function TelaEmbaladora() {
-  const [dataAlvo, setDataAlvo] = useState(() => {
-    const d = new Date();
-    return d.toISOString().split('T')[0];
-  });
-  const [registros, setRegistros] = useState([]);
-  const [carregando, setCarregando] = useState(true);
+            <button onclick="openTab('tab-pre-pesagem', this)" class="tab-btn rounded-2xl p-4 text-left group flex flex-col justify-center">
+                <div class="text-3xl mb-2 group-[.active]:text-imac-brown text-gray-400 transition-colors"><i class="ph-fill ph-scales"></i></div>
+                <h3 class="font-black text-base mb-0 leading-tight">2. Pré-Pesagem</h3>
+                <p class="text-xs mt-1 group-[.active]:text-imac-brownLight text-gray-500 font-medium">Geração de Kits</p>
+            </button>
 
-  useEffect(() => {
-    setCarregando(true);
-    const ref = window.db.collection('tunel_helicoidal').doc(dataAlvo);
-    const unsub = ref.onSnapshot(snap => {
-      setCarregando(false);
-      if (snap.exists && snap.data().registros) {
-        // Calculate fall time for each
-        const r = snap.data().registros.map(reg => {
-          const [h, m] = reg.horaEntrada.split(':').map(Number);
-          const totalMinutos = h * 60 + m + (reg.tempo || 35);
-          const fallH = Math.floor(totalMinutos / 60) % 24;
-          const fallM = totalMinutos % 60;
-          const horaQueda = `${fallH.toString().padStart(2, '0')}:${fallM.toString().padStart(2, '0')}`;
-          
-          return { ...reg, horaQueda, totalMinutos };
-        });
-        r.sort((a, b) => a.totalMinutos - b.totalMinutos);
-        setRegistros(r);
-      } else {
-        setRegistros([]);
-      }
-    });
-    return unsub;
-  }, [dataAlvo]);
+            <button onclick="openTab('tab-producao', this)" class="tab-btn rounded-2xl p-4 text-left group flex flex-col justify-center">
+                <div class="text-3xl mb-2 group-[.active]:text-imac-brown text-gray-400 transition-colors"><i class="ph-fill ph-gear"></i></div>
+                <h3 class="font-black text-base mb-0 leading-tight">3. Produção</h3>
+                <p class="text-xs mt-1 group-[.active]:text-imac-brownLight text-gray-500 font-medium">Masseira e OP</p>
+            </button>
 
-  const agoraMins = new Date().getHours() * 60 + new Date().getMinutes();
+            <button onclick="openTab('tab-embaladora', this)" class="tab-btn rounded-2xl p-4 text-left group flex flex-col justify-center">
+                <div class="text-3xl mb-2 group-[.active]:text-imac-brown text-gray-400 transition-colors"><i class="ph-fill ph-package"></i></div>
+                <h3 class="font-black text-base mb-0 leading-tight">4. Embaladora</h3>
+                <p class="text-xs mt-1 group-[.active]:text-imac-brownLight text-gray-500 font-medium">Painel do Túnel</p>
+            </button>
 
-  return React.createElement('div', { className: 'container' },
-    React.createElement('div', { className: 'toolbar toolbar-data' },
-      React.createElement('div', { className: 'toolbar-data-centro flex-1 text-center' },
-        React.createElement('div', { style: { fontWeight: 800 } }, 'Previsão de Embalagem'),
-        React.createElement('input', { type: 'date', className: 'input-data mx-auto block mt-1', value: dataAlvo, onChange: e => e.target.value && setDataAlvo(e.target.value) })
-      )
-    ),
-    carregando ? React.createElement('div', { className: 'status-msg' }, 'Carregando previsão...') :
-    registros.length === 0 ? React.createElement('div', { className: 'status-msg' }, 'Nenhum produto programado no túnel para esta data.') :
-    React.createElement('div', { className: 'space-y-4' },
-      registros.map((reg, i) => {
-        const jaCaiu = reg.totalMinutos <= agoraMins;
-        const caindoAgora = !jaCaiu && (reg.totalMinutos - agoraMins <= 10);
-        let cardClass = 'bg-white p-4 rounded-xl shadow-sm border-l-4 ';
-        if (jaCaiu) cardClass += 'border-green-500 opacity-70';
-        else if (caindoAgora) cardClass += 'border-red-500 bg-red-50 animate-pulse';
-        else cardClass += 'border-blue-500';
+            <button onclick="openTab('tab-expedicao', this)" class="tab-btn rounded-2xl p-4 text-left group flex flex-col justify-center">
+                <div class="text-3xl mb-2 group-[.active]:text-imac-brown text-gray-400 transition-colors"><i class="ph-fill ph-snowflake"></i></div>
+                <h3 class="font-black text-base mb-0 leading-tight">5. Expedição</h3>
+                <p class="text-xs mt-1 group-[.active]:text-imac-brownLight text-gray-500 font-medium">Câmaras e Qualidade</p>
+            </button>
+        </div>
 
-        return React.createElement('div', { key: i, className: cardClass },
-          React.createElement('div', { className: 'flex justify-between items-start mb-2' },
-            React.createElement('div', { className: 'font-bold text-gray-800 text-lg' }, reg.produto),
-            React.createElement('div', { className: `px-3 py-1 rounded-full text-xs font-bold ${jaCaiu ? 'bg-green-100 text-green-700' : (caindoAgora ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700')}` },
-              jaCaiu ? 'Concluído' : (caindoAgora ? 'Preparar (Em breve)' : 'Aguardando')
-            )
-          ),
-          React.createElement('div', { className: 'flex justify-between text-sm text-gray-600' },
-            React.createElement('div', null, React.createElement('span', { className: 'font-bold text-gray-400 text-xs uppercase' }, 'Entrada no Túnel'), React.createElement('br'), React.createElement('i', { className: 'ph ph-clock' }), ' ', reg.horaEntrada),
-            React.createElement('div', { className: 'text-right' }, React.createElement('span', { className: 'font-bold text-gray-400 text-xs uppercase' }, 'Previsão de Queda'), React.createElement('br'), React.createElement('span', { className: 'font-bold text-lg' }, reg.horaQueda))
-          )
-        );
-      })
-    )
-  );
-}
-\n
-// ==================== TELA RESUMO PCP (TV) ====================
-function TelaResumoPCP() {
-  const [abaAtual, setAbaAtual] = useState(0); // 0: Produção, 1: Túnel, 2: Expedição
-  const [dataAlvo] = useState(() => new Date().toISOString().split('T')[0]);
-  
-  // Dados
-  const [prodDiaria, setProdDiaria] = useState([]);
-  const [tunel, setTunel] = useState([]);
-  const [expedicao, setExpedicao] = useState([]);
+        <div class="bg-white rounded-3xl p-6 md:p-10 shadow-xl border border-gray-200 min-h-[500px]">
+            
+            <!-- ABA 1: ESTOQUE OS -->
+            <div id="tab-estoque" class="tab-content active">
+                <div class="flex flex-col xl:flex-row gap-12 items-start">
+                    <div class="flex-1">
+                        <div class="inline-flex items-center gap-2 border border-imac-yellow bg-imac-yellowLight text-imac-brown font-black px-4 py-1.5 rounded-full mb-6 uppercase tracking-wider text-xs shadow-sm">
+                            <i class="ph-bold ph-database text-lg"></i> App Estoque OS (PCP)
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-black text-imac-brown mb-6 tracking-tight">A Inteligência Antes da Produção</h2>
+                        <p class="text-gray-600 mb-8 text-lg leading-relaxed">
+                            Tudo começa no controle rigoroso da matéria-prima. O aplicativo <strong>Estoque OS</strong> centraliza as entradas, gerencia as Fichas Técnicas e analisa algoritmicamente o consumo futuro para evitar faltas ou desperdícios.
+                        </p>
+                        
+                        <ul class="space-y-4">
+                            <li class="hover-card flex items-start gap-4 bg-white p-5 rounded-2xl">
+                                <div class="w-12 h-12 rounded-full bg-imac-yellowLight text-imac-brown flex items-center justify-center shrink-0 font-black text-2xl"><i class="ph-fill ph-chart-line-up"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-imac-brown text-lg">Projeção de Consumo (PCP)</h4>
+                                    <p class="text-sm text-gray-600 mt-1 leading-relaxed">Calcula a estimativa de esgotamento baseado no consumo real dos últimos 60 dias ou dias úteis. Projeta matematicamente quanto de insumo será necessário nos próximos dias.</p>
+                                </div>
+                            </li>
+                            <li class="hover-card flex items-start gap-4 bg-white p-5 rounded-2xl">
+                                <div class="w-12 h-12 rounded-full bg-imac-yellowLight text-imac-brown flex items-center justify-center shrink-0 font-black text-2xl"><i class="ph-fill ph-clock-counter-clockwise"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-imac-brown text-lg">Análise PVPS Automática</h4>
+                                    <p class="text-sm text-gray-600 mt-1 leading-relaxed">Cruza a Validade do lote com seu Ritmo de Consumo. Se o insumo for vencer antes de acabar, o sistema sugere OPs extras para escoar o material sem perdas financeiras.</p>
+                                </div>
+                            </li>
+                            <li class="hover-card flex items-start gap-4 bg-white p-5 rounded-2xl">
+                                <div class="w-12 h-12 rounded-full bg-imac-yellowLight text-imac-brown flex items-center justify-center shrink-0 font-black text-2xl"><i class="ph-fill ph-book-bookmark"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-imac-brown text-lg">Fichas Técnicas Integradas</h4>
+                                    <p class="text-sm text-gray-600 mt-1 leading-relaxed">As receitas garantem que o sistema desconte o estoque corretamente, integrando o planejamento do PCP diretamente com as próximas etapas de produção.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Card PVPS - CORRIGIDO PARA ALTA LEGIBILIDADE -->
+                    <div class="flex-1 w-full xl:max-w-lg mt-4 xl:mt-0 hover-card rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden cursor-default">
+                        <!-- Borda superior vermelha e Header -->
+                        <div class="h-2 bg-red-500 w-full"></div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+                                        <i class="ph-bold ph-warning text-lg"></i>
+                                    </div>
+                                </div>
+                                <span class="text-xs bg-red-100 text-red-700 px-3 py-1.5 rounded-md font-bold uppercase tracking-wider">Ação Necessária</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-end mb-4">
+                                <span class="text-sm text-gray-500 font-bold">Insumo Focado:</span>
+                                <span class="font-black text-lg text-imac-brown text-right">Farinha de Trigo Especial<br><span class="font-mono text-xs text-gray-400 font-normal">Lote: LT-892/A</span></span>
+                            </div>
+                            
+                            <!-- BLOCO CINZA CORRIGIDO - ALTO CONTRASTE -->
+                            <div class="flex justify-between items-center bg-gray-100 p-4 rounded-xl mt-4 mb-5 border border-gray-300 shadow-inner">
+                                <div>
+                                    <span class="text-[10px] text-gray-500 block uppercase font-bold tracking-widest mb-1">Vence Em:</span>
+                                    <span class="font-black text-xl text-red-600">7 dias (12/07)</span>
+                                </div>
+                                <div class="text-right border-l-2 border-gray-300 pl-4">
+                                    <span class="text-[10px] text-gray-500 block uppercase font-bold tracking-widest mb-1">Projeção de Uso:</span>
+                                    <span class="font-black text-xl text-imac-brown">Levará 14 dias</span>
+                                </div>
+                            </div>
 
-  useEffect(() => {
-    const unsubProd = window.db.collection('producaoDiaria').doc(dataAlvo).onSnapshot(s => {
-      if(s.exists && s.data().itens) setProdDiaria(s.data().itens);
-    });
-    const unsubTunel = window.db.collection('tunel_helicoidal').doc(dataAlvo).onSnapshot(s => {
-      if(s.exists && s.data().registros) {
-        const r = s.data().registros.map(reg => {
-          const [h, m] = reg.horaEntrada.split(':').map(Number);
-          const totalMinutos = h * 60 + m + (reg.tempo || 35);
-          const fallH = Math.floor(totalMinutos / 60) % 24;
-          const fallM = totalMinutos % 60;
-          return { ...reg, horaQueda: `${fallH.toString().padStart(2, '0')}:${fallM.toString().padStart(2, '0')}`, totalMinutos };
-        });
-        r.sort((a, b) => a.totalMinutos - b.totalMinutos);
-        setTunel(r);
-      }
-    });
-    const unsubExp = window.db.collection('expedicaoDiaria').doc(dataAlvo).onSnapshot(s => {
-      if(s.exists && s.data().registros) {
-        // reverse to show newest first
-        setExpedicao([...s.data().registros].reverse().slice(0, 15)); 
-      }
-    });
+                            <!-- Bloco Amarelo -->
+                            <div class="bg-yellow-50 border border-imac-yellow p-4 rounded-xl">
+                                <p class="text-sm font-black text-imac-brown mb-2 flex items-center gap-2"><i class="ph-fill ph-lightning text-imac-yellow text-lg"></i> Simulação Automática:</p>
+                                <p class="text-sm text-gray-700 font-medium leading-relaxed">Há uma sobra estimada de 250kg. Sugestão: Gerar OPs extras de <em>Pão Francês</em> para escoar este lote a tempo e evitar o descarte.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    return () => { unsubProd(); unsubTunel(); unsubExp(); };
-  }, [dataAlvo]);
+            <!-- ABA 2: PRÉ-PESAGEM -->
+            <div id="tab-pre-pesagem" class="tab-content">
+                <div class="flex flex-col xl:flex-row gap-12">
+                    <div class="flex-1">
+                        <div class="inline-flex items-center gap-2 border border-imac-yellow bg-imac-yellowLight text-imac-brown font-black px-4 py-1.5 rounded-full mb-6 uppercase tracking-wider text-xs shadow-sm">
+                            <i class="ph-bold ph-printer text-lg"></i> Tablet e Impressora Zebra
+                        </div>
+                        <h2 class="text-3xl font-black text-imac-brown mb-6 tracking-tight">Geração de Kits na Origem</h2>
+                        <p class="text-gray-600 mb-6 text-lg leading-relaxed">
+                            O operador visualiza as OPs no Tablet. O aplicativo mostra os lotes disponíveis no estoque. Ao separar os itens, imprime etiquetas que amarram <strong>múltiplos ingredientes</strong> em um único código de barras, registrando quem pesou e quando.
+                        </p>
+                        
+                        <div class="space-y-4 mt-8">
+                            <div class="hover-card bg-white p-5 rounded-2xl">
+                                <h4 class="font-bold text-lg mb-2 text-imac-brown flex items-center gap-2"><i class="ph-fill ph-scissors text-imac-yellow text-xl"></i> Etiqueta de Fracionamento</h4>
+                                <p class="text-sm text-gray-600 leading-relaxed">Garante a rastreabilidade da sobra de um insumo aberto, registrando a <strong>Data de Fracionamento</strong> e a <strong>Data de Validade Original</strong>. Evita perda de identificação do que fica no estoque.</p>
+                            </div>
+                            
+                            <div class="hover-card bg-white p-5 rounded-2xl">
+                                <h4 class="font-bold text-lg mb-2 text-imac-brown flex items-center gap-2"><i class="ph-fill ph-package text-imac-yellow text-xl"></i> Etiqueta de Kit (Receita)</h4>
+                                <p class="text-sm text-gray-600 leading-relaxed">Amarra ingredientes de uma OP (ex: Glúten, Sal, Melhorador). O operador e o horário são registrados, e um <strong>código de barras</strong> é gerado para a masseira bipar posteriormente.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mockups de Etiquetas Claras e Realistas -->
+                    <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-100 p-8 rounded-3xl items-start shadow-inner border border-gray-200">
+                        
+                        <!-- Etiqueta Fracionamento -->
+                        <div class="etiqueta-zebra hover-card cursor-default bg-white">
+                            <div class="border-b-2 border-black pb-2 mb-3 flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-black text-xl leading-none tracking-tighter text-imac-brown">IMAC</h3>
+                                    <p class="text-[9px] font-bold uppercase mt-1 leading-none text-gray-500">Uso Interno</p>
+                                </div>
+                                <div class="bg-black text-white px-2 py-1 font-bold text-[10px] uppercase rounded-sm">Fracionado</div>
+                            </div>
+                            
+                            <div class="space-y-3 mb-2 text-sm text-gray-900">
+                                <div class="flex flex-col border-b border-gray-200 pb-1.5">
+                                    <span class="text-[10px] font-bold uppercase text-gray-500 mb-0.5">Insumo Fracionado:</span>
+                                    <span class="font-black text-base leading-tight">Queijo Mussarela R.</span>
+                                </div>
+                                <div class="flex justify-between border-b border-gray-200 pb-1.5 mt-2">
+                                    <span class="text-[10px] font-bold uppercase text-gray-500 self-end">Lote Original:</span>
+                                    <span class="font-bold text-sm bg-gray-100 px-1 rounded">QM-998/26</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 border-b border-gray-200 pb-1.5 mt-2">
+                                    <div>
+                                        <span class="text-[10px] font-bold uppercase text-gray-500 block mb-0.5">D. Frac.:</span>
+                                        <span class="font-bold text-sm">06/07/26</span>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-[10px] font-bold uppercase text-gray-500 block mb-0.5">Validade:</span>
+                                        <span class="font-bold text-sm text-red-600">12/07/26</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-  // Rotação Automática
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setAbaAtual(prev => (prev + 1) % 3);
-    }, 15000); // 15 segundos cada tela
-    return () => clearInterval(timer);
-  }, []);
+                        <!-- Etiqueta Kit -->
+                        <div class="etiqueta-zebra rotate-1 shadow-2xl border-2 border-gray-300 hover-card cursor-default bg-white">
+                            <div class="border-b-2 border-black pb-2 mb-2 flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-black text-xl leading-none tracking-tighter text-imac-brown">IMAC</h3>
+                                    <p class="text-[9px] font-bold uppercase mt-1 leading-none tracking-tight text-gray-500">Pré-Pesagem</p>
+                                </div>
+                                <div class="bg-black text-white px-2 py-1 font-bold text-[10px] uppercase rounded-sm">Kit Insumo</div>
+                            </div>
+                            
+                            <div class="mb-3 bg-gray-100 p-2 rounded text-center border border-gray-200 flex justify-between px-3 items-center">
+                                <span class="text-[10px] font-bold uppercase text-gray-600">OP Vinculada:</span>
+                                <span class="font-black text-xl text-imac-brown">145899</span>
+                            </div>
 
-  const abas = ["Produção (Masseiras)", "Túnel (Embaladora)", "Expedição (Câmaras)"];
+                            <table class="w-full text-[10px] text-left mb-3 border-collapse text-gray-900">
+                                <thead>
+                                    <tr class="border-b border-gray-400">
+                                        <th class="font-bold pb-1 text-gray-500 uppercase">Insumo</th>
+                                        <th class="font-bold pb-1 text-right text-gray-500 uppercase">Lote Orig.</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="font-mono text-[10px]">
+                                    <tr class="border-b border-gray-100">
+                                        <td class="py-1 uppercase font-bold truncate pr-1">Glúten</td>
+                                        <td class="py-1 text-right">LT-G123</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-100">
+                                        <td class="py-1 uppercase font-bold truncate pr-1">Sal Ref.</td>
+                                        <td class="py-1 text-right">S-8992</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-100">
+                                        <td class="py-1 uppercase font-bold truncate pr-1">Melhorador</td>
+                                        <td class="py-1 text-right">ML-444</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-100">
+                                        <td class="py-1 uppercase font-bold truncate pr-1">Fermento</td>
+                                        <td class="py-1 text-right">FR-09X</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-  return React.createElement('div', { className: 'h-full flex flex-col bg-gray-900 text-white p-4' },
-    React.createElement('div', { className: 'flex justify-between items-center mb-6 bg-gray-800 p-4 rounded-xl' },
-      React.createElement('h1', { className: 'text-2xl font-bold text-brand-400' }, 'Painel de Controle de Produção'),
-      React.createElement('div', { className: 'flex space-x-2' },
-        abas.map((titulo, i) => 
-          React.createElement('button', { 
-            key: i, 
-            onClick: () => setAbaAtual(i),
-            className: `px-4 py-2 rounded font-bold transition-colors ${abaAtual === i ? 'bg-brand-600 text-white' : 'bg-gray-700 text-gray-400'}`
-          }, titulo)
-        )
-      )
-    ),
-    React.createElement('div', { className: 'flex-1 overflow-y-auto' },
-      abaAtual === 0 && React.createElement('div', { className: 'grid grid-cols-2 md:grid-cols-4 gap-4' },
-        prodDiaria.length === 0 ? React.createElement('div', { className: 'col-span-4 text-center text-gray-500' }, 'Nenhuma produção registrada hoje.') :
-        prodDiaria.map((p, i) => React.createElement('div', { key: i, className: 'bg-gray-800 p-4 rounded-xl border-l-4 border-orange-500' },
-          React.createElement('div', { className: 'text-xs text-gray-400 font-bold mb-1' }, p.categoria || 'Geral'),
-          React.createElement('div', { className: 'font-bold text-lg mb-2 truncate', title: p.produto }, p.produto),
-          React.createElement('div', { className: 'flex justify-between items-end' },
-            React.createElement('div', null, React.createElement('span', { className: 'text-3xl font-black text-orange-400' }, p.feitos), React.createElement('span', { className: 'text-sm text-gray-500 ml-1' }, '/', p.metaLotes)),
-            React.createElement('div', { className: 'text-xs font-bold px-2 py-1 bg-gray-700 rounded text-gray-300' }, Math.round((p.feitos/p.metaLotes)*100 || 0), '%')
-          )
-        ))
-      ),
-      abaAtual === 1 && React.createElement('div', { className: 'space-y-4 max-w-4xl mx-auto' },
-        tunel.length === 0 ? React.createElement('div', { className: 'text-center text-gray-500' }, 'Nenhum pão no túnel.') :
-        tunel.map((t, i) => React.createElement('div', { key: i, className: 'bg-gray-800 p-4 rounded-xl flex justify-between items-center border-l-4 border-blue-500' },
-          React.createElement('div', null,
-            React.createElement('div', { className: 'font-bold text-xl' }, t.produto),
-            React.createElement('div', { className: 'text-sm text-gray-400 mt-1' }, 'Entrou no túnel: ', t.horaEntrada, ' (', t.tempo, ' min)')
-          ),
-          React.createElement('div', { className: 'text-right' },
-            React.createElement('div', { className: 'text-sm text-gray-400 uppercase tracking-widest' }, 'Previsão Queda'),
-            React.createElement('div', { className: 'text-3xl font-black text-blue-400' }, t.horaQueda)
-          )
-        ))
-      ),
-      abaAtual === 2 && React.createElement('div', null,
-        React.createElement('table', { className: 'w-full text-left bg-gray-800 rounded-xl overflow-hidden shadow-lg' },
-          React.createElement('thead', { className: 'bg-gray-700 text-gray-300' },
-            React.createElement('tr', null,
-              React.createElement('th', { className: 'p-4' }, 'Hora'),
-              React.createElement('th', { className: 'p-4' }, 'Código'),
-              React.createElement('th', { className: 'p-4' }, 'Produto'),
-              React.createElement('th', { className: 'p-4' }, 'Lote / Fab'),
-              React.createElement('th', { className: 'p-4' }, 'Peso (Kg)')
-            )
-          ),
-          React.createElement('tbody', null,
-            expedicao.length === 0 ? React.createElement('tr', null, React.createElement('td', { colSpan: 5, className: 'p-4 text-center text-gray-500' }, 'Nenhuma entrada na expedição.')) :
-            expedicao.map((e, i) => React.createElement('tr', { key: i, className: 'border-b border-gray-700 hover:bg-gray-750' },
-              React.createElement('td', { className: 'p-4 text-gray-400 font-mono text-sm' }, e.hora),
-              React.createElement('td', { className: 'p-4 font-bold text-gray-300' }, e.cod),
-              React.createElement('td', { className: 'p-4 text-brand-300 font-medium' }, e.produto),
-              React.createElement('td', { className: 'p-4 text-gray-400' }, React.createElement('span', { className: 'text-white' }, e.lote), ' / ', e.fab),
-              React.createElement('td', { className: 'p-4 text-green-400 font-bold text-lg' }, e.pesoStr)
-            ))
-          )
-        )
-      )
-    )
-  );
-}
-\nfunction App() {
-  
-  const [currentUser, setCurrentUser] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('imac_user')); } catch(e) { return null; }
-  });
-  const [mostrarTrocaSenha, setMostrarTrocaSenha] = useState(false);
+                            <div class="flex justify-between text-[9px] mb-3 font-medium text-gray-600 bg-gray-50 p-1 rounded">
+                                <span>Op: <strong class="text-gray-900 uppercase">Carlos Silva</strong></span>
+                                <span>06/07 14:30</span>
+                            </div>
 
-  const handleLoginSuccess = (user) => {
-    localStorage.setItem('imac_user', JSON.stringify(user));
-    setCurrentUser(user);
-    if(user.setor === 'embaladora') setTela('embaladora');
-    else if(user.setor === 'expedicao') setTela('expedicao');
-    else if(user.setor === 'producao') setTela('operador');
-    else setTela('inicio');
-  };
+                            <div class="text-center pt-3 border-t border-gray-300">
+                                <p class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-0">Bipar no Tablet Produção</p>
+                                <!-- Uso da fonte de código de barras real -->
+                                <p class="font-barcode text-[3.5rem] text-black leading-none mt-2 mb-1">*8472910*</p>
+                                <p class="font-bold text-[14px] tracking-widest mt-0 text-gray-900">#8472910</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-  const handleLogout = () => {
-    localStorage.removeItem('imac_user');
-    setCurrentUser(null);
-  };
-\n  const [tela, setTela] = useState(() => {
-    try {
-      return new URLSearchParams(window.location.search).get('tv') === '1' ? 'painel' : 'inicio';
-    } catch (e) {
-      return 'inicio';
-    }
-  });
-  const fbPronto = useFirebasePronto();
-  if (!fbPronto) {
-    return /*#__PURE__*/React.createElement("div", {
-      className: "flex h-screen w-full items-center justify-center text-gray-500 bg-gray-50 font-bold"
-    }, "Conectando ao banco de dados...");
-  }
-  if (!currentUser) {
-    return React.createElement(TelaLogin, { onLogin: handleLoginSuccess });
-  }
+            <!-- ABA 3: PRODUÇÃO -->
+            <div id="tab-producao" class="tab-content">
+                <div class="flex flex-col md:flex-row gap-12 items-center">
+                    <div class="flex-1">
+                        <div class="inline-flex items-center gap-2 border border-imac-yellow bg-imac-yellowLight text-imac-brown font-black px-4 py-1.5 rounded-full mb-6 uppercase tracking-wider text-xs shadow-sm">
+                            <i class="ph-bold ph-barcode text-lg"></i> Tablet do Masseiro
+                        </div>
+                        <h2 class="text-3xl font-black text-imac-brown mb-6 tracking-tight">Validação na Masseira</h2>
+                        <p class="text-gray-600 mb-6 text-lg leading-relaxed">
+                            O Masseiro não usa papel. No tablet, a Ordem de Produção aguarda o bipe da etiqueta para destravar o apontamento. Apenas o kit correto inicia o processo.
+                        </p>
+                        
+                        <ul class="space-y-4">
+                            <li class="hover-card flex items-start gap-4 bg-white p-5 rounded-2xl">
+                                <div class="w-12 h-12 rounded-full bg-imac-yellowLight text-imac-brown flex items-center justify-center shrink-0 font-black text-2xl"><i class="ph-fill ph-shield-check"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-imac-brown text-lg">Bloqueio de Erro (Anti-Falha)</h4>
+                                    <p class="text-sm text-gray-600 mt-1 leading-relaxed">O sistema cruza o código bipado com a OP da tela. Se bipar um kit da linha de Salgados enquanto deveria bater Pão Doce, <strong>o app trava e alerta o erro</strong>.</p>
+                                </div>
+                            </li>
+                            <li class="hover-card flex items-start gap-4 bg-white p-5 rounded-2xl">
+                                <div class="w-12 h-12 rounded-full bg-imac-yellowLight text-imac-brown flex items-center justify-center shrink-0 font-black text-2xl"><i class="ph-fill ph-timer"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-imac-brown text-lg">Eficiência e Lote da Farinha</h4>
+                                    <p class="text-sm text-gray-600 mt-1 leading-relaxed">A cada bipe, o sistema usa o horário para calcular a velocidade média e eficiência da linha. O masseiro também insere qual o lote da farinha base utilizada.</p>
+                                </div>
+                            </li>
+                            <li class="hover-card flex items-start gap-4 bg-white p-5 rounded-2xl">
+                                <div class="w-12 h-12 rounded-full bg-imac-yellowLight text-imac-brown flex items-center justify-center shrink-0 font-black text-2xl"><i class="ph-fill ph-check-square-offset"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-imac-brown text-lg">Fechamento da OP pelo Líder</h4>
+                                    <p class="text-sm text-gray-600 mt-1 leading-relaxed">Ao fim da produção, o líder anota a perda em quilos (massa morta) e as quantidades produzidas, confrontando na hora o programado com o realizado.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="flex-1 w-full flex justify-center">
+                        <div class="relative w-full max-w-sm hover-card rounded-[2.5rem] cursor-default border-transparent hover:border-transparent transition-all duration-500 hover:-translate-y-2">
+                            <!-- Mockup de Tablet -->
+                            <div class="bg-gray-900 rounded-[2.5rem] p-3 shadow-2xl border-[6px] border-gray-800 relative aspect-[3/4] overflow-hidden flex flex-col">
+                                <div class="h-6 w-full flex justify-center items-start mb-2"><div class="w-20 h-5 bg-gray-800 rounded-b-xl"></div></div>
+                                <!-- Tela Branca -->
+                                <div class="bg-gray-50 flex-1 rounded-2xl overflow-hidden flex flex-col border border-gray-300 relative">
+                                    <div class="bg-white p-5 text-center border-b border-gray-200 shadow-sm relative">
+                                        <!-- Logo na tela do app -->
+                                        <div class="absolute top-4 left-4"><i class="ph-fill ph-circles-four text-imac-yellow text-xl"></i></div>
+                                        
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">OP #145899</p>
+                                        <h3 class="font-black text-3xl text-imac-brown tracking-tight">130 receitas</h3>
+                                        <p class="text-sm font-bold text-imac-brown mt-2 bg-imac-yellowLight inline-block px-4 py-1.5 rounded-full border border-imac-yellow/30">Pão Francês</p>
+                                    </div>
+                                    <div class="p-6 flex-1 flex flex-col items-center justify-center text-center bg-gray-50">
+                                        <div class="w-24 h-24 bg-white rounded-2xl flex items-center justify-center mb-6 border border-gray-200 shadow-inner relative overflow-hidden group">
+                                            <i class="ph-bold ph-barcode text-6xl text-gray-400 group-hover:text-imac-yellow transition-colors"></i>
+                                            <!-- Linha de scanner animada -->
+                                            <div class="absolute w-full h-1 bg-red-500 top-0 left-0 animate-[scan_2s_ease-in-out_infinite]"></div>
+                                        </div>
+                                        <style>@keyframes scan { 0%, 100% { top: 10%; opacity: 0; } 50% { top: 90%; opacity: 1; box-shadow: 0 0 10px red; } }</style>
+                                        
+                                        <h4 class="font-black text-gray-900 mb-2 text-xl">Aguardando Validação</h4>
+                                        <p class="text-sm text-gray-500 mb-8 font-medium">Bipe o código de barras do Kit da Pré-Pesagem para destravar a batida.</p>
+                                        <button class="bg-imac-yellow hover:bg-yellow-400 text-imac-brown w-full py-4 rounded-xl font-black shadow-md transition-colors text-lg flex items-center justify-center gap-2 active:scale-95">
+                                            <i class="ph-bold ph-camera text-xl"></i> Ativar Leitor
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-  if (tela === 'painel') {
-    return /*#__PURE__*/React.createElement(TelaPainelTV, {
-      sair: () => setTela('inicio')
-    });
-  }
+            <!-- ABA 4: EMBALADORA -->
+            <div id="tab-embaladora" class="tab-content">
+                <div class="flex flex-col-reverse xl:flex-row gap-12 items-start">
+                    <div class="flex-1 w-full space-y-6">
+                        <!-- Painel Dark TV - Mantido escuro pois simula uma TV real na fábrica -->
+                        <div class="bg-gray-900 text-white rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-gray-800 hover-card cursor-default">
+                            <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
+                                <h4 class="font-black text-imac-yellow text-lg md:text-xl flex items-center gap-2 uppercase tracking-wider">
+                                    <i class="ph-fill ph-monitor-play text-2xl"></i> Painel do Túnel Helicoidal
+                                </h4>
+                            </div>
+                            <p class="text-sm text-gray-400 mb-6 font-medium leading-relaxed">Sequência preditiva do que está vindo da masseira e passando pelo túnel.</p>
+                            
+                            <div class="relative border-l-2 border-gray-700 pl-6 space-y-6 ml-2">
+                                <!-- Lote Atual -->
+                                <div class="relative bg-gray-800 p-5 rounded-2xl border border-imac-yellow shadow-lg transform transition-transform hover:translate-x-2">
+                                    <div class="absolute -left-[35px] top-5 w-4 h-4 bg-imac-yellow rounded-full shadow-[0_0_10px_rgba(245,185,21,0.8)]"></div>
+                                    <span class="bg-imac-yellow text-imac-brown text-[10px] font-black px-3 py-1 rounded-md uppercase mb-3 inline-block tracking-wider">Embalando Agora</span>
+                                    <h5 class="font-black text-2xl text-white mb-2 tracking-tight">Pão Ciabata <span class="text-imac-yellow text-lg font-bold bg-black px-2 py-1 rounded ml-2">Lote 101</span></h5>
+                                    <p class="text-sm text-gray-300 font-mono bg-black/40 inline-block px-3 py-1.5 rounded-lg border border-gray-700"><i class="ph-bold ph-clock text-imac-yellow mr-1"></i> Início: 07:23 — Fim: 07:45</p>
+                                </div>
+                                
+                                <!-- Próximo Lote -->
+                                <div class="relative bg-gray-800/50 p-5 rounded-2xl border border-gray-700 transform transition-transform hover:translate-x-2">
+                                    <div class="absolute -left-[35px] top-5 w-4 h-4 bg-gray-600 rounded-full border-2 border-gray-900"></div>
+                                    <span class="bg-gray-700 text-gray-200 text-[10px] font-bold px-3 py-1 rounded-md uppercase mb-3 inline-block tracking-wider">Próximo Lote</span>
+                                    <h5 class="font-bold text-xl text-gray-300 mb-2 tracking-tight">Pão Francês Milho <span class="text-gray-400 text-base font-bold bg-black/40 px-2 py-1 rounded ml-2">Lote 102</span></h5>
+                                    <p class="text-sm text-gray-400 font-mono bg-black/20 inline-block px-3 py-1.5 rounded-lg"><i class="ph-bold ph-clock mr-1"></i> Início: 07:55 — Fim: 08:24</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1">
+                        <div class="inline-flex items-center gap-2 border border-imac-yellow bg-imac-yellowLight text-imac-brown font-black px-4 py-1.5 rounded-full mb-6 uppercase tracking-wider text-xs shadow-sm">
+                            <i class="ph-bold ph-package text-lg"></i> Linha de Embalagem
+                        </div>
+                        <h2 class="text-3xl font-black text-imac-brown mb-6 tracking-tight">Sincronia com o Túnel</h2>
+                        <p class="text-gray-600 mb-6 text-lg leading-relaxed">
+                            O aplicativo atua como um painel preditivo, mostrando os lotes e horários exatos em que os pães sairão do túnel congelador, garantindo preparo antecipado das caixas e bobinas.
+                        </p>
+                        
+                        <div class="space-y-4">
+                            <div class="hover-card bg-white p-5 rounded-2xl">
+                                <h4 class="font-bold text-imac-brown text-lg flex items-center gap-2"><i class="ph-fill ph-eye text-imac-yellow"></i> 1. Previsibilidade</h4>
+                                <p class="text-sm text-gray-600 mt-2 leading-relaxed">Os operadores sabem o horário de início e fim da queda de cada tipo de pão, sincronizando a equipe com a velocidade da masseira anterior.</p>
+                            </div>
+                            <div class="hover-card bg-white p-5 rounded-2xl">
+                                <h4 class="font-bold text-imac-brown text-lg flex items-center gap-2"><i class="ph-fill ph-trash text-imac-yellow"></i> 2. Apontamento de Perdas</h4>
+                                <p class="text-sm text-gray-600 mt-2 leading-relaxed">O operador registra o pão mal formado ou caído. O sistema junta essa perda da embaladora com a perda anotada pelo Líder na masseira para gerar o rendimento real global da OP.</p>
+                            </div>
+                            <div class="hover-card bg-white p-5 rounded-2xl">
+                                <h4 class="font-bold text-imac-brown text-lg flex items-center gap-2"><i class="ph-fill ph-tag text-imac-yellow"></i> 3. Lote do Produto Acabado</h4>
+                                <p class="text-sm text-gray-600 mt-2 leading-relaxed">Ao encaixotar, gera-se o Lote Final, que amarra invisivelmente toda a árvore de rastreabilidade para trás (Farinha Base, Kits da Pré-pesagem, Operadores, Horários).</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-  const nomesTelas = {
-    'lider': 'Conferência de Receitas',
-    'operador': 'Painel de Produção',
-    'embaladora': 'Embaladora',
-    'resumo_pcp': 'Painel TV (Resumos)',
-    'relatorio': 'Relatório',
-    'fechamento': 'Fechamento de Produção',
-    'livro': 'Livro de Produção',
-    'produtos': 'Produtos e Setores',
-    'pcp': 'Lançamentos PCP Winthor',
-    'expedicao': 'Expedição Câmaras'
-  };
+            <!-- ABA 5: EXPEDIÇÃO -->
+            <div id="tab-expedicao" class="tab-content">
+                <div class="text-center max-w-3xl mx-auto mb-12">
+                    <div class="inline-flex items-center gap-2 border border-imac-yellow bg-imac-yellowLight text-imac-brown font-black px-4 py-1.5 rounded-full mb-4 uppercase tracking-wider text-xs shadow-sm">
+                        <i class="ph-bold ph-snowflake text-lg"></i> App das Câmaras Frias
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-black text-imac-brown mb-4 tracking-tight">Gestão Inteligente e Expedição</h2>
+                    <p class="text-gray-600 text-lg">O app audita a entrada física nas câmaras e utiliza inteligência de dados (Curva ABC e limites Min/Max) para otimizar o espaço e evitar ruptura de pedidos.</p>
+                    
+                </div>
 
-  return /*#__PURE__*/React.createElement(
-    "div",
-    { className: "flex-1 flex flex-col h-screen w-full relative pb-16 bg-gray-50 text-gray-800 font-sans" },
-    /*#__PURE__*/React.createElement(
-      "main",
-      { className: "flex-1 flex flex-col h-full overflow-hidden" },
-      /*#__PURE__*/React.createElement(
-        "header",
-        { className: "h-16 bg-white flex items-center justify-between px-6 shadow-sm z-10 shrink-0" },
-        /*#__PURE__*/React.createElement(
-          "div",
-          { className: "flex items-center" },
-          tela !== 'inicio' && /*#__PURE__*/React.createElement(
-            "button",
-            { onClick: () => setTela('inicio'), className: "mr-4 text-gray-500 hover:text-brand-600 transition-colors" },
-            /*#__PURE__*/React.createElement("i", { className: "ph ph-arrow-left text-2xl" })
-          ),
-          /*#__PURE__*/React.createElement(
-            "h2",
-            { className: "text-xl font-bold text-gray-800" },
-            tela === 'inicio' ? 'Fábrica / PCP' : (nomesTelas[tela] || 'Painel')
-          )
-        ),
-        /*#__PURE__*/React.createElement(
-          "div",
-          { className: "flex items-center text-sm" },
-          /*#__PURE__*/React.createElement("p", { className: "font-bold text-gray-800 mr-2 truncate max-w-[100px]", style: {textTransform:"capitalize"} }, currentUser.setor),
-          /*#__PURE__*/React.createElement("button", { onClick: () => setMostrarTrocaSenha(true), className: "mr-3 text-gray-400 hover:text-brand-500 text-xs flex flex-col items-center" }, /*#__PURE__*/React.createElement("i", { className: "ph ph-key text-xl" }), "Senha"), /*#__PURE__*/React.createElement("button", { onClick: handleLogout, className: "text-gray-400 hover:text-red-500 text-xs flex flex-col items-center" }, /*#__PURE__*/React.createElement("i", { className: "ph ph-sign-out text-xl" }), "Sair")
-        )
-      ),
-      /*#__PURE__*/React.createElement(
-        "div",
-        { className: "flex-1 overflow-y-auto p-4 md:p-8", id: "main-container" },
-        tela === 'inicio' && /*#__PURE__*/React.createElement(TelaInicio, { ir: setTela }),
-        tela === 'lider' && /*#__PURE__*/React.createElement(TelaLider, null),
-        tela === 'operador' && /*#__PURE__*/React.createElement(TelaOperador, null),
-        tela === 'relatorio' && /*#__PURE__*/React.createElement(TelaRelatorio, null),
-        tela === 'fechamento' && /*#__PURE__*/React.createElement(TelaFechamento, null),
-        tela === 'livro' && /*#__PURE__*/React.createElement(TelaLivroDeProducao, null),
-        tela === 'produtos' && /*#__PURE__*/React.createElement(TelaProdutos, null),
-        tela === 'pcp' && /*#__PURE__*/React.createElement(TelaPCP, null),
-        tela === 'expedicao' && /*#__PURE__*/React.createElement(TelaExpedicao, null),
-        tela === 'embaladora' && /*#__PURE__*/React.createElement(TelaEmbaladora, null),
-        tela === 'resumo_pcp' && /*#__PURE__*/React.createElement(TelaResumoPCP, null)
-      )
-    ),
-    /*#__PURE__*/React.createElement(
-      "nav",
-      { className: "fixed bottom-0 left-0 w-full h-16 bg-white border-t border-gray-200 flex justify-around items-center z-40 text-xs font-medium text-gray-500 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] pb-safe" },
-      /*#__PURE__*/React.createElement(
-        "button",
-        { onClick: () => setTela('inicio'), className: `flex flex-col items-center justify-center w-full h-full hover:text-brand-600 transition-colors ${tela === 'inicio' ? 'text-brand-600' : ''}` },
-        /*#__PURE__*/React.createElement("i", { className: "ph ph-squares-four text-2xl mb-1" }),
-        "Início"
-      ),
-      (currentUser.setor === 'pcp' || currentUser.setor === 'lider') && /*#__PURE__*/React.createElement(
-        "button",
-        { onClick: () => setTela('lider'), className: `flex flex-col items-center justify-center w-full h-full hover:text-brand-600 transition-colors ${tela === 'lider' ? 'text-brand-600' : ''}` },
-        /*#__PURE__*/React.createElement("i", { className: "ph ph-users text-2xl mb-1" }),
-        "Líder"
-      ),
-      (currentUser.setor === 'pcp' || currentUser.setor === 'producao' || currentUser.setor === 'lider') && /*#__PURE__*/React.createElement(
-        "button",
-        { onClick: () => setTela('operador'), className: `flex flex-col items-center justify-center w-full h-full hover:text-brand-600 transition-colors ${tela === 'operador' ? 'text-brand-600' : ''}` },
-        /*#__PURE__*/React.createElement("i", { className: "ph ph-cooking-pot text-2xl mb-1" }),
-        "Produção"
-      ),
-      (currentUser.setor === 'embaladora') && /*#__PURE__*/React.createElement(
-        "button",
-        { onClick: () => setTela('embaladora'), className: `flex flex-col items-center justify-center w-full h-full hover:text-brand-600 transition-colors ${tela === 'embaladora' ? 'text-brand-600' : ''}` },
-        /*#__PURE__*/React.createElement("i", { className: "ph ph-package text-2xl mb-1" }),
-        "Embaladora"
-      ),
-      (currentUser.setor === 'expedicao') && /*#__PURE__*/React.createElement(
-        "button",
-        { onClick: () => setTela('expedicao'), className: `flex flex-col items-center justify-center w-full h-full hover:text-brand-600 transition-colors ${tela === 'expedicao' ? 'text-brand-600' : ''}` },
-        /*#__PURE__*/React.createElement("i", { className: "ph ph-snowflake text-2xl mb-1" }),
-        "Expedição"
-      ),
-      (currentUser.setor === 'pcp') && /*#__PURE__*/React.createElement(
-        "button",
-        { onClick: () => setTela('pcp'), className: `flex flex-col items-center justify-center w-full h-full hover:text-brand-600 transition-colors ${tela === 'pcp' ? 'text-brand-600' : ''}` },
-        /*#__PURE__*/React.createElement("i", { className: "ph ph-chart-bar text-2xl mb-1" }),
-        "PCP"
-      )
-    )
-  );
-}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                    <!-- Card 1: Pesagem -->
+                    <div class="hover-card bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col cursor-default">
+                        <div class="w-14 h-14 bg-imac-yellowLight text-imac-brown rounded-xl flex items-center justify-center text-3xl mb-5"><i class="ph-fill ph-scales"></i></div>
+                        <h4 class="font-black text-xl mb-3 text-imac-brown">Pesagem de Patinhas</h4>
+                        <p class="text-sm text-gray-600 mb-4 flex-1 leading-relaxed">O estoquista seleciona o Lote Físico da produção e anota o <strong>Peso da Patinha</strong> exato que entra na câmara, mantendo o saldo real atualizado.</p>
+                    </div>
 
-ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(App, null));
-</script>
+                    <!-- Card 2: Controle Min/Max -->
+                    <div class="hover-card bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col cursor-default">
+                        <div class="w-14 h-14 bg-red-50 text-red-500 rounded-xl flex items-center justify-center text-3xl mb-5"><i class="ph-fill ph-warning-octagon"></i></div>
+                        <h4 class="font-black text-xl mb-3 text-imac-brown">Mínimo e Máximo</h4>
+                        <p class="text-sm text-gray-600 mb-4 flex-1 leading-relaxed">Alertas automáticos: o limite <strong>mínimo</strong> avisa para evitar cancelamentos de pedidos extras. O limite <strong>máximo</strong> bloqueia OPs para não abarrotar a câmara desnecessariamente.</p>
+                    </div>
+
+                    <!-- Card 3: Curva ABC -->
+                    <div class="hover-card bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col cursor-default">
+                        <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-3xl mb-5"><i class="ph-fill ph-chart-polar"></i></div>
+                        <h4 class="font-black text-xl mb-3 text-imac-brown">Giro de Estoque (ABC)</h4>
+                        <p class="text-sm text-gray-600 mb-4 flex-1 leading-relaxed">Mapeamento dinâmico de giro. Itens de <strong>Curva A</strong> (alta saída) ficam em posições acessíveis, otimizando o faturamento e o fluxo logístico da expedição.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Card 4: Dashboard Real -->
+                    <div class="hover-card bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col cursor-default">
+                        <div class="w-14 h-14 bg-imac-yellowLight text-imac-brown rounded-xl flex items-center justify-center text-3xl mb-5"><i class="ph-fill ph-chart-pie-slice"></i></div>
+                        <h4 class="font-black text-xl mb-4 text-imac-brown">Dashboard Analítico da Câmara</h4>
+                        <ul class="text-xs space-y-3 font-bold flex-1">
+                            <li class="flex items-center justify-between text-gray-800 bg-gray-100 p-3 rounded-xl border border-gray-200">
+                                <span class="uppercase text-gray-500">Capacidade (Ocupação):</span> <span class="font-black text-sm text-imac-brown">82%</span>
+                            </li>
+                            <li class="flex items-center justify-between text-blue-800 bg-blue-50 p-3 rounded-xl border border-blue-200">
+                                <span class="uppercase">Produtos Curva A (Giro Rápido):</span> <span class="font-black text-sm">65% do Volume</span>
+                            </li>
+                            <li class="flex items-center justify-between text-yellow-800 bg-yellow-50 p-3 rounded-xl border border-yellow-200">
+                                <span class="uppercase">Abaixo do Mínimo:</span> <span class="font-black text-sm text-yellow-600">2 SKUs (Risco Ruptura)</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 5: Saída/Separação -->
+                    <div class="hover-card bg-white rounded-2xl p-6 shadow-sm flex flex-col border border-gray-200 cursor-default">
+                        <div class="w-14 h-14 bg-imac-yellow text-imac-brown rounded-xl flex items-center justify-center text-3xl mb-5 shadow-sm"><i class="ph-fill ph-truck"></i></div>
+                        <h4 class="font-black text-xl mb-3 text-imac-brown">Separação / Destino</h4>
+                        <p class="text-sm text-gray-600 mb-4 flex-1 leading-relaxed">O cruzamento da localização física com a rotatividade (Curva ABC) facilita a separação. Ao carregar o caminhão, o sistema deduz o saldo e amarra o lote expedido à rota, finalizando a rastreabilidade.</p>
+                        
+                        <div class="mt-auto bg-blue-50 border border-blue-200 p-3 rounded-xl flex gap-3 items-start">
+                            <i class="ph-fill ph-info text-blue-600 text-lg mt-0.5"></i>
+                            <p class="text-[11px] text-blue-800 font-medium leading-tight">Painéis visuais indicam se a câmara está apta a receber novas patinhas ou se o teto máximo de estocagem foi atingido.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-8 text-center mt-auto z-10 flex flex-col items-center justify-center gap-3">
+        <img src="logo.png" alt="IMAC" class="h-8 object-contain opacity-50 grayscale hover:grayscale-0 transition-all duration-300" onerror="this.style.display='none'">
+        <p class="text-gray-500 font-bold text-xs uppercase tracking-widest">Controle de Ponta a Ponta - Integração Rastreabilidade</p>
+    </footer>
+
+    <!-- Script de Navegação das Abas -->
+    <script>
+        function openTab(tabId, btnElement) {
+            // Esconde todas as abas
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // Remove "active" de todos os botões
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Ativa a aba e o botão clicado
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active');
+        }
+    </script>
 </body>
-</html> 
+</html>
