@@ -91,27 +91,24 @@
     </div>
 
     <script type="module">
-        // 1. Importa as funções necessárias do Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp } 
         from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 2. SUBSTITUA PELAS SUAS CHAVES DO FIREBASE
+        // Configuração injetada
         const firebaseConfig = {
-            apiKey: "SUA_API_KEY",
-            authDomain: "SEU_PROJETO.firebaseapp.com",
-            projectId: "SEU_PROJETO",
-            storageBucket: "SEU_PROJETO.appspot.com",
-            messagingSenderId: "SEU_SENDER_ID",
-            appId: "SEU_APP_ID"
+            apiKey: "AIzaSyBi83j_zOModBKFkmIET3YYqkHWicpA84g",
+            authDomain: "rastreio-producao.firebaseapp.com",
+            projectId: "rastreio-producao",
+            storageBucket: "rastreio-producao.firebasestorage.app",
+            messagingSenderId: "706467121350",
+            appId: "1:706467121350:web:c3d732686983648bc1afc7"
         };
 
-        // 3. Inicializa o App e o Banco
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const colecaoEntradas = collection(db, "entradas_estoque");
 
-        // 4. Lógica de ESCRITA (Registrar Entrada)
         const formEntrada = document.getElementById('form-entrada');
         const btnSubmit = document.getElementById('btn-submit');
         const msgSucesso = document.getElementById('msg-sucesso');
@@ -122,17 +119,17 @@
             btnSubmit.disabled = true;
 
             try {
-                // Cria o documento no Firebase
                 await addDoc(colecaoEntradas, {
                     codigoProduto: document.getElementById('input-produto').value.toUpperCase(),
                     quantidade: parseFloat(document.getElementById('input-qtd').value),
                     lote: document.getElementById('input-lote').value.toUpperCase(),
-                    statusQualidade: 'Pendente', // Status inicial padrão
-                    sincronizadoEm: serverTimestamp() // Pega a hora exata do servidor do Firebase
+                    statusQualidade: 'Pendente',
+                    sincronizadoEm: serverTimestamp()
                 });
 
-                // Limpa o form e mostra mensagem
                 formEntrada.reset();
+                document.getElementById('input-produto').focus();
+                
                 msgSucesso.classList.remove('hidden');
                 setTimeout(() => msgSucesso.classList.add('hidden'), 3000);
             } catch (error) {
@@ -144,16 +141,12 @@
             }
         });
 
-        // 5. Lógica de LEITURA (Monitorar Entradas em Tempo Real)
         function monitorarEntradas() {
             const tabela = document.getElementById('tabela-entradas');
-            
-            // Busca as 15 últimas entradas ordenadas por data
             const q = query(colecaoEntradas, orderBy("sincronizadoEm", "desc"), limit(15));
 
-            // onSnapshot atualiza a tabela automaticamente se houver mudança no banco
             onSnapshot(q, (snapshot) => {
-                tabela.innerHTML = ''; // Limpa a tabela
+                tabela.innerHTML = '';
                 
                 if (snapshot.empty) {
                     tabela.innerHTML = '<tr><td colspan="5" class="text-center py-6">Nenhuma entrada recente encontrada.</td></tr>';
@@ -163,20 +156,17 @@
                 snapshot.forEach((doc) => {
                     const data = doc.data();
                     
-                    // Formata a data (se existir)
                     let dataFormatada = '-';
                     if (data.sincronizadoEm) {
                         const dataJS = data.sincronizadoEm.toDate();
                         dataFormatada = dataJS.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
                     }
 
-                    // Formata o Status visualmente
                     let badgeStatus = `<span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold border border-orange-200">PENDENTE</span>`;
                     if (data.statusQualidade === 'Liberado') {
                         badgeStatus = `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold border border-green-200">LIBERADO</span>`;
                     }
 
-                    // Cria a linha da tabela
                     const tr = document.createElement('tr');
                     tr.className = 'border-b border-gray-100 hover:bg-gray-50';
                     tr.innerHTML = `
@@ -190,13 +180,11 @@
                 });
             }, (error) => {
                 console.error("Erro ao buscar dados:", error);
-                tabela.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-red-500">Erro de conexão com o banco de dados.</td></tr>';
+                tabela.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-red-500">Erro de conexão com o Firestore. Verifique as regras de segurança.</td></tr>';
             });
         }
 
-        // Inicia o monitoramento ao carregar a página
         monitorarEntradas();
-
     </script>
 </body>
 </html>
