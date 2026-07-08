@@ -3,581 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apresentação Executiva - Rastreabilidade IMAC</title>
-    <!-- Tailwind CSS -->
+    <title>Monitor de Entradas</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Phosphor Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Libre+Barcode+39+Text&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { 
-                        sans: ['Inter', 'sans-serif'],
-                        barcode: ['Libre Barcode 39 Text', 'cursive'],
-                        mono: ['Space Mono', 'monospace']
-                    },
-                    colors: { 
-                        imac: {
-                            yellow: '#F5B915',
-                            yellowLight: '#FEF0C7',
-                            brown: '#4A2F18',
-                            brownLight: '#6B4423'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { scroll-behavior: smooth; background-color: #F9FAFB; }
-        
-        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.4s ease-out forwards; }
-        
-        /* Animação Hover para Cards (Elegante e Sutil) */
-        .hover-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid #E5E7EB;
-        }
-        .hover-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 20px -8px rgba(74, 47, 24, 0.15); /* Sombra marrom suave */
-            border-color: #F5B915; /* Borda amarela IMAC */
-        }
-        
-        /* Botões de Navegação */
-        .tab-btn {
-            background-color: #FFFFFF;
-            border: 2px solid #E5E7EB;
-            color: #6B7280;
-            transition: all 0.3s ease;
-        }
-        .tab-btn:hover {
-            border-color: #F5B915;
-            background-color: #FFFAEB;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(245, 185, 21, 0.1);
-        }
-        .tab-btn.active {
-            background-color: #F5B915;
-            border-color: #F5B915;
-            color: #4A2F18; /* Marrom IMAC */
-            box-shadow: 0 4px 15px -3px rgba(245, 185, 21, 0.4);
-        }
-        
-        /* Etiqueta Zebra Realista */
-        .etiqueta-zebra {
-            background-color: #FFFFFF;
-            color: #000000;
-            padding: 1.5rem;
-            border-radius: 4px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
-            position: relative;
-            border: 1px solid #D1D5DB;
-        }
-        
-        /* Overlay Escuro para o Header fotográfico */
-        .header-bg {
-            background-image: 
-                linear-gradient(rgba(17, 24, 39, 0.8), rgba(74, 47, 24, 0.9)), /* Degradê indo para o marrom da IMAC */
-                url('https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=2072&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
-        }
+        body { background-color: #f3f4f6; color: #1f2937; font-family: system-ui, -apple-system, sans-serif; }
+        .card { background-color: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; }
+        .form-input { width: 100%; padding: 0.75rem 1rem; border-radius: 0.5rem; border: 1px solid #d1d5db; outline: none; transition: border-color 0.2s; }
+        .form-input:focus { border-color: #3b82f6; ring: 2px; }
+        .btn { padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: bold; cursor: pointer; transition: opacity 0.2s; border: none; }
+        .btn-blue { background-color: #3b82f6; color: white; }
+        .btn-blue:hover { opacity: 0.9; }
     </style>
 </head>
-<body class="text-gray-800 font-sans antialiased min-h-screen flex flex-col">
+<body class="p-4 md:p-8">
 
-    <!-- Navbar -->
-    <nav class="w-full bg-white border-b border-gray-200 z-50 shadow-sm relative sticky top-0">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <img src="logo.png" alt="IMAC Logo" class="h-12 object-contain">
-            </div>
-            <div class="hidden md:flex text-sm font-black text-imac-brown uppercase tracking-widest bg-imac-yellowLight px-4 py-2 rounded-full">
-                Projeto Rastreabilidade
-            </div>
-        </div>
-    </nav>
-
-    <!-- Header com Imagem de Fundo e Overlay Escuro -->
-    <header class="header-bg text-white py-16 px-6 relative shadow-inner border-b-8 border-imac-yellow">
-        <div class="max-w-4xl mx-auto relative z-10 text-center">
-            <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight text-white tracking-tight drop-shadow-lg">
-                Controle de Ponta a Ponta
-            </h1>
-            <p class="text-lg md:text-xl text-gray-200 font-medium leading-relaxed drop-shadow-md">
-                Visão interativa do novo fluxo de rastreabilidade para nossas linhas de <strong class="text-imac-yellow text-2xl">pães congelados, salgados, confeitaria e pães de queijo</strong>. <br>Clique nas etapas abaixo para explorar.
-            </p>
-        </div>
-    </header>
-
-    <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-10 relative z-20">
+    <div class="max-w-5xl mx-auto space-y-6">
         
-        <!-- Botões de Navegação -->
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 mb-8">
+        <header class="flex items-center gap-3 mb-8">
+            <div class="bg-blue-500 text-white w-12 h-12 rounded-lg flex items-center justify-center text-xl shadow-sm">
+                <i class="fa-solid fa-truck-ramp-box"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Registro e Monitoramento</h1>
+                <p class="text-sm text-gray-500">Gestão de Entradas de Estoque</p>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <button onclick="openTab('tab-estoque', this)" class="tab-btn active rounded-2xl p-4 text-left group flex flex-col justify-center">
-                <div class="text-3xl mb-2 group-[.active]:text-imac-brown text-gray-400 transition-colors"><i class="ph-fill ph-stack"></i></div>
-                <h3 class="font-black text-base mb-0 leading-tight">1. Estoque OS</h3>
-                <p class="text-xs mt-1 group-[.active]:text-imac-brownLight text-gray-500 font-medium">Insumos e PCP</p>
-            </button>
-
-            <button onclick="openTab('tab-pre-pesagem', this)" class="tab-btn rounded-2xl p-4 text-left group flex flex-col justify-center">
-                <div class="text-3xl mb-2 group-[.active]:text-imac-brown text-gray-400 transition-colors"><i class="ph-fill ph-scales"></i></div>
-                <h3 class="font-black text-base mb-0 leading-tight">2. Pré-Pesagem</h3>
-                <p class="text-xs mt-1 group-[.active]:text-imac-brownLight text-gray-500 font-medium">Geração de Kits</p>
-            </button>
-
-            <button onclick="openTab('tab-producao', this)" class="tab-btn rounded-2xl p-4 text-left group flex flex-col justify-center">
-                <div class="text-3xl mb-2 group-[.active]:text-imac-brown text-gray-400 transition-colors"><i class="ph-fill ph-gear"></i></div>
-                <h3 class="font-black text-base mb-0 leading-tight">3. Produção</h3>
-                <p class="text-xs mt-1 group-[.active]:text-imac-brownLight text-gray-500 font-medium">Masseira e OP</p>
-            </button>
-
-            <button onclick="openTab('tab-embaladora', this)" class="tab-btn rounded-2xl p-4 text-left group flex flex-col justify-center">
-                <div class="text-3xl mb-2 group-[.active]:text-imac-brown text-gray-400 transition-colors"><i class="ph-fill ph-package"></i></div>
-                <h3 class="font-black text-base mb-0 leading-tight">4. Embaladora</h3>
-                <p class="text-xs mt-1 group-[.active]:text-imac-brownLight text-gray-500 font-medium">Painel do Túnel</p>
-            </button>
-
-            <button onclick="openTab('tab-expedicao', this)" class="tab-btn rounded-2xl p-4 text-left group flex flex-col justify-center">
-                <div class="text-3xl mb-2 group-[.active]:text-imac-brown text-gray-400 transition-colors"><i class="ph-fill ph-snowflake"></i></div>
-                <h3 class="font-black text-base mb-0 leading-tight">5. Expedição</h3>
-                <p class="text-xs mt-1 group-[.active]:text-imac-brownLight text-gray-500 font-medium">Câmaras e Qualidade</p>
-            </button>
-        </div>
-
-        <div class="bg-white rounded-3xl p-6 md:p-10 shadow-xl border border-gray-200 min-h-[500px]">
-            
-            <!-- ABA 1: ESTOQUE OS -->
-            <div id="tab-estoque" class="tab-content active">
-                <div class="flex flex-col xl:flex-row gap-12 items-start">
-                    <div class="flex-1">
-                        <div class="inline-flex items-center gap-2 border border-imac-yellow bg-imac-yellowLight text-imac-brown font-black px-4 py-1.5 rounded-full mb-6 uppercase tracking-wider text-xs shadow-sm">
-                            <i class="ph-bold ph-database text-lg"></i> App Estoque OS (PCP)
-                        </div>
-                        <h2 class="text-3xl md:text-4xl font-black text-imac-brown mb-6 tracking-tight">A Inteligência Antes da Produção</h2>
-                        <p class="text-gray-600 mb-8 text-lg leading-relaxed">
-                            Tudo começa no controle rigoroso da matéria-prima. O aplicativo <strong>Estoque OS</strong> centraliza as entradas, gerencia as Fichas Técnicas e analisa algoritmicamente o consumo futuro para evitar faltas ou desperdícios.
-                        </p>
-                        
-                        <ul class="space-y-4">
-                            <li class="hover-card flex items-start gap-4 bg-white p-5 rounded-2xl">
-                                <div class="w-12 h-12 rounded-full bg-imac-yellowLight text-imac-brown flex items-center justify-center shrink-0 font-black text-2xl"><i class="ph-fill ph-chart-line-up"></i></div>
-                                <div>
-                                    <h4 class="font-bold text-imac-brown text-lg">Projeção de Consumo (PCP)</h4>
-                                    <p class="text-sm text-gray-600 mt-1 leading-relaxed">Calcula a estimativa de esgotamento baseado no consumo real dos últimos 60 dias ou dias úteis. Projeta matematicamente quanto de insumo será necessário nos próximos dias.</p>
-                                </div>
-                            </li>
-                            <li class="hover-card flex items-start gap-4 bg-white p-5 rounded-2xl">
-                                <div class="w-12 h-12 rounded-full bg-imac-yellowLight text-imac-brown flex items-center justify-center shrink-0 font-black text-2xl"><i class="ph-fill ph-clock-counter-clockwise"></i></div>
-                                <div>
-                                    <h4 class="font-bold text-imac-brown text-lg">Análise PVPS Automática</h4>
-                                    <p class="text-sm text-gray-600 mt-1 leading-relaxed">Cruza a Validade do lote com seu Ritmo de Consumo. Se o insumo for vencer antes de acabar, o sistema sugere OPs extras para escoar o material sem perdas financeiras.</p>
-                                </div>
-                            </li>
-                            <li class="hover-card flex items-start gap-4 bg-white p-5 rounded-2xl">
-                                <div class="w-12 h-12 rounded-full bg-imac-yellowLight text-imac-brown flex items-center justify-center shrink-0 font-black text-2xl"><i class="ph-fill ph-book-bookmark"></i></div>
-                                <div>
-                                    <h4 class="font-bold text-imac-brown text-lg">Fichas Técnicas Integradas</h4>
-                                    <p class="text-sm text-gray-600 mt-1 leading-relaxed">As receitas garantem que o sistema desconte o estoque corretamente, integrando o planejamento do PCP diretamente com as próximas etapas de produção.</p>
-                                </div>
-                            </li>
-                        </ul>
+            <div class="card lg:col-span-1 h-fit">
+                <h2 class="text-lg font-bold mb-4 border-b pb-2"><i class="fa-solid fa-plus text-blue-500 mr-2"></i>Nova Entrada</h2>
+                
+                <form id="form-entrada" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cód. Produto</label>
+                        <input type="text" id="input-produto" required class="form-input" placeholder="Ex: FAR-001" autocomplete="off">
                     </div>
                     
-                    <!-- Card PVPS - CORRIGIDO PARA ALTA LEGIBILIDADE -->
-                    <div class="flex-1 w-full xl:max-w-lg mt-4 xl:mt-0 hover-card rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden cursor-default">
-                        <!-- Borda superior vermelha e Header -->
-                        <div class="h-2 bg-red-500 w-full"></div>
-                        <div class="p-6">
-                            <div class="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600">
-                                        <i class="ph-bold ph-warning text-lg"></i>
-                                    </div>
-                                </div>
-                                <span class="text-xs bg-red-100 text-red-700 px-3 py-1.5 rounded-md font-bold uppercase tracking-wider">Ação Necessária</span>
-                            </div>
-                            
-                            <div class="flex justify-between items-end mb-4">
-                                <span class="text-sm text-gray-500 font-bold">Insumo Focado:</span>
-                                <span class="font-black text-lg text-imac-brown text-right">Farinha de Trigo Especial<br><span class="font-mono text-xs text-gray-400 font-normal">Lote: LT-892/A</span></span>
-                            </div>
-                            
-                            <!-- BLOCO CINZA CORRIGIDO - ALTO CONTRASTE -->
-                            <div class="flex justify-between items-center bg-gray-100 p-4 rounded-xl mt-4 mb-5 border border-gray-300 shadow-inner">
-                                <div>
-                                    <span class="text-[10px] text-gray-500 block uppercase font-bold tracking-widest mb-1">Vence Em:</span>
-                                    <span class="font-black text-xl text-red-600">7 dias (12/07)</span>
-                                </div>
-                                <div class="text-right border-l-2 border-gray-300 pl-4">
-                                    <span class="text-[10px] text-gray-500 block uppercase font-bold tracking-widest mb-1">Projeção de Uso:</span>
-                                    <span class="font-black text-xl text-imac-brown">Levará 14 dias</span>
-                                </div>
-                            </div>
-
-                            <!-- Bloco Amarelo -->
-                            <div class="bg-yellow-50 border border-imac-yellow p-4 rounded-xl">
-                                <p class="text-sm font-black text-imac-brown mb-2 flex items-center gap-2"><i class="ph-fill ph-lightning text-imac-yellow text-lg"></i> Simulação Automática:</p>
-                                <p class="text-sm text-gray-700 font-medium leading-relaxed">Há uma sobra estimada de 250kg. Sugestão: Gerar OPs extras de <em>Pão Francês</em> para escoar este lote a tempo e evitar o descarte.</p>
-                            </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+                            <input type="number" id="input-qtd" step="0.01" required class="form-input font-bold text-blue-600">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Lote</label>
+                            <input type="text" id="input-lote" required class="form-input" autocomplete="off">
                         </div>
                     </div>
-                </div>
+
+                    <button type="submit" id="btn-submit" class="btn btn-blue w-full mt-2">
+                        <i class="fa-solid fa-save mr-2"></i>Registrar no Banco
+                    </button>
+                    <div id="msg-sucesso" class="hidden text-green-600 text-sm font-bold text-center mt-2">Entrada registrada com sucesso!</div>
+                </form>
             </div>
 
-            <!-- ABA 2: PRÉ-PESAGEM -->
-            <div id="tab-pre-pesagem" class="tab-content">
-                <div class="flex flex-col xl:flex-row gap-12">
-                    <div class="flex-1">
-                        <div class="inline-flex items-center gap-2 border border-imac-yellow bg-imac-yellowLight text-imac-brown font-black px-4 py-1.5 rounded-full mb-6 uppercase tracking-wider text-xs shadow-sm">
-                            <i class="ph-bold ph-printer text-lg"></i> Tablet e Impressora Zebra
-                        </div>
-                        <h2 class="text-3xl font-black text-imac-brown mb-6 tracking-tight">Geração de Kits na Origem</h2>
-                        <p class="text-gray-600 mb-6 text-lg leading-relaxed">
-                            O operador visualiza as OPs no Tablet. O aplicativo mostra os lotes disponíveis no estoque. Ao separar os itens, imprime etiquetas que amarram <strong>múltiplos ingredientes</strong> em um único código de barras, registrando quem pesou e quando.
-                        </p>
-                        
-                        <div class="space-y-4 mt-8">
-                            <div class="hover-card bg-white p-5 rounded-2xl">
-                                <h4 class="font-bold text-lg mb-2 text-imac-brown flex items-center gap-2"><i class="ph-fill ph-scissors text-imac-yellow text-xl"></i> Etiqueta de Fracionamento</h4>
-                                <p class="text-sm text-gray-600 leading-relaxed">Garante a rastreabilidade da sobra de um insumo aberto, registrando a <strong>Data de Fracionamento</strong> e a <strong>Data de Validade Original</strong>. Evita perda de identificação do que fica no estoque.</p>
-                            </div>
-                            
-                            <div class="hover-card bg-white p-5 rounded-2xl">
-                                <h4 class="font-bold text-lg mb-2 text-imac-brown flex items-center gap-2"><i class="ph-fill ph-package text-imac-yellow text-xl"></i> Etiqueta de Kit (Receita)</h4>
-                                <p class="text-sm text-gray-600 leading-relaxed">Amarra ingredientes de uma OP (ex: Glúten, Sal, Melhorador). O operador e o horário são registrados, e um <strong>código de barras</strong> é gerado para a masseira bipar posteriormente.</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Mockups de Etiquetas Claras e Realistas -->
-                    <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-100 p-8 rounded-3xl items-start shadow-inner border border-gray-200">
-                        
-                        <!-- Etiqueta Fracionamento -->
-                        <div class="etiqueta-zebra hover-card cursor-default bg-white">
-                            <div class="border-b-2 border-black pb-2 mb-3 flex justify-between items-start">
-                                <div>
-                                    <h3 class="font-black text-xl leading-none tracking-tighter text-imac-brown">IMAC</h3>
-                                    <p class="text-[9px] font-bold uppercase mt-1 leading-none text-gray-500">Uso Interno</p>
-                                </div>
-                                <div class="bg-black text-white px-2 py-1 font-bold text-[10px] uppercase rounded-sm">Fracionado</div>
-                            </div>
-                            
-                            <div class="space-y-3 mb-2 text-sm text-gray-900">
-                                <div class="flex flex-col border-b border-gray-200 pb-1.5">
-                                    <span class="text-[10px] font-bold uppercase text-gray-500 mb-0.5">Insumo Fracionado:</span>
-                                    <span class="font-black text-base leading-tight">Queijo Mussarela R.</span>
-                                </div>
-                                <div class="flex justify-between border-b border-gray-200 pb-1.5 mt-2">
-                                    <span class="text-[10px] font-bold uppercase text-gray-500 self-end">Lote Original:</span>
-                                    <span class="font-bold text-sm bg-gray-100 px-1 rounded">QM-998/26</span>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2 border-b border-gray-200 pb-1.5 mt-2">
-                                    <div>
-                                        <span class="text-[10px] font-bold uppercase text-gray-500 block mb-0.5">D. Frac.:</span>
-                                        <span class="font-bold text-sm">06/07/26</span>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-[10px] font-bold uppercase text-gray-500 block mb-0.5">Validade:</span>
-                                        <span class="font-bold text-sm text-red-600">12/07/26</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Etiqueta Kit -->
-                        <div class="etiqueta-zebra rotate-1 shadow-2xl border-2 border-gray-300 hover-card cursor-default bg-white">
-                            <div class="border-b-2 border-black pb-2 mb-2 flex justify-between items-start">
-                                <div>
-                                    <h3 class="font-black text-xl leading-none tracking-tighter text-imac-brown">IMAC</h3>
-                                    <p class="text-[9px] font-bold uppercase mt-1 leading-none tracking-tight text-gray-500">Pré-Pesagem</p>
-                                </div>
-                                <div class="bg-black text-white px-2 py-1 font-bold text-[10px] uppercase rounded-sm">Kit Insumo</div>
-                            </div>
-                            
-                            <div class="mb-3 bg-gray-100 p-2 rounded text-center border border-gray-200 flex justify-between px-3 items-center">
-                                <span class="text-[10px] font-bold uppercase text-gray-600">OP Vinculada:</span>
-                                <span class="font-black text-xl text-imac-brown">145899</span>
-                            </div>
-
-                            <table class="w-full text-[10px] text-left mb-3 border-collapse text-gray-900">
-                                <thead>
-                                    <tr class="border-b border-gray-400">
-                                        <th class="font-bold pb-1 text-gray-500 uppercase">Insumo</th>
-                                        <th class="font-bold pb-1 text-right text-gray-500 uppercase">Lote Orig.</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="font-mono text-[10px]">
-                                    <tr class="border-b border-gray-100">
-                                        <td class="py-1 uppercase font-bold truncate pr-1">Glúten</td>
-                                        <td class="py-1 text-right">LT-G123</td>
-                                    </tr>
-                                    <tr class="border-b border-gray-100">
-                                        <td class="py-1 uppercase font-bold truncate pr-1">Sal Ref.</td>
-                                        <td class="py-1 text-right">S-8992</td>
-                                    </tr>
-                                    <tr class="border-b border-gray-100">
-                                        <td class="py-1 uppercase font-bold truncate pr-1">Melhorador</td>
-                                        <td class="py-1 text-right">ML-444</td>
-                                    </tr>
-                                    <tr class="border-b border-gray-100">
-                                        <td class="py-1 uppercase font-bold truncate pr-1">Fermento</td>
-                                        <td class="py-1 text-right">FR-09X</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-                            <div class="flex justify-between text-[9px] mb-3 font-medium text-gray-600 bg-gray-50 p-1 rounded">
-                                <span>Op: <strong class="text-gray-900 uppercase">Carlos Silva</strong></span>
-                                <span>06/07 14:30</span>
-                            </div>
-
-                            <div class="text-center pt-3 border-t border-gray-300">
-                                <p class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-0">Bipar no Tablet Produção</p>
-                                <!-- Uso da fonte de código de barras real -->
-                                <p class="font-barcode text-[3.5rem] text-black leading-none mt-2 mb-1">*8472910*</p>
-                                <p class="font-bold text-[14px] tracking-widest mt-0 text-gray-900">#8472910</p>
-                            </div>
-                        </div>
-                    </div>
+            <div class="card lg:col-span-2">
+                <div class="flex justify-between items-center mb-4 border-b pb-2">
+                    <h2 class="text-lg font-bold"><i class="fa-solid fa-clock-rotate-left text-blue-500 mr-2"></i>Últimas Entradas</h2>
+                    <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Ao vivo
+                    </span>
                 </div>
-            </div>
-
-            <!-- ABA 3: PRODUÇÃO -->
-            <div id="tab-producao" class="tab-content">
-                <div class="flex flex-col md:flex-row gap-12 items-center">
-                    <div class="flex-1">
-                        <div class="inline-flex items-center gap-2 border border-imac-yellow bg-imac-yellowLight text-imac-brown font-black px-4 py-1.5 rounded-full mb-6 uppercase tracking-wider text-xs shadow-sm">
-                            <i class="ph-bold ph-barcode text-lg"></i> Tablet do Masseiro
-                        </div>
-                        <h2 class="text-3xl font-black text-imac-brown mb-6 tracking-tight">Validação na Masseira</h2>
-                        <p class="text-gray-600 mb-6 text-lg leading-relaxed">
-                            O Masseiro não usa papel. No tablet, a Ordem de Produção aguarda o bipe da etiqueta para destravar o apontamento. Apenas o kit correto inicia o processo.
-                        </p>
-                        
-                        <ul class="space-y-4">
-                            <li class="hover-card flex items-start gap-4 bg-white p-5 rounded-2xl">
-                                <div class="w-12 h-12 rounded-full bg-imac-yellowLight text-imac-brown flex items-center justify-center shrink-0 font-black text-2xl"><i class="ph-fill ph-shield-check"></i></div>
-                                <div>
-                                    <h4 class="font-bold text-imac-brown text-lg">Bloqueio de Erro (Anti-Falha)</h4>
-                                    <p class="text-sm text-gray-600 mt-1 leading-relaxed">O sistema cruza o código bipado com a OP da tela. Se bipar um kit da linha de Salgados enquanto deveria bater Pão Doce, <strong>o app trava e alerta o erro</strong>.</p>
-                                </div>
-                            </li>
-                            <li class="hover-card flex items-start gap-4 bg-white p-5 rounded-2xl">
-                                <div class="w-12 h-12 rounded-full bg-imac-yellowLight text-imac-brown flex items-center justify-center shrink-0 font-black text-2xl"><i class="ph-fill ph-timer"></i></div>
-                                <div>
-                                    <h4 class="font-bold text-imac-brown text-lg">Eficiência e Lote da Farinha</h4>
-                                    <p class="text-sm text-gray-600 mt-1 leading-relaxed">A cada bipe, o sistema usa o horário para calcular a velocidade média e eficiência da linha. O masseiro também insere qual o lote da farinha base utilizada.</p>
-                                </div>
-                            </li>
-                            <li class="hover-card flex items-start gap-4 bg-white p-5 rounded-2xl">
-                                <div class="w-12 h-12 rounded-full bg-imac-yellowLight text-imac-brown flex items-center justify-center shrink-0 font-black text-2xl"><i class="ph-fill ph-check-square-offset"></i></div>
-                                <div>
-                                    <h4 class="font-bold text-imac-brown text-lg">Fechamento da OP pelo Líder</h4>
-                                    <p class="text-sm text-gray-600 mt-1 leading-relaxed">Ao fim da produção, o líder anota a perda em quilos (massa morta) e as quantidades produzidas, confrontando na hora o programado com o realizado.</p>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                    
-                    <div class="flex-1 w-full flex justify-center">
-                        <div class="relative w-full max-w-sm hover-card rounded-[2.5rem] cursor-default border-transparent hover:border-transparent transition-all duration-500 hover:-translate-y-2">
-                            <!-- Mockup de Tablet -->
-                            <div class="bg-gray-900 rounded-[2.5rem] p-3 shadow-2xl border-[6px] border-gray-800 relative aspect-[3/4] overflow-hidden flex flex-col">
-                                <div class="h-6 w-full flex justify-center items-start mb-2"><div class="w-20 h-5 bg-gray-800 rounded-b-xl"></div></div>
-                                <!-- Tela Branca -->
-                                <div class="bg-gray-50 flex-1 rounded-2xl overflow-hidden flex flex-col border border-gray-300 relative">
-                                    <div class="bg-white p-5 text-center border-b border-gray-200 shadow-sm relative">
-                                        <!-- Logo na tela do app -->
-                                        <div class="absolute top-4 left-4"><i class="ph-fill ph-circles-four text-imac-yellow text-xl"></i></div>
-                                        
-                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">OP #145899</p>
-                                        <h3 class="font-black text-3xl text-imac-brown tracking-tight">130 receitas</h3>
-                                        <p class="text-sm font-bold text-imac-brown mt-2 bg-imac-yellowLight inline-block px-4 py-1.5 rounded-full border border-imac-yellow/30">Pão Francês</p>
-                                    </div>
-                                    <div class="p-6 flex-1 flex flex-col items-center justify-center text-center bg-gray-50">
-                                        <div class="w-24 h-24 bg-white rounded-2xl flex items-center justify-center mb-6 border border-gray-200 shadow-inner relative overflow-hidden group">
-                                            <i class="ph-bold ph-barcode text-6xl text-gray-400 group-hover:text-imac-yellow transition-colors"></i>
-                                            <!-- Linha de scanner animada -->
-                                            <div class="absolute w-full h-1 bg-red-500 top-0 left-0 animate-[scan_2s_ease-in-out_infinite]"></div>
-                                        </div>
-                                        <style>@keyframes scan { 0%, 100% { top: 10%; opacity: 0; } 50% { top: 90%; opacity: 1; box-shadow: 0 0 10px red; } }</style>
-                                        
-                                        <h4 class="font-black text-gray-900 mb-2 text-xl">Aguardando Validação</h4>
-                                        <p class="text-sm text-gray-500 mb-8 font-medium">Bipe o código de barras do Kit da Pré-Pesagem para destravar a batida.</p>
-                                        <button class="bg-imac-yellow hover:bg-yellow-400 text-imac-brown w-full py-4 rounded-xl font-black shadow-md transition-colors text-lg flex items-center justify-center gap-2 active:scale-95">
-                                            <i class="ph-bold ph-camera text-xl"></i> Ativar Leitor
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ABA 4: EMBALADORA -->
-            <div id="tab-embaladora" class="tab-content">
-                <div class="flex flex-col-reverse xl:flex-row gap-12 items-start">
-                    <div class="flex-1 w-full space-y-6">
-                        <!-- Painel Dark TV - Mantido escuro pois simula uma TV real na fábrica -->
-                        <div class="bg-gray-900 text-white rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-gray-800 hover-card cursor-default">
-                            <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
-                                <h4 class="font-black text-imac-yellow text-lg md:text-xl flex items-center gap-2 uppercase tracking-wider">
-                                    <i class="ph-fill ph-monitor-play text-2xl"></i> Painel do Túnel Helicoidal
-                                </h4>
-                            </div>
-                            <p class="text-sm text-gray-400 mb-6 font-medium leading-relaxed">Sequência preditiva do que está vindo da masseira e passando pelo túnel.</p>
-                            
-                            <div class="relative border-l-2 border-gray-700 pl-6 space-y-6 ml-2">
-                                <!-- Lote Atual -->
-                                <div class="relative bg-gray-800 p-5 rounded-2xl border border-imac-yellow shadow-lg transform transition-transform hover:translate-x-2">
-                                    <div class="absolute -left-[35px] top-5 w-4 h-4 bg-imac-yellow rounded-full shadow-[0_0_10px_rgba(245,185,21,0.8)]"></div>
-                                    <span class="bg-imac-yellow text-imac-brown text-[10px] font-black px-3 py-1 rounded-md uppercase mb-3 inline-block tracking-wider">Embalando Agora</span>
-                                    <h5 class="font-black text-2xl text-white mb-2 tracking-tight">Pão Ciabata <span class="text-imac-yellow text-lg font-bold bg-black px-2 py-1 rounded ml-2">Lote 101</span></h5>
-                                    <p class="text-sm text-gray-300 font-mono bg-black/40 inline-block px-3 py-1.5 rounded-lg border border-gray-700"><i class="ph-bold ph-clock text-imac-yellow mr-1"></i> Início: 07:23 — Fim: 07:45</p>
-                                </div>
-                                
-                                <!-- Próximo Lote -->
-                                <div class="relative bg-gray-800/50 p-5 rounded-2xl border border-gray-700 transform transition-transform hover:translate-x-2">
-                                    <div class="absolute -left-[35px] top-5 w-4 h-4 bg-gray-600 rounded-full border-2 border-gray-900"></div>
-                                    <span class="bg-gray-700 text-gray-200 text-[10px] font-bold px-3 py-1 rounded-md uppercase mb-3 inline-block tracking-wider">Próximo Lote</span>
-                                    <h5 class="font-bold text-xl text-gray-300 mb-2 tracking-tight">Pão Francês Milho <span class="text-gray-400 text-base font-bold bg-black/40 px-2 py-1 rounded ml-2">Lote 102</span></h5>
-                                    <p class="text-sm text-gray-400 font-mono bg-black/20 inline-block px-3 py-1.5 rounded-lg"><i class="ph-bold ph-clock mr-1"></i> Início: 07:55 — Fim: 08:24</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex-1">
-                        <div class="inline-flex items-center gap-2 border border-imac-yellow bg-imac-yellowLight text-imac-brown font-black px-4 py-1.5 rounded-full mb-6 uppercase tracking-wider text-xs shadow-sm">
-                            <i class="ph-bold ph-package text-lg"></i> Linha de Embalagem
-                        </div>
-                        <h2 class="text-3xl font-black text-imac-brown mb-6 tracking-tight">Sincronia com o Túnel</h2>
-                        <p class="text-gray-600 mb-6 text-lg leading-relaxed">
-                            O aplicativo atua como um painel preditivo, mostrando os lotes e horários exatos em que os pães sairão do túnel congelador, garantindo preparo antecipado das caixas e bobinas.
-                        </p>
-                        
-                        <div class="space-y-4">
-                            <div class="hover-card bg-white p-5 rounded-2xl">
-                                <h4 class="font-bold text-imac-brown text-lg flex items-center gap-2"><i class="ph-fill ph-eye text-imac-yellow"></i> 1. Previsibilidade</h4>
-                                <p class="text-sm text-gray-600 mt-2 leading-relaxed">Os operadores sabem o horário de início e fim da queda de cada tipo de pão, sincronizando a equipe com a velocidade da masseira anterior.</p>
-                            </div>
-                            <div class="hover-card bg-white p-5 rounded-2xl">
-                                <h4 class="font-bold text-imac-brown text-lg flex items-center gap-2"><i class="ph-fill ph-trash text-imac-yellow"></i> 2. Apontamento de Perdas</h4>
-                                <p class="text-sm text-gray-600 mt-2 leading-relaxed">O operador registra o pão mal formado ou caído. O sistema junta essa perda da embaladora com a perda anotada pelo Líder na masseira para gerar o rendimento real global da OP.</p>
-                            </div>
-                            <div class="hover-card bg-white p-5 rounded-2xl">
-                                <h4 class="font-bold text-imac-brown text-lg flex items-center gap-2"><i class="ph-fill ph-tag text-imac-yellow"></i> 3. Lote do Produto Acabado</h4>
-                                <p class="text-sm text-gray-600 mt-2 leading-relaxed">Ao encaixotar, gera-se o Lote Final, que amarra invisivelmente toda a árvore de rastreabilidade para trás (Farinha Base, Kits da Pré-pesagem, Operadores, Horários).</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ABA 5: EXPEDIÇÃO -->
-            <div id="tab-expedicao" class="tab-content">
-                <div class="text-center max-w-3xl mx-auto mb-12">
-                    <div class="inline-flex items-center gap-2 border border-imac-yellow bg-imac-yellowLight text-imac-brown font-black px-4 py-1.5 rounded-full mb-4 uppercase tracking-wider text-xs shadow-sm">
-                        <i class="ph-bold ph-snowflake text-lg"></i> App das Câmaras Frias
-                    </div>
-                    <h2 class="text-3xl md:text-4xl font-black text-imac-brown mb-4 tracking-tight">Gestão Inteligente e Expedição</h2>
-                    <p class="text-gray-600 text-lg">O app audita a entrada física nas câmaras e utiliza inteligência de dados (Curva ABC e limites Min/Max) para otimizar o espaço e evitar ruptura de pedidos.</p>
-                    
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                    <!-- Card 1: Pesagem -->
-                    <div class="hover-card bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col cursor-default">
-                        <div class="w-14 h-14 bg-imac-yellowLight text-imac-brown rounded-xl flex items-center justify-center text-3xl mb-5"><i class="ph-fill ph-scales"></i></div>
-                        <h4 class="font-black text-xl mb-3 text-imac-brown">Pesagem de Patinhas</h4>
-                        <p class="text-sm text-gray-600 mb-4 flex-1 leading-relaxed">O estoquista seleciona o Lote Físico da produção e anota o <strong>Peso da Patinha</strong> exato que entra na câmara, mantendo o saldo real atualizado.</p>
-                    </div>
-
-                    <!-- Card 2: Controle Min/Max -->
-                    <div class="hover-card bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col cursor-default">
-                        <div class="w-14 h-14 bg-red-50 text-red-500 rounded-xl flex items-center justify-center text-3xl mb-5"><i class="ph-fill ph-warning-octagon"></i></div>
-                        <h4 class="font-black text-xl mb-3 text-imac-brown">Mínimo e Máximo</h4>
-                        <p class="text-sm text-gray-600 mb-4 flex-1 leading-relaxed">Alertas automáticos: o limite <strong>mínimo</strong> avisa para evitar cancelamentos de pedidos extras. O limite <strong>máximo</strong> bloqueia OPs para não abarrotar a câmara desnecessariamente.</p>
-                    </div>
-
-                    <!-- Card 3: Curva ABC -->
-                    <div class="hover-card bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col cursor-default">
-                        <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-3xl mb-5"><i class="ph-fill ph-chart-polar"></i></div>
-                        <h4 class="font-black text-xl mb-3 text-imac-brown">Giro de Estoque (ABC)</h4>
-                        <p class="text-sm text-gray-600 mb-4 flex-1 leading-relaxed">Mapeamento dinâmico de giro. Itens de <strong>Curva A</strong> (alta saída) ficam em posições acessíveis, otimizando o faturamento e o fluxo logístico da expedição.</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Card 4: Dashboard Real -->
-                    <div class="hover-card bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col cursor-default">
-                        <div class="w-14 h-14 bg-imac-yellowLight text-imac-brown rounded-xl flex items-center justify-center text-3xl mb-5"><i class="ph-fill ph-chart-pie-slice"></i></div>
-                        <h4 class="font-black text-xl mb-4 text-imac-brown">Dashboard Analítico da Câmara</h4>
-                        <ul class="text-xs space-y-3 font-bold flex-1">
-                            <li class="flex items-center justify-between text-gray-800 bg-gray-100 p-3 rounded-xl border border-gray-200">
-                                <span class="uppercase text-gray-500">Capacidade (Ocupação):</span> <span class="font-black text-sm text-imac-brown">82%</span>
-                            </li>
-                            <li class="flex items-center justify-between text-blue-800 bg-blue-50 p-3 rounded-xl border border-blue-200">
-                                <span class="uppercase">Produtos Curva A (Giro Rápido):</span> <span class="font-black text-sm">65% do Volume</span>
-                            </li>
-                            <li class="flex items-center justify-between text-yellow-800 bg-yellow-50 p-3 rounded-xl border border-yellow-200">
-                                <span class="uppercase">Abaixo do Mínimo:</span> <span class="font-black text-sm text-yellow-600">2 SKUs (Risco Ruptura)</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Card 5: Saída/Separação -->
-                    <div class="hover-card bg-white rounded-2xl p-6 shadow-sm flex flex-col border border-gray-200 cursor-default">
-                        <div class="w-14 h-14 bg-imac-yellow text-imac-brown rounded-xl flex items-center justify-center text-3xl mb-5 shadow-sm"><i class="ph-fill ph-truck"></i></div>
-                        <h4 class="font-black text-xl mb-3 text-imac-brown">Separação / Destino</h4>
-                        <p class="text-sm text-gray-600 mb-4 flex-1 leading-relaxed">O cruzamento da localização física com a rotatividade (Curva ABC) facilita a separação. Ao carregar o caminhão, o sistema deduz o saldo e amarra o lote expedido à rota, finalizando a rastreabilidade.</p>
-                        
-                        <div class="mt-auto bg-blue-50 border border-blue-200 p-3 rounded-xl flex gap-3 items-start">
-                            <i class="ph-fill ph-info text-blue-600 text-lg mt-0.5"></i>
-                            <p class="text-[11px] text-blue-800 font-medium leading-tight">Painéis visuais indicam se a câmara está apta a receber novas patinhas ou se o teto máximo de estocagem foi atingido.</p>
-                        </div>
-                    </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-600">
+                        <thead class="text-xs uppercase bg-gray-50 text-gray-500">
+                            <tr>
+                                <th class="px-4 py-3 rounded-tl-lg">Data/Hora</th>
+                                <th class="px-4 py-3">Produto</th>
+                                <th class="px-4 py-3 text-right">Qtd</th>
+                                <th class="px-4 py-3">Lote</th>
+                                <th class="px-4 py-3 text-center rounded-tr-lg">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-entradas" class="divide-y divide-gray-100">
+                            <tr>
+                                <td colspan="5" class="text-center py-8 text-gray-400">Carregando dados do banco...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
         </div>
-    </main>
+    </div>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 py-8 text-center mt-auto z-10 flex flex-col items-center justify-center gap-3">
-        <img src="logo.png" alt="IMAC" class="h-8 object-contain opacity-50 grayscale hover:grayscale-0 transition-all duration-300" onerror="this.style.display='none'">
-        <p class="text-gray-500 font-bold text-xs uppercase tracking-widest">Controle de Ponta a Ponta - Integração Rastreabilidade</p>
-    </footer>
+    <script type="module">
+        // 1. Importa as funções necessárias do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp } 
+        from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    <!-- Script de Navegação das Abas -->
-    <script>
-        function openTab(tabId, btnElement) {
-            // Esconde todas as abas
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            // Remove "active" de todos os botões
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+        // 2. SUBSTITUA PELAS SUAS CHAVES DO FIREBASE
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_PROJETO.firebaseapp.com",
+            projectId: "SEU_PROJETO",
+            storageBucket: "SEU_PROJETO.appspot.com",
+            messagingSenderId: "SEU_SENDER_ID",
+            appId: "SEU_APP_ID"
+        };
+
+        // 3. Inicializa o App e o Banco
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const colecaoEntradas = collection(db, "entradas_estoque");
+
+        // 4. Lógica de ESCRITA (Registrar Entrada)
+        const formEntrada = document.getElementById('form-entrada');
+        const btnSubmit = document.getElementById('btn-submit');
+        const msgSucesso = document.getElementById('msg-sucesso');
+
+        formEntrada.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Salvando...';
+            btnSubmit.disabled = true;
+
+            try {
+                // Cria o documento no Firebase
+                await addDoc(colecaoEntradas, {
+                    codigoProduto: document.getElementById('input-produto').value.toUpperCase(),
+                    quantidade: parseFloat(document.getElementById('input-qtd').value),
+                    lote: document.getElementById('input-lote').value.toUpperCase(),
+                    statusQualidade: 'Pendente', // Status inicial padrão
+                    sincronizadoEm: serverTimestamp() // Pega a hora exata do servidor do Firebase
+                });
+
+                // Limpa o form e mostra mensagem
+                formEntrada.reset();
+                msgSucesso.classList.remove('hidden');
+                setTimeout(() => msgSucesso.classList.add('hidden'), 3000);
+            } catch (error) {
+                console.error("Erro ao salvar: ", error);
+                alert("Erro ao salvar no banco de dados.");
+            } finally {
+                btnSubmit.innerHTML = '<i class="fa-solid fa-save mr-2"></i>Registrar no Banco';
+                btnSubmit.disabled = false;
+            }
+        });
+
+        // 5. Lógica de LEITURA (Monitorar Entradas em Tempo Real)
+        function monitorarEntradas() {
+            const tabela = document.getElementById('tabela-entradas');
             
-            // Ativa a aba e o botão clicado
-            document.getElementById(tabId).classList.add('active');
-            btnElement.classList.add('active');
+            // Busca as 15 últimas entradas ordenadas por data
+            const q = query(colecaoEntradas, orderBy("sincronizadoEm", "desc"), limit(15));
+
+            // onSnapshot atualiza a tabela automaticamente se houver mudança no banco
+            onSnapshot(q, (snapshot) => {
+                tabela.innerHTML = ''; // Limpa a tabela
+                
+                if (snapshot.empty) {
+                    tabela.innerHTML = '<tr><td colspan="5" class="text-center py-6">Nenhuma entrada recente encontrada.</td></tr>';
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    
+                    // Formata a data (se existir)
+                    let dataFormatada = '-';
+                    if (data.sincronizadoEm) {
+                        const dataJS = data.sincronizadoEm.toDate();
+                        dataFormatada = dataJS.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                    }
+
+                    // Formata o Status visualmente
+                    let badgeStatus = `<span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold border border-orange-200">PENDENTE</span>`;
+                    if (data.statusQualidade === 'Liberado') {
+                        badgeStatus = `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold border border-green-200">LIBERADO</span>`;
+                    }
+
+                    // Cria a linha da tabela
+                    const tr = document.createElement('tr');
+                    tr.className = 'border-b border-gray-100 hover:bg-gray-50';
+                    tr.innerHTML = `
+                        <td class="px-4 py-3 text-xs text-gray-500">${dataFormatada}</td>
+                        <td class="px-4 py-3 font-bold text-gray-800">${data.codigoProduto || '-'}</td>
+                        <td class="px-4 py-3 text-right font-bold text-blue-600">${data.quantidade || 0}</td>
+                        <td class="px-4 py-3 font-mono text-xs">${data.lote || '-'}</td>
+                        <td class="px-4 py-3 text-center">${badgeStatus}</td>
+                    `;
+                    tabela.appendChild(tr);
+                });
+            }, (error) => {
+                console.error("Erro ao buscar dados:", error);
+                tabela.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-red-500">Erro de conexão com o banco de dados.</td></tr>';
+            });
         }
+
+        // Inicia o monitoramento ao carregar a página
+        monitorarEntradas();
+
     </script>
 </body>
 </html>
